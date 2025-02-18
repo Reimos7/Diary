@@ -27,7 +27,7 @@ extension WeatherService {
                 switch response.result {
                 case .success(let weatherData):
                     DispatchQueue.main.async {
-                        self?.currentWeather = Weather(data: weatherData)
+                        self?.currentWeather = CurrentWeather(data: weatherData)
                         print("응답데이터\(weatherData)")
                     }
                 case .failure(let error):

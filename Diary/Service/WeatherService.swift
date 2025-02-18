@@ -17,7 +17,7 @@ class WeatherService: NSObject, ObservableObject {
     // 현재 위치
     @Published var currentLocation: String?
     // 현재 날씨
-    @Published var currentWeather: Weather?
+    @Published var currentWeather: CurrentWeather?
     // 에러 문자열을 저장하는 속성
     @Published var lastError: String?
     

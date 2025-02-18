@@ -9,8 +9,13 @@ import SwiftUI
 
 struct ComposeView: View {
     //@Binding var selectedDate: Date
+    
     // 현재 날짜
     @State private var currentDate = Date()
+    @EnvironmentObject var service: WeatherService
+    
+    let model: CurrentWeather?
+    
     var body: some View {
         let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
@@ -21,10 +26,17 @@ struct ComposeView: View {
         
         NavigationStack {
             VStack {
-//                Image(systemName: DummyContainer.preview.weatherIcon)
-//                    .resizable()
-//                    .frame(width: 50, height: 50)
-//                    .padding()
+                if let model = service.currentWeather {
+                    Image(systemName: model.icon)
+                    // 아이콘 심볼 이미지를 멀티 컬러 색상으로
+                        //.symbolRenderingMode(.multicolor)
+                        .resizable()
+                        .frame(width: 50,height: 50)
+                        .onAppear() {
+                            print("\(model.icon)")
+                        }
+                }
+                
                 Text(dateFormatter.string(from: Date())) // 2025년 2월 5일 (수요일)
                 
                 Spacer()
@@ -41,9 +53,9 @@ struct ComposeView: View {
             }
         }
     }
-        
+    
 }
 
-#Preview {
-    ComposeView()
-}
+//#Preview {
+//    ComposeView(model: .preview)
+//}

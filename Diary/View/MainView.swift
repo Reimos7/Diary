@@ -10,28 +10,63 @@ import SwiftData
 import FSCalendar
 
 struct MainView: View {
-    @EnvironmentObject var service: WeatherService
     
-    let model: Weather?
+    @EnvironmentObject var service: WeatherService
     @State private var selectedDate: Date = Date()
+    
+    let model: CurrentWeather?
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading) {
-                // 메인화면에서 날씨 연동해주기 
-                if let model = model {
-                    HStack {
-                        Text(service.currentLocation ?? "없음")
-                        Image(systemName: model.icon)
-                        
-                        Text(model.temperature)
-                        Text(model.weather)
-                        Spacer()
+            VStack() {
+                // 메인화면에서 날씨 연동해주기
+                Text(service.currentLocation ?? "없음")
+                    .font(.title)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 60)
+                //Spacer()
+                /*
+                 WeatherService가 API에서 받아온 데이터를 currentWeather에 저장하면,
+                 @EnvironmentObject var service를 통해 MainView에서 실시간으로 반영됨
+                 */
+                
+                if let model = service.currentWeather {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            if model.icon != "moon.fill" {
+                                Image(systemName: model.icon)
+                                    .font(.largeTitle)
+                                // 아이콘 심볼 이미지를 멀티 컬러 색상으로
+                                    .symbolRenderingMode(.multicolor)
+                                    .onAppear {
+                                        print("아이콘이 적용됨 \(model.icon)")
+                                    }
+                            } else {
+                                Image(systemName: model.icon)
+                                    .font(.largeTitle)
+                                // 아이콘 심볼 이미지를 멀티 컬러 색상으로
+                                // moon.fill이면 멀티 컬러 안됨
+                                //.symbolRenderingMode(.multicolor)
+                                    .onAppear {
+                                        print("아이콘이 적용됨 \(model.icon)")
+                                    }
+                            }
+                            
+                            Text(model.weather)
+                            Text(model.temperature)
+                            
+                            //Spacer()
+                        }
+                        .padding()
+                        .font(.largeTitle)
+                        //.frame(height: reader.size.height)
                     }
-                    .padding()
-                    .font(.largeTitle)
                 }
+                
+                
+                
             }
+            .padding()
             
             VStack {
                 // 캘린더
@@ -40,7 +75,7 @@ struct MainView: View {
                     .padding()
                 
                 NavigationLink {
-                    ComposeView()
+                    ComposeView(model: model)
                 }           label: {
                     Image(systemName: "pencil")
                         .resizable()
@@ -49,23 +84,22 @@ struct MainView: View {
                 }
             }
             .padding()
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingView()
-                    } label: {
-                        Image(systemName: "gearshape.fill")
+            Spacer()
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            SettingView()
+                        } label: {
+                            Image(systemName: "gearshape.fill")
+                        }
+                        
                     }
-                    
                 }
-            }
+            
         }
         
         
+        
     }
-}
-#Preview {
-    MainView(model: .preview)
-    
 }
 
