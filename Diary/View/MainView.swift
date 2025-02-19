@@ -13,11 +13,14 @@ struct MainView: View {
     
     @EnvironmentObject var service: WeatherService
     @State private var selectedDate: Date = Date()
+    //날짜 선택시 네비게이션
+    @State private var selectedDateNavigate = false
     
     let model: CurrentWeather?
     
     var body: some View {
         NavigationStack {
+            // MARK: - 날씨
             VStack() {
                 // 메인화면에서 날씨 연동해주기
                 Text(service.currentLocation ?? "없음")
@@ -62,18 +65,26 @@ struct MainView: View {
                         //.frame(height: reader.size.height)
                     }
                 }
-                
-                
-                
-            }
+             }
             .padding()
             
             VStack {
+                // MARK: - 날짜 선택 시 해당 날짜 다이어리 작성페이지 이동
+                NavigationLink(isActive: $selectedDateNavigate) {
+                    FSCalenderComposeView(selectedDate: selectedDate)
+                } label: {
+                    EmptyView()
+                }
                 // 캘린더
-                FSCalendarView(selectedDate: $selectedDate)
-                    .frame(width: 400, height: 400)
-                    .padding()
+                FSCalendarView(selectedDate: $selectedDate, dateSelectAction: { date in
+                    selectedDate = date
+                    selectedDateNavigate = true
+                })
+                .frame(width: 400, height: 400)
+                .padding()
                 
+                
+                // MARK: - 오늘 글쓰기
                 NavigationLink {
                     ComposeView(model: model)
                 }           label: {

@@ -10,8 +10,11 @@ import FSCalendar
 
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
+    // 캘린더에서 날짜 직접 선택 시 실행할 콜백 함수
+    var dateSelectAction: ((Date) -> Void)?
     
     func makeUIView(context: Context) -> FSCalendar {
+
         let calendar = FSCalendar()
         calendar.delegate = context.coordinator
         calendar.dataSource = context.coordinator
@@ -63,8 +66,11 @@ struct FSCalendarView: UIViewRepresentable {
                         return .black // ✅ 평일은 검정색
                     }
                 }
+        
+        // 날짜 선택 시 콜백 호출
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
             parent.selectedDate = date
+            parent.dateSelectAction?(date) // 콜백 호출 
         }
     }
 }

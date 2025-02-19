@@ -7,9 +7,8 @@
 
 import SwiftUI
 
+// 글쓰기 버튼 누르면 실행 되는 뷰 (오늘 날짜만)
 struct ComposeView: View {
-    //@Binding var selectedDate: Date
-    
     // 현재 날짜
     @State private var currentDate = Date()
     @EnvironmentObject var service: WeatherService
