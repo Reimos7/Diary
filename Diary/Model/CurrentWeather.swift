@@ -22,14 +22,14 @@ extension CurrentWeather {
     
     init?(data: CodableCurrentWeather) {
         guard let weatherInfo = data.weather.first else {return nil}
-        // 🛠 디버깅 코드 추가
+        // 디버깅 코드 추가
             print("API 응답 아이콘 코드: \(weatherInfo.icon)")
 
         // icon에 sfSymbol 넣기
         icon = weatherInfo.icon.weatherImageName
         weather = weatherInfo.description
         temperature = data.main.temp.temperatureString
-        // 🛠 변환된 아이콘 코드 확인
+        // 변환된 아이콘 코드 확인
            print("변환된 SF Symbol: \(icon)")
     }
 }

@@ -12,6 +12,7 @@ struct ComposeView: View {
     // 현재 날짜
     @State private var currentDate = Date()
     @EnvironmentObject var service: WeatherService
+    @State private var content: String = ""
     
     let model: CurrentWeather?
     
@@ -37,6 +38,9 @@ struct ComposeView: View {
                 }
                 
                 Text(dateFormatter.string(from: Date())) // 2025년 2월 5일 (수요일)
+                // 입력을 위한 TextEditor
+                TextEditor(text: $content)
+                    .padding()
                 
                 Spacer()
             }

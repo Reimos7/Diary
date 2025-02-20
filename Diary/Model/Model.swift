@@ -7,17 +7,14 @@
 
 import Foundation
 import SwiftData
-// 일기 제목, 내용, 날짜 
+// 일기 내용, 날짜
 @Model
-final class Item {
-    var title: String
+class Diary {
     var content: String
     var date: Date
     
-    init(title: String, content: String, date: Date = Date.now) {
-        self.title = title
+    init(content: String, date: Date) {
         self.content = content
         self.date = date
     }
-    
 }
