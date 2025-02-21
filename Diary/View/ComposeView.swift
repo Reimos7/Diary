@@ -10,9 +10,11 @@ import SwiftUI
 // 글쓰기 버튼 누르면 실행 되는 뷰 (오늘 날짜만)
 struct ComposeView: View {
     // 현재 날짜
-    @State private var currentDate = Date()
+   
     @EnvironmentObject var service: WeatherService
     @State private var content: String = ""
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var manager: SwiftDataManager
     
     let model: CurrentWeather?
     
@@ -47,9 +49,11 @@ struct ComposeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        
+                        manager.addDiaryData(content: content, date: Date())
+                        manager.fetchDiaryData()
+                        dismiss()
                     } label: {
-                        Label("Save", systemImage: "check")
+                        Label("Save", systemImage: "checkmark")
                     }
                     
                 }

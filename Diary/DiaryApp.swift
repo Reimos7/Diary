@@ -12,10 +12,11 @@ import SwiftData
 struct DiaryApp: App {
     // 런타임에 사용하는거니까, 프리뷰 파라미터를 사용하지 않고, false값을 그대로 사용
     let service = WeatherService()
+    @StateObject private var manager = SwiftDataManager()
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Diary.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -33,5 +34,6 @@ struct DiaryApp: App {
         .modelContainer(sharedModelContainer)
         // WeatherService는 앱 전체에서 공통적으로 사용하는거니까, environmentObject로 공유 하는게 좋음
             .environmentObject(service)
+            .environmentObject(manager)
     }
 }

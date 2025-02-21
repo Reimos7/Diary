@@ -20,13 +20,14 @@ class SwiftDataManager: ObservableObject {
      SwiftUI에서는 @MainActor를 추가해야 하지만, UIKit에서는 기본적으로 Main Thread에서 실행되기 때문에 오류가 발생하지 않는다!
      SwiftData의 mainContext는 @MainActor에서 실행되어야 하기 때문에, SwiftDataManager 전체를 @MainActor로 설정하면 자동으로 해결
      */
-    
-    // 스택 초기화 1단계
     var container: ModelContainer?
     
     var context: ModelContext? {
         return container?.mainContext
     }
+    
+    // 저장된 일기 목록 저장함
+    @Published var diaryEntries: [Diary] = []
     
     init() {
         do {
@@ -56,7 +57,10 @@ class SwiftDataManager: ObservableObject {
             // 최신 날짜 순으로 정렬
             let fetchDiary = FetchDescriptor<Diary>(sortBy: [SortDescriptor(\.date, order: .reverse)])
             // 데이터 가져오기
-            return try context.fetch(fetchDiary)
+            let results = try context.fetch(fetchDiary) //  데이터를 변수에 저장
+            self.diaryEntries = results // @Published 변수 업데이트
+            return results // 데이터를 반환
+            
         } catch {
             print("데이터 가져오기 실패함 \(error.localizedDescription)")
             return []

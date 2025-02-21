@@ -97,7 +97,7 @@ struct MainView: View {
             .padding()
             Spacer()
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .topBarLeading) {
                         NavigationLink {
                             SettingView()
                         } label: {
@@ -106,11 +106,16 @@ struct MainView: View {
                         
                     }
                 }
-            
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            ListView()
+                        } label: {
+                            Image(systemName: "list.bullet")
+                        }
+                    }
+                }
         }
-        
-        
-        
     }
 }
 
