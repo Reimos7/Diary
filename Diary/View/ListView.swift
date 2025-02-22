@@ -18,7 +18,7 @@ struct ListView: View {
                 ForEach(manager.diaryEntries, id: \.self) { data in
                     // 일기를 선택하면 해당 일기 DetailView로 이동
                     NavigationLink {
-                        DetailView()
+                        DetailView(data: data)
                     } label: {
                         DiaryCell(diaryCellData: data)
                     }
