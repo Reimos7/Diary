@@ -17,12 +17,6 @@ struct ComposeView: View {
     let model: CurrentWeather?
     
     var body: some View {
-        let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy년 M월 d일 EEEE" // 요일 포함
-            formatter.locale = Locale(identifier: "ko_KR")
-            return formatter
-        }()
         
         NavigationStack {
             VStack {
@@ -36,8 +30,8 @@ struct ComposeView: View {
                             print("\(model.icon)")
                         }
                 }
-                
-                Text(dateFormatter.string(from: Date())) // 2025년 2월 5일 (수요일)
+
+                Text(DateFormatter.dateFormatter.string(from: Date())) // 2025년 2월 5일 (수요일)
                 // 입력을 위한 TextEditor
                 TextEditor(text: $content)
                     .padding()

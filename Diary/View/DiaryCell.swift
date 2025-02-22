@@ -10,20 +10,12 @@ import SwiftUI
 struct DiaryCell: View {
     
     let diaryCellData: Diary
-    
-    var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Aisa/Seoul")
-        return formatter
-    }
-    
+ 
     var body: some View {
         VStack {
             Text(diaryCellData.content)
                 .lineLimit(1)
-            Text(dateFormatter.string(from: diaryCellData.date))
+            Text(DateFormatter.dateFormatter.string(from: diaryCellData.date))
             
         }
     }

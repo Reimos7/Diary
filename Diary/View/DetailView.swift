@@ -8,15 +8,7 @@ struct DetailView: View {
     @Environment(\.dismiss) var dismiss
     
     let data: Diary
-    
-    var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        return formatter
-    }
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -26,7 +18,7 @@ struct DetailView: View {
                             .padding()
                         Spacer(minLength: 0)
                     }
-                    Text(dateFormatter.string(from: data.date))
+                    Text(DateFormatter.dateFormatter.string(from: data.date))
                         .padding()
                         .font(.footnote)
                         .foregroundStyle(.secondary)
