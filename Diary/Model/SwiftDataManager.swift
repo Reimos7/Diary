@@ -49,13 +49,14 @@ class SwiftDataManager: ObservableObject {
         saveContext()
     }
     
-    // Read 일기 목록 조회
-    func fetchDiaryData() -> [Diary] {
+    // Read 일기 목록 조회 , 파라미터로 오름차순, 내림차순 결정
+    func fetchDiaryData(isDecending: Bool) -> [Diary] {
         guard let context = context else {return []}
         
         do {
+            let sortOrder: SortOrder = isDecending ? .reverse : .forward
             // 최신 날짜 순으로 정렬
-            let fetchDiary = FetchDescriptor<Diary>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+            let fetchDiary = FetchDescriptor<Diary>(sortBy: [SortDescriptor(\.date, order: sortOrder)])
             // 데이터 가져오기
             let results = try context.fetch(fetchDiary) //  데이터를 변수에 저장
             self.diaryEntries = results // @Published 변수 업데이트

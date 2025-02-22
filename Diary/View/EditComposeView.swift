@@ -10,6 +10,7 @@ import SwiftUI
 struct EditComposeView: View {
     
     @State private var content: String = ""
+    @State private var showToast: Bool = false
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
     
@@ -47,15 +48,32 @@ struct EditComposeView: View {
                     Button {
                         guard let data = data else { return }
                         manager.updateDiaryData(entry: data, newContent: content)
-                        dismiss()
+                        showToast = true
+                        // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            showToast = false
+                            dismiss()
+                        }
                     } label: {
                         Text("수정")
                     }
-
                 }
                 
             }
-            
+            // 저장하면 toast 메시지로 알려줌
+            if showToast {
+                VStack {
+                    Text("일기를 수정했어요!")
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .transition(.opacity)
+                .animation(.easeInOut, value: showToast)
+                .padding(.bottom, 50)
+                
+            }
         }
         
     }

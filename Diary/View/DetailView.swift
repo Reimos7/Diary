@@ -3,12 +3,13 @@ import SwiftUI
 // 일기 상세 화면
 struct DetailView: View {
     
-    @State private var showEditComposeView = false
+    @State private var showEditComposeView: Bool = false
+    @State private var showDeleteAlert: Bool = false
     @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
     
     let data: Diary
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -31,8 +32,7 @@ struct DetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button(role: .destructive) {
-                            manager.deleteDiaryData(entry: data)
-                            dismiss()
+                            showDeleteAlert = true
                         } label: {
                             Text("삭제")
                         }
@@ -46,6 +46,16 @@ struct DetailView: View {
                         Image(systemName:  "ellipsis")
                     }
                 }
+            } // alert로 삭제
+            .alert("삭제", isPresented: $showDeleteAlert) {
+                Button(role: .destructive) {
+                    manager.deleteDiaryData(entry: data)
+                    dismiss()
+                } label: {
+                    Text("삭제")
+                }
+            } message: {
+                Text("일기를 삭제할까요?")
             }
             
             .fullScreenCover(isPresented: $showEditComposeView) {

@@ -9,9 +9,10 @@ import SwiftUI
 
 // 글쓰기 버튼 누르면 실행 되는 뷰 (오늘 날짜만)
 struct ComposeView: View {
-    @EnvironmentObject var service: WeatherService
     @State private var content: String = ""
+    @State private var showToast: Bool = false
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var service: WeatherService
     @EnvironmentObject var manager: SwiftDataManager
     
     let model: CurrentWeather?
@@ -42,14 +43,33 @@ struct ComposeView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         manager.addDiaryData(content: content, date: Date())
-                        manager.fetchDiaryData()
-                        dismiss()
+                        manager.fetchDiaryData(isDecending: true)
+                        showToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            showToast = false
+                            dismiss()
+                        }
                     } label: {
                         Label("Save", systemImage: "checkmark")
                     }
                     
                 }
             }
+            // 저장하면 toast 메시지로 알려줌
+            if showToast {
+                VStack {
+                    Text("일기를 저장했어요!")
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .transition(.opacity)
+                .animation(.easeInOut, value: showToast)
+                .padding(.bottom, 50)
+                
+            }
+            
         }
     }
     
