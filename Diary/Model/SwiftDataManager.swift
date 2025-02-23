@@ -68,6 +68,26 @@ class SwiftDataManager: ObservableObject {
         }
     }
     
+    // 검색을 통한 일기 목록 조회하기
+    func searchDiaryData(keyword: String) {
+        guard let context = context else {return}
+        
+        do {
+            // Diary 모델의 content에서 keyword가 포함된 데이터를 찾도록 설정
+            let predicate = #Predicate<Diary> { $0.content.contains(keyword)}
+            
+            // 검색 조건을 적용해서 데이터를 최신순으로 정렬
+            let fetchDescriptor = FetchDescriptor<Diary>(
+                        predicate: predicate,
+                        sortBy: [SortDescriptor(\.date, order: .reverse)]
+            )
+            // 검색 결과를 diaryEntries에 저장하여 화면을 업데이트
+            self.diaryEntries = try context.fetch(fetchDescriptor)
+        } catch {
+            print("검색 실패: \(error.localizedDescription)")
+        }
+    }
+    
     // Update (기존 일기 수정하기)
     func updateDiaryData(entry: Diary, newContent: String) {
         guard let context = context else {return}
