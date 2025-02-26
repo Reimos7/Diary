@@ -15,7 +15,7 @@ struct ListView: View {
     @EnvironmentObject var manager: SwiftDataManager
     
     var body: some View {
-        NavigationStack {
+        NavigationStack() {
             List {
                 ForEach(manager.diaryEntries, id: \.self) { data in
                     // 일기를 선택하면 해당 일기 DetailView로 이동
@@ -27,7 +27,6 @@ struct ListView: View {
                 }
                 .onDelete(perform: delete)
             }
-            
             .listStyle(.plain)
             .navigationTitle("일기 목록")
             // 화면이 나타날 때 데이터 로드

@@ -71,12 +71,12 @@ struct MainView: View {
             VStack {
                 // MARK: - 날짜 선택 시 해당 날짜 다이어리 작성페이지 이동
                 NavigationLink(isActive: $selectedDateNavigate) {
-                    FSCalenderComposeView(selectedDate: selectedDate)
+                    CalendarComposeView(selectedDate: $selectedDate)
                 } label: {
                     EmptyView()
                 }
                 // 캘린더
-                FSCalendarView(selectedDate: $selectedDate, dateSelectAction: { date in
+                CalendarSetView(selectedDate: $selectedDate, dateSelectAction: { date in
                     selectedDate = date
                     selectedDateNavigate = true
                 })

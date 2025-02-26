@@ -33,6 +33,8 @@ class SwiftDataManager: ObservableObject {
         do {
             // SwiftData의 모델 컨테이너를 초기화
             container = try ModelContainer(for: Diary.self)
+            // 실행시 바로 데이터 불러오기
+            fetchDiaryData(isDecending: true)
         } catch {
             fatalError("SwiftData 초기화 실패: \(error.localizedDescription)")
         }
@@ -65,6 +67,13 @@ class SwiftDataManager: ObservableObject {
         } catch {
             print("데이터 가져오기 실패함 \(error.localizedDescription)")
             return []
+        }
+    }
+    // 특정 날짜에 저장된 일기가 존재하는지 확인
+    func hasDiaryentry(for date: Date) -> Bool {
+        return diaryEntries.contains { entry in
+            Calendar.current.isDate(entry.date, inSameDayAs: date)
+            
         }
     }
     

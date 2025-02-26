@@ -43,7 +43,7 @@ struct ComposeView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         manager.addDiaryData(content: content, date: Date())
-                        manager.fetchDiaryData(isDecending: true)
+//                        manager.fetchDiaryData(isDecending: true)
                         showToast = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             showToast = false

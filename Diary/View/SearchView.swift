@@ -13,7 +13,7 @@ struct SearchView: View {
     @EnvironmentObject var manager: SwiftDataManager
     
     var body: some View {
-        NavigationStack  {
+        NavigationStack() {
             VStack {
                 if keyword.isEmpty {
                     Spacer()
