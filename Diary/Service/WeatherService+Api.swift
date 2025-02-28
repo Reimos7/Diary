@@ -21,7 +21,14 @@ extension WeatherService {
             "units": "metric",
             "lang": "kr"
         ]
-        AF.request(url, method: .get, parameters: parameters)
+        // 기존 코드 
+        //AF.request(url, method: .get, parameters: parameters)
+        
+        //URLRequest에 캐싱을 방지하는 헤더 추가.
+        AF.request(url, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: [
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache"
+        ])
             .validate(statusCode: 200..<300)
             .responseDecodable(of: CodableCurrentWeather.self) { [weak self] response in
                 switch response.result {

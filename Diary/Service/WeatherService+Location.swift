@@ -107,4 +107,12 @@ extension WeatherService: CLLocationManagerDelegate {
         // 발생한 에러 메시지 저장
         lastError = error.localizedDescription
     }
+    //  강제로 새 API 호출
+    @objc func updateWeatherManually() {
+        if let location = locationManager.location {
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            fetchWeather(lat: lat, lon: lon)
+        }
+    }
 }
