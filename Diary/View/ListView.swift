@@ -39,14 +39,22 @@ struct ListView: View {
                     NavigationLink {
                         SearchView()
                     } label: {
-                        Image(systemName: "magnifyingglass")
+                        Image("search_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                            .foregroundColor(.primary)
                     }
                     // 정렬 버튼
                     Button {
                         sortByDateDesc.toggle()
                         manager.fetchDiaryData(isDecending: sortByDateDesc)
                     } label: {
-                        Image(systemName: "arrow.up.arrow.down")
+                        Image("reverseSearch_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30) // SF Symbol 크기와 유사하게 조정
+                            .foregroundColor(.primary)
                     }
                 }
             }

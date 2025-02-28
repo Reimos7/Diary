@@ -21,52 +21,7 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             // MARK: - 날씨
-            VStack() {
-                // 메인화면에서 날씨 연동해주기
-                Text(service.currentLocation ?? "없음")
-                    .font(.title)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 60)
-                //Spacer()
-                /*
-                 WeatherService가 API에서 받아온 데이터를 currentWeather에 저장하면,
-                 @EnvironmentObject var service를 통해 MainView에서 실시간으로 반영됨
-                 */
-                
-                if let model = service.currentWeather {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            if model.icon != "moon.fill" {
-                                Image(systemName: model.icon)
-                                    .font(.largeTitle)
-                                // 아이콘 심볼 이미지를 멀티 컬러 색상으로
-                                    .symbolRenderingMode(.multicolor)
-                                    .onAppear {
-                                        print("아이콘이 적용됨 \(model.icon)")
-                                    }
-                            } else {
-                                Image(systemName: model.icon)
-                                    .font(.largeTitle)
-                                // 아이콘 심볼 이미지를 멀티 컬러 색상으로
-                                // moon.fill이면 멀티 컬러 안됨
-                                //.symbolRenderingMode(.multicolor)
-                                    .onAppear {
-                                        print("아이콘이 적용됨 \(model.icon)")
-                                    }
-                            }
-                            
-                            Text(model.weather)
-                            Text(model.temperature)
-                            
-                            //Spacer()
-                        }
-                        .padding()
-                        .font(.largeTitle)
-                        //.frame(height: reader.size.height)
-                    }
-                }
-             }
-            .padding()
+            WeatherView()
             
             VStack {
                 // MARK: - 날짜 선택 시 해당 날짜 다이어리 작성페이지 이동
@@ -80,7 +35,7 @@ struct MainView: View {
                     selectedDate = date
                     selectedDateNavigate = true
                 })
-                .frame(width: 400, height: 400)
+                .frame(minWidth: 400, minHeight: 400)
                 .padding()
                 
                 
@@ -88,10 +43,9 @@ struct MainView: View {
                 NavigationLink {
                     ComposeView(model: model)
                 }           label: {
-                    Image(systemName: "pencil")
+                    Image("pencil_img")
                         .resizable()
-                        .frame(width: 50, height: 50)
-                    
+                        .frame(maxWidth: 50,maxHeight: 50)
                 }
             }
             .padding()
@@ -101,7 +55,11 @@ struct MainView: View {
                         NavigationLink {
                             SettingView()
                         } label: {
-                            Image(systemName: "gearshape.fill")
+                            Image("setting_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                                .foregroundColor(.primary) // 다크 모드에서도 보이게 설정
                         }
                         
                     }
@@ -111,11 +69,15 @@ struct MainView: View {
                         NavigationLink {
                             ListView()
                         } label: {
-                            Image(systemName: "list.bullet")
+                            Image("list_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                                .foregroundColor(.primary) // 다크 모드에서도 보이게 설정
                         }
                     }
                 }
         }
+        
     }
 }
-

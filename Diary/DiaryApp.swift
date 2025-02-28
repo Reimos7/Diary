@@ -35,5 +35,6 @@ struct DiaryApp: App {
         // WeatherService는 앱 전체에서 공통적으로 사용하는거니까, environmentObject로 공유 하는게 좋음
             .environmentObject(service)
             .environmentObject(manager)
+    
     }
 }

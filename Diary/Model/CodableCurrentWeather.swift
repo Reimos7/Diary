@@ -19,6 +19,14 @@ struct CodableCurrentWeather: Codable {
     
     struct Main: Codable {
         let temp: Double
+        let temp_min: Double
+        let temp_max: Double
     }
     let main: Main
+    
+    struct Sys: Codable {
+        let sunrise: Double
+        let sunset: Double
+    }
+    let sys: Sys
 }

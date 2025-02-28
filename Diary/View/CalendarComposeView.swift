@@ -34,7 +34,11 @@ struct CalendarComposeView: View {
                         dismiss()
                     }
                 } label: {
-                    Label("Save", systemImage: "checkmark")
+                    Image("checkmark_img")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                        .foregroundColor(.primary)
                 }
                 
             }
