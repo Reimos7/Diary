@@ -25,7 +25,7 @@ struct CalendarSetView: UIViewRepresentable {
         //  캘린더 로케일 설정 (한국어)
         calendar.locale = Locale(identifier: "ko_KR")
         // 셀 크기 조정
-        calendar.rowHeight = 50
+        calendar.rowHeight = 80
         //  캘린더 헤더의 날짜 형식
         calendar.appearance.headerDateFormat = "yyyy.MM"
         
@@ -36,6 +36,7 @@ struct CalendarSetView: UIViewRepresentable {
         calendar.appearance.selectionColor = UIColor(red: 230/255, green: 244/255, blue: 237/255, alpha: 1)
         calendar.appearance.titleTodayColor = .black
         calendar.appearance.subtitleFont = UIFont.systemFont(ofSize: 10)
+        //calendar.appearance.subtitleDefaultColor = UIColor.blue
         calendar.appearance.todayColor = UIColor(red: 230/255, green: 244/255, blue: 237/255, alpha: 1)
         calendar.appearance.titleSelectionColor = UIColor.black
         calendar.appearance.headerMinimumDissolvedAlpha = 0.0
@@ -80,8 +81,10 @@ struct CalendarSetView: UIViewRepresentable {
 //                   if todayString == targetDateString {
 //                       return "오늘"
 //                   }
+//                
 //                   return nil
 //               }
+            
         // ✅ 오늘 날짜에 "오늘"을 표시하는 코드
 //        func calendar(_ calendar: FSCalendar, subtitleFor date: Date) -> String? {}
 //            let dateFormatter = DateFormatter()
