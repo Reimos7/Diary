@@ -49,6 +49,8 @@ extension CurrentWeather {
         sunset = date.formatted(.dateTime.hour().minute())
         // 변환된 아이콘 코드 확인
            print("변환된 SF Symbol: \(icon)")
+        print("현재 온도: \(data.main.temp), 최고 온도: \(data.main.temp_max), 최저 온도: \(data.main.temp_min)")
+        
     }
 }
 

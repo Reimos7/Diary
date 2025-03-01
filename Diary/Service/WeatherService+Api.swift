@@ -29,17 +29,20 @@ extension WeatherService {
             "Cache-Control": "no-cache",
             "Pragma": "no-cache"
         ])
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: CodableCurrentWeather.self) { [weak self] response in
-                switch response.result {
-                case .success(let weatherData):
-                    DispatchQueue.main.async {
-                        self?.currentWeather = CurrentWeather(data: weatherData)
-                        print("응답데이터\(weatherData)")
-                    }
-                case .failure(let error):
-                    print("Weather API Error: \(error.localizedDescription)")
+        .validate(statusCode: 200..<300)
+        .responseDecodable(of: CodableCurrentWeather.self) { [weak self] response in
+            switch response.result {
+            case .success(let weatherData):
+                DispatchQueue.main.async {
+                    self?.currentWeather = CurrentWeather(data: weatherData)
+                    print("------ API 원본 응답 ------")
+                    print("응답데이터\(weatherData)")
+                    print("-------------------------")
+                    
                 }
+            case .failure(let error):
+                print("Weather API Error: \(error.localizedDescription)")
             }
+        }
     }
 }
