@@ -66,25 +66,40 @@ struct ComposeView: View {
                         }
                         .padding()
                     }
-                    
-                    // 입력을 위한 TextEditor
-                    TextEditor(text: $content)
-                    //.frame(height: 120)
-                        .padding()
+                    //                    ZStack {
+                    //                        if content.isEmpty {
+                    //                            Text("일기를 입력해주세요!")
+                    //                                .foregroundColor(Color(uiColor: .placeholderText))
+                    //                        }
+                    //                        // 입력을 위한 TextEditor
+                    //                        TextEditor(text: $content)
+                    //                        //.frame(height: 120)
+                    //                            .padding()
+                    //                            .focused($focused)
+                    //                        //.background(Color(.systemGray6))
+                    //                        //.cornerRadius(8)
+                    //                            .border(.gray.opacity(0.2), width: 1)
+                    //
+                    //                        //Spacer()
+                    //                    }
+                    //                    .padding(.horizontal)
+                    //                    .cornerRadius(8)
+                    //
+                    //                    Spacer()
+                    ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
+                        .padding(.horizontal)
                         .focused($focused)
-                        //.background(Color(.systemGray6))
-                        //.cornerRadius(8)
-                    .border(.gray.opacity(0.2), width: 1)
+                        
                     
                     Spacer()
+                    
                 }
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.focused = true
                     }
                 }
-                // 이거는 안됨
-                //.ignoresSafeArea(.keyboard, edges: .bottom)
+                
                 
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
@@ -145,6 +160,8 @@ struct ComposeView: View {
                 
             }
         }
+        // 이거는 안됨
+        //.ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     
