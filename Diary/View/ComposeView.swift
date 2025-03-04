@@ -21,6 +21,8 @@ struct ComposeView: View {
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
     //직접 실행할 PhotosPicker
     @State private var selectedItems: [PhotosPickerItem] = []
+    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
+    @State private var imagePath: [String]? = nil
     
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var service: WeatherService
@@ -89,11 +91,14 @@ struct ComposeView: View {
                     ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
                         .padding(.horizontal)
                         .focused($focused)
-                        
+                    
                     
                     Spacer()
                     
                 }
+                //                .onChange(of: selectedItems, { _, newValue in
+                //                    loadImages()
+                //                })
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.focused = true
@@ -122,19 +127,36 @@ struct ComposeView: View {
                             
                         }
                         Button {
-                            manager.addDiaryData(content: content, date: Date())
-                            //                        manager.fetchDiaryData(isDecending: true)
-                            showToast = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                showToast = false
-                                dismiss()
+                            
+                            Task {
+                                var savedPath: [String] = []
+                                
+                                for image in selectedImages {
+                                    if let path = FileManagerSet.saveImageToFileManager(image: image) {
+                                        savedPath.append(path) //  저장된 경로를 추가
+                                    }
+                                }
+                                imagePath = savedPath.isEmpty ? nil : savedPath
+                                
+                                manager.addDiaryData(content: content, date: Date(), imagePath: imagePath)
+                                // manager.fetchDiaryData(isDecending: true)
+                                
+                                // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
+                                self.focused = false
+                                
+                                showToast = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    showToast = false
+                                    dismiss()
+                                }
+                                
                             }
                         } label: {
                             Image("checkmark_img")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                .foregroundColor(.primary)
+                                .foregroundColor(.black)
                         }
                     }
                 }

@@ -25,6 +25,9 @@ class SwiftDataManager: ObservableObject {
     var context: ModelContext? {
         return container?.mainContext
     }
+    var imagePath: String? = nil
+    // 선택된 이미지 저장
+    @State private var selectedImages: [UIImage] = []
     
     // 저장된 일기 목록 저장함
     @Published var diaryEntries: [Diary] = []
@@ -40,15 +43,16 @@ class SwiftDataManager: ObservableObject {
         }
     }
     
-    // Create 새로운 일기 추가
-    func addDiaryData(content: String, date: Date) {
+    // Create 새로운 일기 추가 - 이미지 추가 가능
+    func addDiaryData(content: String, date: Date, imagePath: [String]? = nil) {
         guard let context = context else {return}
         
-        let diaryNewData = Diary(content: content, date: date)
+        let diaryNewData = Diary(content: content, date: date, imagePath: imagePath)
         // 데이터 추가
         context.insert(diaryNewData)
         // 저장
         saveContext()
+        print("저장 완료됨>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     }
     
     // Read 일기 목록 조회 , 파라미터로 오름차순, 내림차순 결정

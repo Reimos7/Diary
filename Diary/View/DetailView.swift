@@ -8,17 +8,42 @@ struct DetailView: View {
     @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
     
+    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
+    @State private var imageUrl: [URL] = []
+    
     let data: Diary
     
     var body: some View {
         NavigationStack {
             VStack {
                 ScrollView {
-                    HStack {
-                        Text(data.content)
-                            .padding()
-                        Spacer(minLength: 0)
+                    // HStack {
+                    
+                    // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
+                    if let paths = data.imagePath, !paths.isEmpty {
+                        ForEach(paths, id: \.self) { path in
+                            if let url = URL(string: path) {
+                                AsyncImage(url: url) { image in
+                                    image.resizable()
+                                        .scaledToFit()
+                                        .frame(width: 300, height: 300)
+                                    
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                
+                            } else {
+                                Text("이미지 불러오기 실패")
+                            }
+                            
+                        }
                     }
+                    
+                    Text(data.content)
+                        .padding()
+                    
+                    Spacer(minLength: 0)
+                    //}
                     Text(DateFormatter.dateFormatter.string(from: data.date))
                         .padding()
                         .font(.footnote)
