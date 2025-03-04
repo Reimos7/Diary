@@ -24,6 +24,28 @@ struct FileManagerSet {
             return nil
         }
     }
+    
+    // 파일 삭제 함수 - 저장된 이미지 경로 삭제를 위한 함수
+    // 파일이 실제로 존재 할때만 삭제함
+    static func deleteImageFromFileManager(at path: String) {
+        guard let fileURL = URL(string: path) else {
+            print("잘못된 경로: \(path)")
+            return
+        }
+
+        let filePath = fileURL.path // 실제 파일 경로 변환
+
+        if FileManager.default.fileExists(atPath: filePath) {
+            do {
+                try FileManager.default.removeItem(atPath: filePath)
+                print("이미지 삭제 성공: \(filePath)")
+            } catch {
+                print("이미지 삭제 실패: \(error.localizedDescription)")
+            }
+        } else {
+            print("파일이 존재하지 않음: \(filePath)")
+        }
+    }
 
     static func loadImageFromFileManager(path: String) -> UIImage? {
         guard let url = URL(string: path) else { return nil }

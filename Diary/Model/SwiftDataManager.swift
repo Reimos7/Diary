@@ -91,8 +91,8 @@ class SwiftDataManager: ObservableObject {
             
             // 검색 조건을 적용해서 데이터를 최신순으로 정렬
             let fetchDescriptor = FetchDescriptor<Diary>(
-                        predicate: predicate,
-                        sortBy: [SortDescriptor(\.date, order: .reverse)]
+                predicate: predicate,
+                sortBy: [SortDescriptor(\.date, order: .reverse)]
             )
             // 검색 결과를 diaryEntries에 저장하여 화면을 업데이트
             self.diaryEntries = try context.fetch(fetchDescriptor)
@@ -109,9 +109,16 @@ class SwiftDataManager: ObservableObject {
         saveContext()
     }
     
-    // Delete (일기 삭제)
+    // Delete (일기 삭제) - 저장된 이미지 경로도 삭제 
     func deleteDiaryData(entry: Diary) {
         guard let context = context else {return}
+        // 저장된 이미지 경로 존재 시 삭제
+        if let paths = entry.imagePath {
+            for path in paths {
+                FileManagerSet.deleteImageFromFileManager(at: path)
+            }
+        }
+        
         // 데이터 삭제
         context.delete(entry)
         saveContext()
