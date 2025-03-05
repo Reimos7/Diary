@@ -6,11 +6,25 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct EditComposeView: View {
-    
     @State private var content: String = ""
     @State private var showToast: Bool = false
+    // 사진 선택기(Picker)를 보여줄지 여부
+    @State private var showPhotoPicker: Bool = false
+    //PhotosPicker에서 선택된 사진을 저장하는 배열
+    @State private var selectedItems: [PhotosPickerItem] = []
+    // 사용자가 선택한 이미지들을 저장하는 배열
+    @State private var selectedImages: [UIImage] = []
+    //전체 화면에서 이미지를 볼 때 사용하는 변수 (이미지를 클릭하면 설정됨)
+    @State private var selectedImageForFullScreen: IdentifiableImage? = nil
+    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
+    // 선택한 이미지를 파일로 저장한 후 해당 파일의 **경로**(파일 위치)를 저장하는 배열
+    @State private var imagePath: [String] = []
+    // 에러 감지 상태
+    @State private var isPreSentedError: Bool = false
+    
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
     // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
@@ -45,8 +59,6 @@ struct EditComposeView: View {
                         }
                         
                     }
-                    //                        TextEditor(text: $content)
-                    //                            .padding()
                     ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
                         .padding(.horizontal)
                         .focused($focused)
@@ -81,7 +93,17 @@ struct EditComposeView: View {
                         Text("닫기")
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    // 사진은 일단 1장만 저장
+                    PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                    }
+                    .onChange(of: selectedItems) { _, newValue in
+                        Task {
+                            await updateSelectedImage(newItems: newValue)
+                        }
+                    }
+                    //ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         guard let data = data else { return }
                         manager.updateDiaryData(entry: data, newContent: content)
@@ -97,8 +119,9 @@ struct EditComposeView: View {
                     } label: {
                         Text("수정")
                     }
+                    //  }
+                    
                 }
-                
             }
             // 저장하면 toast 메시지로 알려줌
             if showToast {
@@ -116,6 +139,41 @@ struct EditComposeView: View {
             }
         }
         
+    }
+    // 사용자가 새 이미지를 선택하면 기존 이미지를 삭제하고 새로운 이미지를 저장
+    private func updateSelectedImage(newItems: [PhotosPickerItem]) async {
+        guard let data = data else {return}
+        
+        // 기존 이미지 삭제 (파일 + SwiftData에서 경로 삭제함)
+        if let paths = data.imagePath {
+            for path in paths {
+                FileManagerSet.deleteImageFromFileManager(at: path)
+                print("기존 이미지와 경로를 삭제했습니다: \(path)")
+            }
+        }
+        
+        // SwiftData에서 기존 경로 삭제
+        data.imagePath = nil // 기존 이미지 경로 제거
+        try? manager.saveContext() // SwiftData 변경 사항 저장
+        
+        // 기존 UI 데이터 초기화
+        imagePath.removeAll()
+        selectedItems.removeAll()
+        
+        // 새로운 이미지 추가
+        for item in newItems {
+            if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                if let savedPath = FileManagerSet.saveImageToFileManager(image: image) {
+                    imagePath.append(savedPath)
+                }
+                DispatchQueue.main.async {
+                    selectedImages.append(image)
+                }
+            }
+        }
+        // SwiftData에 새로운 이미지 경로 업데이트
+        data.imagePath = imagePath.isEmpty ? nil : imagePath
+        try? manager.saveContext() // 변경 사항 바로 저장 
     }
 }
 

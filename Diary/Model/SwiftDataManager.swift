@@ -125,7 +125,7 @@ class SwiftDataManager: ObservableObject {
     }
     
     // SwiftData에서는 CordData처럼 Save를 안해줘도 되지만, 바로 저장하고 싶으니 함수로 만듬
-    private func saveContext() {
+     func saveContext() {
         do {
             try context?.save() // 변경 사항 저장
         } catch {
