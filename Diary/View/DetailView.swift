@@ -5,11 +5,13 @@ struct DetailView: View {
     
     @State private var showEditComposeView: Bool = false
     @State private var showDeleteAlert: Bool = false
-    @EnvironmentObject var manager: SwiftDataManager
-    @Environment(\.dismiss) var dismiss
-    
+    // 클릭한 이미지 풀 스크린
+    @State private var selectedImageForFullscreen: IdentifiableImage? = nil
     // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
     @State private var imageUrl: [URL] = []
+    
+    @EnvironmentObject var manager: SwiftDataManager
+    @Environment(\.dismiss) var dismiss
     
     let data: Diary
     
@@ -27,6 +29,13 @@ struct DetailView: View {
                                     image.resizable()
                                         .scaledToFit()
                                         .frame(width: 300, height: 300)
+                                        // 풀 스크린 이미지 보기
+                                        .onTapGesture {
+                                            // contentsOfFile 로컬 파일에서 이미지를 불러옴
+                                            if let uiImage = UIImage(contentsOfFile: url.path) {
+                                                selectedImageForFullscreen = IdentifiableImage(image: uiImage)
+                                            }
+                                        }
                                     
                                 } placeholder: {
                                     ProgressView()
@@ -37,7 +46,9 @@ struct DetailView: View {
                             }
                             
                         }
+                        
                     }
+                    
                     
                     Text(data.content)
                         .padding()
@@ -49,6 +60,10 @@ struct DetailView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+            }
+            // 이미지 클릭 시 전체 화면 표시
+            .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
+                FullscreenImageView(image: fullScreenImage.image)
             }
             
             // MARK: - 편집,삭제 메뉴 버튼
