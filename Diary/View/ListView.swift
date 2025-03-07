@@ -18,16 +18,26 @@ struct ListView: View {
         NavigationStack() {
             List {
                 ForEach(manager.diaryEntries, id: \.self) { data in
-                    // 일기를 선택하면 해당 일기 DetailView로 이동
-                    NavigationLink {
-                        DetailView(data: data)
-                    } label: {
+                    ZStack {
+                        // 실제로 보이는 셀 (디자인용)
                         DiaryCell(diaryCellData: data)
+                        
+                        // 터치 영역을 만들기 위한 투명 버튼
+                        // 일기를 선택하면 해당 일기 DetailView로 이동
+                        NavigationLink(destination: DetailView(data:data)) {
+                            EmptyView()
+                        }
+                        .buttonStyle(.plain) // > 네비게이션 링크 표시 제거
+                        .opacity(0) // 터치 영역을 유지하면서 안 보이게 설정
                     }
+                    .listRowSeparator(.hidden) // 줄 없애기
+                    
                 }
                 .onDelete(perform: delete)
+
             }
-            .listStyle(.plain)
+            .scrollContentBackground(.hidden) // 리스트 배경 제거
+            //.listStyle(.plain)
             .navigationTitle("일기 목록")
             // 화면이 나타날 때 데이터 로드
             .onAppear {
