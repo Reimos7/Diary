@@ -24,21 +24,32 @@ struct SearchView: View {
                 if !keyword.isEmpty && !isTyping {
                     List {
                         ForEach(manager.diaryEntries, id: \.self) { data in
-                            // 일기를 선택하면 해당 일기 DetailView로 이동
-                            NavigationLink {
-                                DetailView(data: data)
-                            } label: {
+                            
+                            ZStack {
+                                // 디자인을 위해 보여지는 셀
                                 DiaryCell(diaryCellData: data)
+                                
+                                // 터치 영역을 위한 투명 버튼
+                                NavigationLink(destination: DetailView(data: data)) {
+                                    EmptyView()
+                                }
+                                // 네비게이션 링크 표시 제거
+                                .buttonStyle(.plain)
+                                // 터치 영역 유지 (보이지 않게 설정)
+                                .opacity(0)
                             }
+                            // 줄 없애기
+                            .listRowSeparator(.hidden)
                         }
                     }
+                    // 리스트 배경 제거
+                    .scrollContentBackground(.hidden)
                     .listStyle(.plain)
                     
                 } else {
                     Spacer()
                     Text("일기를 검색해주세요")
                     Spacer()
-                    
                 }
             }
             // 기본 뒤로 가기 버튼 숨김
@@ -54,7 +65,6 @@ struct SearchView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                     }
-                    
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     HStack {
