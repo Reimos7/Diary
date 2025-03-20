@@ -85,6 +85,8 @@ struct DetailView: View {
                         screenshotShareAlert = true  // 캡처 후 Alert 표시
                     } label: {
                         Image(systemName: "square.and.arrow.up")
+                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -93,6 +95,8 @@ struct DetailView: View {
                         Button { showEditComposeView = true } label: { Text("편집") }
                     } label: {
                         Image(systemName: "ellipsis")
+                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                 }
                 

@@ -6,10 +6,20 @@
 //
 
 import SwiftUI
-// 추후 다크모드 처리 넣기 
+
 struct SettingView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            List {
+                NavigationLink {
+                    ThemeView()
+                } label: {
+                    Text("화면 테마")
+                }
+            }
+            .navigationTitle("설정")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 

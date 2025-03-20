@@ -76,6 +76,7 @@ struct CalendarComposeView: View {
                     // 사진은 일단 1장만 저장
                     PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
                         Image(systemName: "photo.on.rectangle.angled")
+                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                     .onChange(of: selectedItems) { _, newValue in
                         Task { // 선택한 사진을 앱에 추가하는 비동기 작업 수행
@@ -104,8 +105,8 @@ struct CalendarComposeView: View {
                             }
                             // 이미지가 없으면 nil 처리
                             imagePath = savedPath.isEmpty ? nil : savedPath
-                            // 일기 데이터를 SwiftDataManager를 통해 저장
-                            manager.addDiaryData(content: content, date: Date(), imagePath: imagePath)
+                            // 일기 데이터를 SwiftDataManager를 통해 저장, 캘린더에서 선택한 날짜로 저장
+                            manager.addDiaryData(content: content, date: selectedDate, imagePath: imagePath)
                             
                             // 저장 버튼을 누르면 키보드 내려서 사용자에게 showToast 보여주기
                             self.focused = false
@@ -123,7 +124,8 @@ struct CalendarComposeView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
-                            .foregroundStyle(.black)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
                 }
             }
@@ -136,19 +138,15 @@ struct CalendarComposeView: View {
                     Text("일기를 저장했어요!")
                         .padding()
                         .background(Color(.systemGray5))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.primary) // 다크모드에서도 자동 변경
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .transition(.opacity)
                 .animation(.easeInOut, value: showToast)
                 .padding(.bottom, 50)
                 
-            }
-            
-            
+            } 
         }
-        
-        // .navigationTitle(dateFormatter.string(from: selectedDate))
     }
 }
 

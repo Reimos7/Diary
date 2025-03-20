@@ -34,7 +34,7 @@ struct FullscreenImageView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 30))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary) 
                             .padding()
                     }
 

@@ -97,6 +97,8 @@ struct EditComposeView: View {
                     // 사진은 일단 1장만 저장
                     PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
                         Image(systemName: "photo.on.rectangle.angled")
+                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                     .onChange(of: selectedItems) { _, newValue in
                         Task {
@@ -129,7 +131,7 @@ struct EditComposeView: View {
                     Text("일기를 수정했어요!")
                         .padding()
                         .background(Color(.systemGray5))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.primary) // 다크모드에서도 자동 변경
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .transition(.opacity)

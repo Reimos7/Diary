@@ -10,7 +10,6 @@ import SwiftData
 import FSCalendar
 
 struct MainView: View {
-    
     @EnvironmentObject var service: WeatherService
     @State private var selectedDate: Date = Date()
     //날짜 선택시 네비게이션
@@ -46,6 +45,8 @@ struct MainView: View {
                     Image("pencil_img")
                         .resizable()
                         .frame(maxWidth: 50,maxHeight: 50)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                 }
             }
             .padding()
@@ -58,8 +59,10 @@ struct MainView: View {
                             Image("setting_img")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                .foregroundColor(.primary) // 다크 모드에서도 보이게 설정
+                                .frame(width: 44, height: 44) // SF Symbol 크기와 유사하게 조정
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                            
                         }
                         
                     }
@@ -72,12 +75,12 @@ struct MainView: View {
                             Image("list_img")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                .foregroundColor(.primary) // 다크 모드에서도 보이게 설정
+                                .frame(width: 34, height: 34) // SF Symbol 크기와 유사하게 조정
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                         }
                     }
                 }
         }
-        
     }
 }

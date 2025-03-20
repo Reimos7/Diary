@@ -11,6 +11,7 @@ struct DiaryCell: View {
     let diaryCellData: Diary
     // 모든 기기에서 동일한 너비
     private let fixedWidth = UIScreen.main.bounds.width * 0.85
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
@@ -18,7 +19,7 @@ struct DiaryCell: View {
             Text(DateFormatter.dateFormatter.string(from: diaryCellData.date))
                 .padding()
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary) // 다크 모드 대응
             
             // 이미지가 있을 경우 표시
             if let paths = diaryCellData.imagePath, !paths.isEmpty {
@@ -41,13 +42,16 @@ struct DiaryCell: View {
             Text(diaryCellData.content)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: fixedWidth - 20, alignment: .leading)
+                .foregroundStyle(.primary) // 다크 모드 대응
                 .padding(.bottom, 10)
         }
         .padding()
         // 가로 크기 고정
         .frame(width: fixedWidth)
         // 카드 형식의 UI
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        //.background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        .background(RoundedRectangle(cornerRadius: 12)
+            .fill(colorScheme == .dark ? Color(uiColor: .lightGray) : Color.white))
         // 그림자 효과
         .shadow(radius: 2)
     }

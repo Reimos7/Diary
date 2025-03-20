@@ -52,7 +52,7 @@ struct ComposeView: View {
                     
                     // 선택한 이미지 출력
                     if !selectedImages.isEmpty {
-                        //ScrollView(.horizontal, showsIndicators: false) {
+                        
                         VStack(spacing: 5) {
                             ForEach(selectedImages, id: \.self) { image in
                                 Image(uiImage: image)
@@ -64,30 +64,10 @@ struct ComposeView: View {
                                         selectedImageForFullscreen = IdentifiableImage(image: image)
                                     }
                             }
-                            // }
+                            
                         }
                         .padding()
                     }
-                    //                    ZStack {
-                    //                        if content.isEmpty {
-                    //                            Text("일기를 입력해주세요!")
-                    //                                .foregroundColor(Color(uiColor: .placeholderText))
-                    //                        }
-                    //                        // 입력을 위한 TextEditor
-                    //                        TextEditor(text: $content)
-                    //                        //.frame(height: 120)
-                    //                            .padding()
-                    //                            .focused($focused)
-                    //                        //.background(Color(.systemGray6))
-                    //                        //.cornerRadius(8)
-                    //                            .border(.gray.opacity(0.2), width: 1)
-                    //
-                    //                        //Spacer()
-                    //                    }
-                    //                    .padding(.horizontal)
-                    //                    .cornerRadius(8)
-                    //
-                    //                    Spacer()
                     ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
                         .padding(.horizontal)
                         .focused($focused)
@@ -96,21 +76,18 @@ struct ComposeView: View {
                     Spacer()
                     
                 }
-                //                .onChange(of: selectedItems, { _, newValue in
-                //                    loadImages()
-                //                })
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.focused = true
                     }
                 }
                 
-                
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         // 일단 사진은 1장만 저장
                         PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
                             Image(systemName: "photo.on.rectangle.angled")
+                                .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                         }
                         .onChange(of: selectedItems) { _, newValue in
                             Task {
@@ -156,7 +133,8 @@ struct ComposeView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                .foregroundColor(.black)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                         }
                     }
                 }
@@ -171,7 +149,7 @@ struct ComposeView: View {
                         Text("일기를 저장했어요!")
                             .padding()
                             .background(Color(.systemGray5))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.primary) // 다크모드에서도 자동 변경
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .transition(.opacity)
@@ -185,37 +163,8 @@ struct ComposeView: View {
         // 이거는 안됨
         //.ignoresSafeArea(.keyboard, edges: .bottom)
     }
-    
-    
-    
-    //#Preview {
-    //    ComposeView(model: .preview)
-    //}
 }
 
-//                       Button {
-//                            // PhotoPickerView를 버튼처럼 사용하기
-//                            PhotoPickerView(selectedImages: $selectedImages, isPresentedError: $isPresentedError) {
-//                                HStack {
-//                                    Image(systemName: "photo.on.rectangle.angled")
-//                                }
-//                                .padding()
-//                                .background(Color.blue)
-//                                .foregroundStyle(.white)
-//                                .cornerRadius(10)
-//                            }
-//
-//                        }
-//                        .padding()
-//                        .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
-//                            FullscreenImageView(image: fullScreenImage.image)
-//                        }
-//
-//
-//                     label: {
-//                        Text("이미지")
-//                    }
-//
 
 
 

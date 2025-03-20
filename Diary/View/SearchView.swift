@@ -99,7 +99,8 @@ struct SearchView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                            .foregroundColor(.primary)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
                 }
             }
