@@ -85,19 +85,80 @@ struct EditComposeView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            // 키보드 버튼 (현재 시간, 키보드 내리기)
+            // EditComposeView는 시뮬레이터에서만 가능하고 실기기에서 사용 불가 코드
+            //            .toolbar {
+            //                ToolbarItemGroup(placement: .keyboard) {
+            //                    Button {
+            //                        content += DateFormatter.timeFormatter.string(from: Date())
+            //                    } label: {
+            //                        Image("clock_img")
+            //                            .resizable()
+            //                            .scaledToFit()
+            //                            .frame(width: 18, height: 18) // SF Symbol 크기와 유사하게 조정
+            //                            .symbolRenderingMode(.palette)
+            //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+            //                    }
+            //                    Spacer()
+            //                    Button {
+            //                        hideKeyboard()
+            //                    } label: {
+            //                        Image("keyboard_img")
+            //                            .resizable()
+            //                            .scaledToFit()
+            //                            .frame(width: 20, height: 20) // SF Symbol 크기와 유사하게 조정
+            //                            .symbolRenderingMode(.palette)
+            //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+            //                    }
+            //                }
+            //            }
+            
+            // 키보드 툴바 - 단일 툴바로 통합
+            .safeAreaInset(edge: .bottom, alignment: .center, spacing: 0) {
+                if focused {
+                    HStack {
+                        Button {
+                            content += DateFormatter.timeFormatter.string(from: Date())
+                        } label: {
+                            Image("clock_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .foregroundStyle(Color.primary)
+                        }
+                        
+                        Spacer()
+                        
+                        Button {
+                            focused = false
+                        } label: {
+                            Image("keyboard_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .foregroundStyle(Color.primary)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color(UIColor.systemBackground))
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismiss()
                     } label: {
-                        Text("닫기")
+                        Image(systemName: "xmark")
+                        //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // 사진은 일단 1장만 저장
                     PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
                         Image(systemName: "photo.on.rectangle.angled")
-                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                        //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
                             .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                     .onChange(of: selectedItems) { _, newValue in
@@ -119,7 +180,12 @@ struct EditComposeView: View {
                             dismiss()
                         }
                     } label: {
-                        Text("수정")
+                        Image("checkmark_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
                     //  }
                     
@@ -175,7 +241,7 @@ struct EditComposeView: View {
         }
         // SwiftData에 새로운 이미지 경로 업데이트
         data.imagePath = imagePath.isEmpty ? nil : imagePath
-        try? manager.saveContext() // 변경 사항 바로 저장 
+        try? manager.saveContext() // 변경 사항 바로 저장
     }
 }
 

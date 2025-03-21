@@ -70,7 +70,6 @@ struct CalendarComposeView: View {
                     self.focused = true
                 }
             }
-            
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // 사진은 일단 1장만 저장
@@ -129,6 +128,34 @@ struct CalendarComposeView: View {
                     }
                 }
             }
+            
+            // 키보드 버튼 (현재 시간, 키보드 내리기)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button {
+                        content += DateFormatter.timeFormatter.string(from: Date())
+                    } label: {
+                        Image("clock_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18) // SF Symbol 크기와 유사하게 조정
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                    }
+                    Spacer()
+                    Button {
+                        hideKeyboard()
+                    } label: {
+                        Image("keyboard_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20) // SF Symbol 크기와 유사하게 조정
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                    }
+                }
+            }
+            
             // 이미지 클릭 시 전체 화면 표시
             .fullScreenCover(item: $selectedImageForFullScreen) { fullScreenImage in FullscreenImageView(image: fullScreenImage.image)
             }
@@ -144,7 +171,6 @@ struct CalendarComposeView: View {
                 .transition(.opacity)
                 .animation(.easeInOut, value: showToast)
                 .padding(.bottom, 50)
-                
             } 
         }
     }
