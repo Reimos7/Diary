@@ -10,6 +10,8 @@ import PhotosUI
 
 struct EditComposeView: View {
     @State private var content: String = ""
+    // X 닫기 버튼을 누르면 현재 화면에서 나갈지 계속 있을지 alert
+    @State private var showDismissAlert: Bool = false
     @State private var showToast: Bool = false
     // 사진 선택기(Picker)를 보여줄지 여부
     @State private var showPhotoPicker: Bool = false
@@ -68,7 +70,7 @@ struct EditComposeView: View {
                     
                     
                     // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
-                    // 키보드 올리기 
+                    // 키보드 올리기
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 self.focused = true
@@ -147,8 +149,9 @@ struct EditComposeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        dismiss()
-                    } label: {
+                        showDismissAlert = true
+                    }
+                    label: {
                         Image(systemName: "xmark")
                         //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
                             .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
@@ -191,6 +194,18 @@ struct EditComposeView: View {
                     
                 }
             }
+            .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
+                Button("나가기", role: .destructive) {
+                    dismiss()
+                }
+                
+                Button("계속 작성", role: .cancel) {
+                    showDismissAlert = false
+                }
+            } message: {
+                Text("작성한 글이 저장되지 않습니다!")
+            }
+            
             // 저장하면 toast 메시지로 알려줌
             if showToast {
                 VStack {
