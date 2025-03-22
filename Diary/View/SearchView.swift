@@ -64,7 +64,10 @@ struct SearchView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "chevron.left")
+                            .foregroundColor(Color(uiColor: UIColor.label))
+                        
                     }
+                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     HStack {

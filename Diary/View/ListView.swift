@@ -12,6 +12,7 @@ import SwiftData
 struct ListView: View {
     // true -> 내림차순(최근)
     @State private var sortByDateDesc: Bool = true
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
     
     var body: some View {
@@ -38,10 +39,35 @@ struct ListView: View {
             }
             .scrollContentBackground(.hidden) // 리스트 배경 제거
             //.listStyle(.plain)
-            .navigationTitle("일기 목록")
+            //.navigationTitle("일기 목록")
+        
             // 화면이 나타날 때 데이터 로드
             .onAppear {
                 manager.fetchDiaryData(isDecending: sortByDateDesc)
+            }
+            // 기본 뒤로 가기 버튼 숨김
+            .navigationBarBackButtonHidden()
+            // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
+            .background(NavigationControllerWrapper())
+            .toolbar {
+                // 타이틀 직접 설정
+                ToolbarItem(placement: .principal) {
+                    Text("일기 목록")
+                        .font(.headline)
+                        .foregroundColor(Color(uiColor: .label)) // 다크모드 대응
+                }
+                // 뒤로 가기 버튼
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        // 뒤로 가기 동작 (현재 뷰 닫기)
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(Color(uiColor: UIColor.label))
+                    }
+                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
+                }
+                
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
