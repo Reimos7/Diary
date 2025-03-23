@@ -56,7 +56,7 @@ extension WeatherService: CLLocationManagerDelegate {
             } catch {
                 print("주소 변환 실패: \(error.localizedDescription)")
                 // 에러 메시지 저장 (UI에서 에러 표시 가능)
-                self.lastError = error.localizedDescription
+                //self.lastError = error.localizedDescription
             }
         }
     }

@@ -21,7 +21,7 @@ struct ListView: View {
                 ForEach(manager.diaryEntries, id: \.self) { data in
                     ZStack {
                         // 실제로 보이는 셀 (디자인용)
-                        DiaryCell(diaryCellData: data)
+                        DiaryCell(data: data)
                         
                         // 터치 영역을 만들기 위한 투명 버튼
                         // 일기를 선택하면 해당 일기 DetailView로 이동

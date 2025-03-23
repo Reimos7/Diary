@@ -92,14 +92,7 @@ struct ComposeView: View {
                         }
                         .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
                     }
-                }
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        self.focused = true
-                    }
-                }
-                
-                .toolbar {
+                    
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         // 일단 사진은 1장만 저장
                         PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
@@ -121,9 +114,10 @@ struct ComposeView: View {
                             
                         }
                         Button {
-                            
                             Task {
                                 var savedPath: [String] = []
+                                
+                                guard let weather = service.currentWeather else {return}
                                 
                                 for image in selectedImages {
                                     if let path = FileManagerSet.saveImageToFileManager(image: image) {
@@ -132,7 +126,8 @@ struct ComposeView: View {
                                 }
                                 imagePath = savedPath.isEmpty ? nil : savedPath
                                 
-                                manager.addDiaryData(content: content, date: Date(), imagePath: imagePath)
+                                manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: weather.icon )
+                                
                                 // manager.fetchDiaryData(isDecending: true)
                                 
                                 // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
@@ -154,9 +149,7 @@ struct ComposeView: View {
                                 .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                         }
                     }
-                }
-                // 키보드 버튼 (현재 시간, 키보드 내리기)
-                .toolbar {
+                    
                     ToolbarItemGroup(placement: .keyboard) {
                         Button {
                             content += DateFormatter.timeFormatter.string(from: Date())
@@ -181,6 +174,12 @@ struct ComposeView: View {
                         }
                     }
                 }
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.focused = true
+                    }
+                }
+               
                 // 이미지 클릭 시 전체 화면 표시
                 .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
                     FullscreenImageView(image: fullScreenImage.image)

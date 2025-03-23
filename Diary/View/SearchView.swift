@@ -27,7 +27,7 @@ struct SearchView: View {
                             
                             ZStack {
                                 // 디자인을 위해 보여지는 셀
-                                DiaryCell(diaryCellData: data)
+                                DiaryCell(data: data)
                                 
                                 // 터치 영역을 위한 투명 버튼
                                 NavigationLink(destination: DetailView(data: data)) {

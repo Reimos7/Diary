@@ -44,10 +44,10 @@ class SwiftDataManager: ObservableObject {
     }
     
     // Create 새로운 일기 추가 - 이미지 추가 가능
-    func addDiaryData(content: String, date: Date, imagePath: [String]? = nil) {
+    func addDiaryData(content: String, date: Date, imagePath: [String]? = nil, currentWeatherImage: String? = nil) {
         guard let context = context else {return}
         
-        let diaryNewData = Diary(content: content, date: date, imagePath: imagePath)
+        let diaryNewData = Diary(content: content, date: date, imagePath: imagePath, currentWeatherImage: currentWeatherImage)
         // 데이터 추가
         context.insert(diaryNewData)
         // 저장

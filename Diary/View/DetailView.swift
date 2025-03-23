@@ -21,6 +21,17 @@ struct DetailView: View {
         NavigationStack {
             VStack {
                 ScrollView {
+                    // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
+                    if let weatherIcon = data.currentWearherImage {
+                        Image(systemName: weatherIcon)
+                        // 아이콘 심볼 이미지를 멀티 컬러 색상으로
+                        //.symbolRenderingMode(.multicolor)
+                            .resizable()
+                            .frame(width: 50,height: 50)
+                            .onAppear() {
+                                print("\(weatherIcon)")
+                            }
+                    }
                     // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
                     if let paths = data.imagePath, !paths.isEmpty {
                         ForEach(paths, id: \.self) { path in
