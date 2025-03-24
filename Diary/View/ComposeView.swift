@@ -36,16 +36,27 @@ struct ComposeView: View {
         ScrollView {
             NavigationStack {
                 VStack(spacing: 0) {
-                    if let model = service.currentWeather {
-                        Image(systemName: model.icon)
-                        // 아이콘 심볼 이미지를 멀티 컬러 색상으로
-                        //.symbolRenderingMode(.multicolor)
-                            .resizable()
-                            .frame(width: 50,height: 50)
-                            .onAppear() {
-                                print("\(model.icon)")
-                            }
+                    // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
+                    ZStack {
+                        if let model = service.currentWeather {
+                            Image(systemName: model.icon)
+                                .resizable()
+                                .frame(width: 82, height: 72)
+                                .offset(x: 1, y: 1)
+                                .foregroundStyle(.gray.opacity(0.3))
+
+                            Image(systemName: model.icon)
+                                .symbolRenderingMode(.multicolor)
+                                .resizable()
+                                .frame(width: 80, height: 70)
+                                .onAppear {
+                                    print(model.icon)
+                                }
+                        } else {
+                            
+                        }
                     }
+                    .shadow(radius: 2)
                     
                     Text(DateFormatter.dateFormatter.string(from: Date())) // 2025년 2월 5일 (수요일)
                     //.padding(.bottom, 2)
@@ -179,7 +190,7 @@ struct ComposeView: View {
                         self.focused = true
                     }
                 }
-               
+                
                 // 이미지 클릭 시 전체 화면 표시
                 .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
                     FullscreenImageView(image: fullScreenImage.image)

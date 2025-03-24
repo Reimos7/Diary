@@ -16,15 +16,24 @@ struct DiaryCell: View {
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
-            if let weatherIcon = data.currentWearherImage {
-                Image(systemName: weatherIcon)
-                // 아이콘 심볼 이미지를 멀티 컬러 색상으로
-                //.symbolRenderingMode(.multicolor)
-                    .resizable()
-                    .frame(width: 50,height: 50)
-                    .onAppear() {
-                        print("\(weatherIcon)")
-                    }
+            ZStack {
+                if let weatherIcon = data.currentWeatherImage {
+                    Image(systemName: weatherIcon)
+                        .resizable()
+                        .frame(width: 82, height: 72)
+                        .offset(x: 1, y: 1)
+                        .foregroundStyle(.gray.opacity(0.3))
+
+                    Image(systemName: weatherIcon)
+                        .symbolRenderingMode(.multicolor)
+                        .resizable()
+                        .frame(width: 80, height: 70)
+                        .onAppear {
+                            print(weatherIcon)
+                        }
+                } else {
+                   
+                }
             }
             
             // 날짜 표시
