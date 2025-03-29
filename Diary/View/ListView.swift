@@ -101,7 +101,12 @@ struct ListView: View {
     // 스와이프 삭제 기능
     func delete(set: IndexSet) {
         for index in set {
+            // SwiftData(Context)에서 삭제
             manager.deleteDiaryData(entry: manager.diaryEntries[index])
+            // 배열에서도 즉시 삭제
+            manager.diaryEntries.remove(at: index)
+            // 삭제 후 바로 SwiftData context 저장
+            manager.saveContext()
         }
     }
 }
