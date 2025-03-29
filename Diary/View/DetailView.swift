@@ -85,6 +85,21 @@ struct DetailView: View {
             .navigationBarBackButtonHidden()
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
+//            .toolbar {
+//                // 뒤로 가기 버튼
+//                ToolbarItem(placement: .topBarLeading) {
+//                    Button {
+//                        // 뒤로 가기 동작 (현재 뷰 닫기)
+//                        dismiss()
+//                    } label: {
+//                        Image(systemName: "chevron.left")
+//                            .foregroundColor(Color(uiColor: UIColor.label))
+//                    }
+//                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
+//                }
+//            }
+            // MARK: - 캡쳐 공유, 편집, 삭제 버튼
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
@@ -97,11 +112,8 @@ struct DetailView: View {
                     }
                     .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
                 }
-            }
-            // MARK: - 캡쳐 공유, 편집, 삭제 버튼
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         // ios 14 이하 버전에서 화면 캡쳐 후 앨범에 저장
                         //                        let screenshot = UIApplication.shared.windows.first?.rootViewController?.view.changeUIImage()
@@ -126,8 +138,7 @@ struct DetailView: View {
                             //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
                             .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
+                    
                     Menu {
                         Button(role: .destructive) { showDeleteAlert = true } label: { Text("삭제") }
                         Button { showEditComposeView = true } label: { Text("편집") }

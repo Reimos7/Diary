@@ -38,23 +38,28 @@ struct ComposeView: View {
                 VStack(spacing: 0) {
                     // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
                     ZStack {
-                        if let model = service.currentWeather {
-                            Image(systemName: model.icon)
-                                .resizable()
-                                .frame(width: 82, height: 72)
-                                .offset(x: 1, y: 1)
-                                .foregroundStyle(.gray.opacity(0.3))
-
-                            Image(systemName: model.icon)
-                                .symbolRenderingMode(.multicolor)
-                                .resizable()
-                                .frame(width: 80, height: 70)
-                                .onAppear {
-                                    print(model.icon)
-                                }
+                        // 위치 권한이 거부된 상태라면
+                        if service.showLocationDeniedWeatherView {
+                            Text("위치 권한을 허용하면 날씨를 기록할 수 있어요!\n")
                         } else {
-                            
-                        }
+                            if let model = service.currentWeather {
+                                Image(systemName: model.icon)
+                                    .resizable()
+                                    .frame(width: 82, height: 72)
+                                    .offset(x: 1, y: 1)
+                                    .foregroundStyle(.gray.opacity(0.3))
+                                
+                                Image(systemName: model.icon)
+                                    .symbolRenderingMode(.multicolor)
+                                    .resizable()
+                                    .frame(width: 80, height: 70)
+                                    .onAppear {
+                                        print(model.icon)
+                                    }
+                            }
+                        }/*else if service.showLocationDeniedWeatherView {
+                            Text("위치 권한을 허용하면 날씨를 기록할 수 있어요!\n")
+                        }*/
                     }
                     .shadow(radius: 2)
                     
@@ -128,18 +133,44 @@ struct ComposeView: View {
                             Task {
                                 var savedPath: [String] = []
                                 
-                                guard let weather = service.currentWeather else {return}
-                                
                                 for image in selectedImages {
                                     if let path = FileManagerSet.saveImageToFileManager(image: image) {
                                         savedPath.append(path) //  저장된 경로를 추가
                                     }
                                 }
+                                
                                 imagePath = savedPath.isEmpty ? nil : savedPath
                                 
-                                manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: weather.icon )
+                                // 현재 위치 즉, 날씨 정보 존재 유무에 따른 분기 처리
+                                guard let weather = service.currentWeather else {
+                                    // 날씨 정보가 없을때
+                                    print("날씨 정보가 없을때 호출됨 ")
+                                    manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: nil)
+                                    
+                                    //manager.fetchDiaryData(isDecending: true)
+                                    
+                                    // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
+                                    self.focused = false
+                                    
+                                    showToast = true
+                                    
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                        showToast = false
+                                        dismiss()
+                                    }
+                                    return
+                                }
                                 
-                                // manager.fetchDiaryData(isDecending: true)
+//                                for image in selectedImages {
+//                                    if let path = FileManagerSet.saveImageToFileManager(image: image) {
+//                                        savedPath.append(path) //  저장된 경로를 추가
+//                                    }
+//                                }
+                                //imagePath = savedPath.isEmpty ? nil : savedPath
+                                
+                                manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: weather.icon)
+                                
+                                //manager.fetchDiaryData(isDecending: true)
                                 
                                 // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
                                 self.focused = false

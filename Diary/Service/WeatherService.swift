@@ -24,6 +24,11 @@ class WeatherService: NSObject, ObservableObject {
     @Published var currentWeather: CurrentWeather?
     // 에러 문자열을 저장하는 속성
     @Published var lastError: String?
+    // 위치 권한이 거부된 경우 weathetView 변경
+    @Published var showLocationDeniedWeatherView: Bool = false 
+    // 위치 권한이 거부된 경우 alert
+    @Published var showLocationDeniedAlert: Bool = false
+   
     
     // 실행시 위치 권한 요청
     override init() {
