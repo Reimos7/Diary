@@ -22,17 +22,21 @@ struct MainView: View {
         NavigationStack {
             // MARK: - 날씨
             WeatherView()
+                .frame(height: 200)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 2)
+                .padding(.top , -10)
             
-            VStack() {
-                
+            VStack {
                 // 캘린더
                 CalendarSetView(selectedDate: $selectedDate, dateSelectAction: { date in
                     selectedDate = date
                     selectedDateNavigate = true
                 })
-                .frame(minWidth: 400, minHeight: 400)
-                .padding()
-                
+                .frame(maxWidth: .infinity)
+                .frame(height: 400)
+
+                Spacer()
                 
                 // MARK: - 오늘 글쓰기
                 NavigationLink {
@@ -51,7 +55,6 @@ struct MainView: View {
                 CalendarComposeView(selectedDate: $selectedDate)
             })
             .padding()
-            Spacer()
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         NavigationLink {
