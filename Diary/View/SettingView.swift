@@ -17,6 +17,11 @@ struct SettingView: View {
                 } label: {
                     Text("화면 테마")
                 }
+                NavigationLink {
+                    NotificationView()
+                } label: {
+                    Text("알림 설정")
+                }
             }
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.inline)

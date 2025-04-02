@@ -16,6 +16,13 @@ extension DateFormatter {
         return formatter
     }()
     
+    static let dateScheduleNotificationFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M월 d일"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
+    
     static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "a hh:mm"
