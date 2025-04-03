@@ -99,6 +99,12 @@ struct CalendarSetView: UIViewRepresentable {
             parent.dateSelectAction?(date) // 콜백 호출
         }
         
+        // 사용자가 날짜를 선택하려고 할때, 해당 날짜가 선택 가능한지 판단
+        func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
+            // 오늘 이후 날짜를 비활성화(선택 불가) 처리
+            return date <= Date()
+        }
+        
         // "오늘"을 현재 날짜 아래에 표시
         func calendar(_ calendar: FSCalendar, subtitleFor date: Date) -> String? {
             let today = Date()
