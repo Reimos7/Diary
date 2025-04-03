@@ -26,7 +26,7 @@ struct CalendarSetView: UIViewRepresentable {
         // 셀 크기 조정
         calendar.rowHeight = 80
         // 캘린더 헤더의 날짜 형식
-        calendar.appearance.headerDateFormat = "yyyy.MM"
+        calendar.appearance.headerDateFormat = "yyyy년 M월"
         
         // 범위 설정 (월 단위 범위만 보이도록 설정)
         calendar.scope = .month
@@ -52,7 +52,7 @@ struct CalendarSetView: UIViewRepresentable {
         // 캘린더 배경 색상
         calendar.backgroundColor = isDarkMode ? UIColor.black : UIColor.white
         calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor.black
-        calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.lightGray : UIColor.systemGray3
+        //calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleWeekendColor = isDarkMode ? UIColor.red.withAlphaComponent(0.8) : UIColor.red
         
@@ -61,6 +61,15 @@ struct CalendarSetView: UIViewRepresentable {
         calendar.appearance.titleTodayColor = UIColor.white // 오늘 날짜 글자 흰색
         calendar.appearance.subtitleTodayColor = UIColor.white // "오늘" 글자도 흰색
         calendar.appearance.borderSelectionColor = UIColor.clear
+        
+        // 일요일은 항상 red / 다른 요일은 라이트 모드 black, 다크모드 white
+        calendar.calendarWeekdayView.weekdayLabels.enumerated().forEach { index, label in
+            if index == 0 {
+                label.textColor = UIColor.red
+            } else {
+                label.textColor = isDarkMode ? UIColor.white : UIColor.black
+            }
+        }
     }
     
     func makeCoordinator() -> Coordinator {
