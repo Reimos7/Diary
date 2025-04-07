@@ -56,13 +56,25 @@ struct CalendarComposeView: View {
                     }
                     .padding()
                 }
-
-                // 입력을 위한 커스텀 TextEditor (자동 줄 바꿈)
-                ResizableTextView(text: $content, placeholder: "일기를 입력해 주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
-                    .padding()
+                // 일기 입력 부분 
+                ZStack(alignment: .topLeading) {
+                    
+                    TextEditor(text: $content)
+                    // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
+                        .padding(.horizontal, -5)
                     // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
-                    .focused($focused)
-                Spacer()
+                        .focused($focused)
+                    
+                    // placeholder - TextEidtor는 기본 제공 안됨
+                    if content.isEmpty {
+                        Text("일기를 입력해 주세요!")
+                            .foregroundStyle(.gray)
+                            .padding(.top, 8)
+                        //.padding(.leading, 2)
+                    }
+                    //ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
+                }
+                .padding()
             }
             // 화면이 나타난 후 0.5초 뒤에 키보드를 자동으로 올림
             .onAppear {
@@ -189,7 +201,7 @@ struct CalendarComposeView: View {
                 .transition(.opacity)
                 .animation(.easeInOut, value: showToast)
                 .padding(.bottom, 50)
-            } 
+            }
         }
     }
 }
