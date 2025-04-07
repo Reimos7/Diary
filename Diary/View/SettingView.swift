@@ -12,17 +12,55 @@ struct SettingView: View {
     var body: some View {
         NavigationStack {
             List {
-                NavigationLink {
-                    ThemeView()
-                } label: {
-                    Text("화면 테마")
+                ZStack {
+                    NavigationLink {
+                        NotificationView()
+                    } label: {
+                        EmptyView()
+                        
+                    }.opacity(0)
+                    HStack(spacing: 8) { // ← 간격을 적절히 조절 (원하는 만큼)
+                        Image("notification2_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary)
+
+                        Text("알림")
+
+                        Spacer()
+                    }
+                    
                 }
-                NavigationLink {
-                    NotificationView()
-                } label: {
-                    Text("알림 설정")
+                .listRowSeparator(.hidden) // 줄 없애기
+                
+                ZStack {
+                    NavigationLink {
+                        ThemeView()
+                    } label: {
+                        EmptyView()
+                        
+                    }.opacity(0)
+                    HStack(spacing: 8) {
+                        Image("theme_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary)
+                        
+                        Text("테마")
+                        
+                        Spacer()
+                        
+                    }
                 }
+                .listRowSeparator(.hidden) // 줄 없애기
             }
+            //.frame(maxWidth: .infinity, alignment: .leading)
+            //.padding()
+            .listStyle(.plain)
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.inline)
             // 기본 뒤로 가기 버튼 숨김
