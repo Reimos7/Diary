@@ -1,7 +1,8 @@
 import SwiftUI
-
+import PhotosUI
 
 struct PhotoPickerTest: View {
+    @State private var selectedPhotos: [PhotosPickerItem] = []
     // 선택된 이미지 저장
     @State private var selectedImages: [UIImage] = []
     //에러 감지 상태
@@ -33,7 +34,7 @@ struct PhotoPickerTest: View {
             }
             
             // PhotoPickerView를 버튼처럼 사용하기
-            PhotoPickerView(selectedImages: $selectedImages, isPresentedError: $isPresentedError) {
+            PhotoPickerView(selectedPhotos: $selectedPhotos, selectedImages: $selectedImages, isPresentedError: $isPresentedError) {
                 HStack {
                     Image(systemName: "photo.on.rectangle.angled")
                 }

@@ -116,9 +116,12 @@ struct CalendarComposeView: View {
                                     // UI 업데이트는 메인 스레드에서 실행해야함 - 사진 추가는 UI 업데이트 작업이니까 메인 스레드에서 하기
                                     DispatchQueue.main.async {
                                         // 선택한 이미지 저장
-                                        selectedImages.append(image)
+                                        // append로 하지말고 배열 전체를 덮어 쓰게해서 1장만 선택하게
+                                        selectedImages = [image]
+                                        //selectedImages.append(image)
                                     }
                                 }
+                                //selectedItems.removeAll()
                             }
                         }
                     }

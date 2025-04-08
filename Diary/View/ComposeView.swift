@@ -128,14 +128,20 @@ struct ComposeView: View {
                                 .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                         }
                         .onChange(of: selectedItems) { _, newValue in
-                            Task {
+                            Task { // 선택한 사진을 앱에 추가하는 비동기 작업 수행
                                 for item in newValue {
-                                    if let data = try? await item.loadTransferable(type: Data.self),
-                                       let image = UIImage(data: data) {
+                                    // item.loadTransferable(type: Data.self) - 선택한 사진을 “파일 데이터”로 변환하는 작업
+                                    // 변환된 데이터를 UIImage로 변환하여 앱에서 표시할 수 있는 이미지로 만듦
+                                    if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                                        // UI 업데이트는 메인 스레드에서 실행해야함 - 사진 추가는 UI 업데이트 작업이니까 메인 스레드에서 하기
                                         DispatchQueue.main.async {
-                                            selectedImages.append(image)
+                                            // 선택한 이미지 저장
+                                            // append로 하지말고 배열 전체를 덮어 쓰게해서 1장만 선택하게
+                                            selectedImages = [image]
+                                            //selectedImages.append(image)
                                         }
                                     }
+                                    //selectedItems.removeAll()
                                 }
                                 
                             }

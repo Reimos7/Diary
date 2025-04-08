@@ -10,7 +10,7 @@ import PhotosUI
 
 struct PhotoPickerView<Content: View>: View {
     // PhotoPicker와 상호 연동할 수 있는 선택된 Item 배열 상태 프로퍼티
-    @State private var selectedPhotos: [PhotosPickerItem]
+    @Binding private var selectedPhotos: [PhotosPickerItem]
     // 실제 해당 컴포넌트를 호출한 상위 뷰와 바인딩 시킬 이미지 배열 프로퍼티
     @Binding var selectedImages: [UIImage]
     // 로드 중 실패 시 상위 뷰에 에러를 띄워주기 위해 감지하는 바인딩 프로퍼티
@@ -34,15 +34,15 @@ struct PhotoPickerView<Content: View>: View {
     private let content: () -> Content
     
     init(
-        selectedPhotos: [PhotosPickerItem] = [],
+        selectedPhotos: Binding<[PhotosPickerItem]>,
         selectedImages: Binding<[UIImage]>,
         isPresentedError: Binding<Bool> = .constant(false),
-        maxSelectedCount: Int = 3,
+        maxSelectedCount: Int = 1,
         matching: PHPickerFilter = .images,
         photoLibrary: PHPhotoLibrary = .shared(),
         content: @escaping () -> Content
     ) {
-        self.selectedPhotos = selectedPhotos
+        self._selectedPhotos = selectedPhotos
         self._selectedImages = selectedImages
         self._isPresentedError = isPresentedError
         self.maxSelectedCount = maxSelectedCount
@@ -94,15 +94,5 @@ struct PhotoPickerView<Content: View>: View {
         }
         // selectedPhotos를 마지막에 전부 삭제해줌으로 다시 PhotosPicker를 노출했을때 선택했던 이미지의 선택 상태가 풀려있도록 해줍니다.
         selectedPhotos.removeAll()
-    }
-}
-
-#Preview {
-    PhotoPickerView(selectedImages: .constant([]), isPresentedError: .constant(false)) {
-        Text("사진 선택하기")
-            .padding()
-                .background(Color.green)
-                .foregroundColor(.white)
-                 .cornerRadius(10)
     }
 }
