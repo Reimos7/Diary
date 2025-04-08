@@ -20,7 +20,7 @@ struct SettingView: View {
                         
                     }.opacity(0)
                     HStack(spacing: 8) { // ← 간격을 적절히 조절 (원하는 만큼)
-                        Image("notification2_img")
+                        Image("notification_img")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)

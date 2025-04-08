@@ -104,8 +104,12 @@ struct CalendarComposeView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // 사진은 일단 1장만 저장
                     PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
-                        Image(systemName: "photo.on.rectangle.angled")
-                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
+                        Image("gallery_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
                     .onChange(of: selectedItems) { _, newValue in
                         Task { // 선택한 사진을 앱에 추가하는 비동기 작업 수행
