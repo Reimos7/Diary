@@ -15,7 +15,12 @@ struct CalendarComposeView: View {
     @State private var showToast: Bool = false
     // 사진 선택기(Picker)를 보여줄지 여부
     @State private var showPhotoPicker: Bool = false
+    // 선택된 이미지를 길게 눌렀을때
+    @State private var isLongPressedPhoto: Bool = false
     // PhotosPicker에서 선택된 사진을 저장하는 배열
+    // 클릭한 이미지 저장
+    @State private var selectedImageForFullscreen: IdentifiableImage? = nil
+    //직접 실행할 PhotosPicker
     @State private var selectedItems: [PhotosPickerItem] = []
     // 사용자가 선택한 이미지들을 저장하는 배열
     @State private var selectedImages: [UIImage] = []
@@ -39,19 +44,12 @@ struct CalendarComposeView: View {
                 // 캘린더에서 선택한 날짜를 보여줌
                 Text(DateFormatter.dateFormatter.string(from:selectedDate))
                 
-                // 선택한 이미지 표시
+                // 선택한 이미지 출력
                 if !selectedImages.isEmpty {
                     VStack(spacing: 5) {
-                        ForEach(selectedImages, id: \.self) {
-                            image in
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 300, height: 300)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .onTapGesture {
-                                    selectedImageForFullScreen = IdentifiableImage(image: image)
-                                }
+                        ForEach(selectedImages, id: \.self) { image in
+                            // 이미지를 길게 눌렀을때 휴지통 버튼을 통해 이미지 지우기 
+                            LongPressImageView(image: image, isLongPressedPhoto: $isLongPressedPhoto, selectedImages: $selectedImages, selectedImageForFullscreen: $selectedImageForFullscreen)
                         }
                     }
                     .padding()
@@ -117,6 +115,8 @@ struct CalendarComposeView: View {
                                 // item.loadTransferable(type: Data.self) - 선택한 사진을 “파일 데이터”로 변환하는 작업
                                 // 변환된 데이터를 UIImage로 변환하여 앱에서 표시할 수 있는 이미지로 만듦
                                 if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                                    // 새로운 이미지 선택시 휴지통 버튼 초기화
+                                    isLongPressedPhoto = false
                                     // UI 업데이트는 메인 스레드에서 실행해야함 - 사진 추가는 UI 업데이트 작업이니까 메인 스레드에서 하기
                                     DispatchQueue.main.async {
                                         // 선택한 이미지 저장

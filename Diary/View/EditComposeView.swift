@@ -15,14 +15,15 @@ struct EditComposeView: View {
     @State private var showToast: Bool = false
     // 사진 선택기(Picker)를 보여줄지 여부
     @State private var showPhotoPicker: Bool = false
+    // 선택된 이미지를 길게 눌렀을때
+    @State private var isLongPressedPhoto: Bool = false
     //PhotosPicker에서 선택된 사진을 저장하는 배열
     @State private var selectedItems: [PhotosPickerItem] = []
     // 사용자가 선택한 이미지들을 저장하는 배열
     @State private var selectedImages: [UIImage] = []
     //전체 화면에서 이미지를 볼 때 사용하는 변수 (이미지를 클릭하면 설정됨)
-    @State private var selectedImageForFullScreen: IdentifiableImage? = nil
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 **경로**(파일 위치)를 저장하는 배열
+    @State private var selectedImageForFullscreen: IdentifiableImage? = nil
+    // 선택한 이미지를 파일로 저장한 후 해당 파일의 경로(파일 위치)를 저장하는 배열
     @State private var imagePath: [String] = []
     // 에러 감지 상태
     @State private var isPreSentedError: Bool = false
@@ -67,21 +68,39 @@ struct EditComposeView: View {
                     if let paths = data?.imagePath, !paths.isEmpty {
                         ForEach(paths, id: \.self) { path in
                             if let url = URL(string: path) {
-                                AsyncImage(url: url) { image in
-                                    image.resizable()
-                                        .scaledToFit()
-                                        .frame(width: 300, height: 300)
-                                    
-                                } placeholder: {
-                                    ProgressView()
+                                // UIImage로 이미지 로드
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        // 이미지가 성공적으로 로드되면, UIImage로 변환하여 LongPressImageView에 전달
+                                        if let uiImage = UIImage(named: path) ?? loadUIImage(from: url) {
+                                            LongPressImageView(image: uiImage,
+                                                               imagePath: path,
+                                                               isLongPressedPhoto: $isLongPressedPhoto,
+                                                               selectedImages: $selectedImages,
+                                                               selectedImageForFullscreen: $selectedImageForFullscreen,
+                                                               diaryData: data)
+                                        } else {
+                                            // 이미지를 UIImage로 변환할 수 없는 경우
+                                            image
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 300, height: 300)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        }
+                                    case .empty:
+                                        ProgressView()
+                                    case .failure(_):
+                                        Text("이미지 로딩 실패")
+                                    @unknown default:
+                                        ProgressView()
+                                    }
                                 }
-                                
                             } else {
                                 Text("이미지 불러오기 실패")
                             }
                             
                         }
-                        
                     }
                     // 일기 입력 부분 
                     ZStack(alignment: .topLeading) {
@@ -209,6 +228,8 @@ struct EditComposeView: View {
                         Task {
                             await updateSelectedImage(newItems: newValue)
                         }
+                        // 새로운 이미지 선택시 휴지통 버튼 초기화
+                        isLongPressedPhoto = false
                     }
                     //ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -299,5 +320,16 @@ struct EditComposeView: View {
         data.imagePath = imagePath.isEmpty ? nil : imagePath
         try? manager.saveContext() // 변경 사항 바로 저장
     }
+    
+    // URL에서 UIImage 로드하는 함수 추가
+    func loadUIImage(from url: URL) -> UIImage? {
+        do {
+            let data = try Data(contentsOf: url)
+            return UIImage(data: data)
+        } catch {
+            print("이미지 로드 실패: \(error)")
+            return nil
+        }
+    }
+    
 }
-
