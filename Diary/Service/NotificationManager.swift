@@ -51,6 +51,12 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     // 알림 객체를 만들고 내용을 작성, 알림이 언제 울리게 할지 정한다
     // 오늘 작성한 일기가 없으면 매일 오후 11시에 알림 발송
     func scheduleNotification() {
+        // 알림 설정이 꺼져 있으면 아무 작업도 하지 않음
+        if !UserDefaults.standard.bool(forKey: "isPushNotificationEnabled") {
+            print("알림 설정이 꺼져 있어 알림을 예약하지 않습니다")
+            return
+        }
+        
         // 중복 예약 방지
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["diaryReminder"])
         
@@ -81,6 +87,13 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
         
     }
+    
+    // 푸시 알림 취소 메서드
+    func cancelPushNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        print("푸시 알림 취소")
+    }
+    
     
     // 해당 함수는 willPresent 과 didReceive 에 따라 작동하는 함수다. 알림이 울릴 때와, 알림을 받았을 때 어떤 작업을 처리할지 작성하면 된다
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {

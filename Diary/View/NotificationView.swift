@@ -13,6 +13,7 @@ struct NotificationView: View {
     //@State private var isOnPushNotification: Bool = false
     @State private var showPushNotificationAlert: Bool = false
     @EnvironmentObject var service: WeatherService
+    @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -24,11 +25,16 @@ struct NotificationView: View {
                             // Toggle on 하면, 앱 권한 설정으로 이동하는 alert 보여주기 
                             // 권한으로 이동해서 설정 유도
                             showPushNotificationAlert = true
+                            // 알림 권한 확인 후 일기가 없는 경우 알림 설정
+                            // manager를 직접 사용하여 diary entries 접근
+                            NotificationManager.shared.checkScheduleNotification(entries: manager.diaryEntries)
                             
                         } else {
                             // Toggle off 하면, 이미 예약된 알림을 취소시켜서 알림을 보내지 않게 하기
                             // 실제 권한 자체는 해제할 수 없기 때문에, 우회적 처리를 하는것이 일반적임
                             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["diaryReminder"])
+                            // 알림 끄기 - 모든 알림 취소
+                            NotificationManager.shared.cancelPushNotifications()
                         }
                         
                     }
