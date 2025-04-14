@@ -54,7 +54,7 @@ struct CalendarSetView: UIViewRepresentable {
         calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor.black
         //calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor.black
-        calendar.appearance.titleWeekendColor = isDarkMode ? UIColor.red.withAlphaComponent(0.8) : UIColor.red
+        //calendar.appearance.titleWeekendColor = isDarkMode ? UIColor.red.withAlphaComponent(0.8) : UIColor.red
         // 선택한 날짜 기본 스타일 제거
         calendar.appearance.selectionColor = .clear
         //calendar.appearance.titleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
@@ -74,12 +74,15 @@ struct CalendarSetView: UIViewRepresentable {
         // "오늘" 글자 내리기
         calendar.appearance.subtitleOffset = CGPoint(x: 0, y: 5)
         calendar.appearance.selectionColor = .clear
-        // 일요일은 항상 red / 다른 요일은 라이트 모드 black, 다크모드 white
+        // 일요일은 항상 red, 토요일은 blue 평일은 라이트 모드 black, 다크모드 white
         calendar.calendarWeekdayView.weekdayLabels.enumerated().forEach { index, label in
-            if index == 0 {
-                label.textColor = UIColor.red
-            } else {
-                label.textColor = isDarkMode ? UIColor.white : UIColor.black
+            switch index {
+            case 0:  // 일요일
+                label.textColor = .systemRed
+            case 6:  // 토요일
+                label.textColor = .systemBlue
+            default:
+                label.textColor = isDarkMode ? .white : .black
             }
         }
     }
@@ -104,7 +107,27 @@ struct CalendarSetView: UIViewRepresentable {
             return [UIColor.red]
         }
         
-        
+        // 캘린더 날짜 색상 적용 함수
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
+            
+            // 현재 캘린더가 보여주고 있는 달
+            let currentMonth = Calendar.current.component(.month, from: calendar.currentPage)
+            // 선택한 날짜의 달
+            let targetMonth = Calendar.current.component(.month, from: date)
+            // 선택한 날짜의 요일
+            let weekday = Calendar.current.component(.weekday, from: date)
+            
+            // 현재 달이 아닌 이전/다음 달 날짜는 회색 유지
+            if currentMonth != targetMonth {
+                return UIColor.lightGray
+            }
+            switch weekday {
+            case 1: return .systemRed      // 일요일
+            case 7: return .systemBlue     // 토요일
+            default:
+                return calendar.traitCollection.userInterfaceStyle == .dark ? .white : .black
+            }
+        }
         // 날짜 선택 시 콜백 호출
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
             parent.selectedDate = date
@@ -143,9 +166,9 @@ struct CalendarSetView: UIViewRepresentable {
             // 요일에 따라 색상 다르게 설정
             switch weekday {
             case 1: // 일요일
-                return UIColor.red
-            case 7: // 토요일
-                return UIColor.red
+                return UIColor.systemRed
+            case 7:  // 토요일
+                return UIColor.systemBlue
             default:
                 return calendar.appearance.titleDefaultColor // 평일: 기본 색
             }
