@@ -9,7 +9,7 @@ import FSCalendar
 
 // MARK: - 커스텀 캘린더 설정
 struct CalendarSetView: UIViewRepresentable {
-    @Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
+    //@Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
     @EnvironmentObject var manager: SwiftDataManager
     @Binding var selectedDate: Date
     // 캘린더에서 날짜 직접 선택 시 실행할 콜백 함수
@@ -20,19 +20,6 @@ struct CalendarSetView: UIViewRepresentable {
         let calendar = FSCalendar()
         calendar.delegate = context.coordinator
         calendar.dataSource = context.coordinator
-        
-        // 캘린더 로케일 설정 (한국어)
-        calendar.locale = Locale(identifier: "ko_KR")
-        // 셀 크기 조정
-        calendar.rowHeight = 80
-        // 캘린더 헤더의 날짜 형식
-        calendar.appearance.headerDateFormat = "yyyy년 M월"
-        
-        // 범위 설정 (월 단위 범위만 보이도록 설정)
-        calendar.scope = .month
-        
-        // 이전 달, 다음 달 버튼 숨기기
-        calendar.appearance.headerMinimumDissolvedAlpha = 0 // 내비게이션 화살표 숨기기
         
         // 다크 모드와 라이트 모드에 따른 색상 설정
         updateCalendarAppearance(calendar)
@@ -47,9 +34,21 @@ struct CalendarSetView: UIViewRepresentable {
     
     /// 다크 모드 여부에 따라 캘린더 색상을 동적으로 업데이트하는 함수
     func updateCalendarAppearance(_ calendar: FSCalendar) {
-        let isDarkMode = colorScheme == .dark
+        // FSCalendar는 UIKit 컴포넌트이기 때문에, traitCollection을 이용하면 정확한 시점에 정확한 스타일을 적용 (colorScheme X)
+        let isDarkMode = calendar.traitCollection.userInterfaceStyle == .dark
         
         // 캘린더 배경 색상
+        // 이전 달, 다음 달 버튼 숨기기
+        calendar.appearance.headerMinimumDissolvedAlpha = 0 // 내비게이션 화살표 숨기기
+        // 캘린더 로케일 설정 (한국어)
+        calendar.locale = Locale(identifier: "ko_KR")
+        // 셀 크기 조정
+        calendar.rowHeight = 80
+        // 캘린더 헤더의 날짜 형식
+        calendar.appearance.headerDateFormat = "yyyy년 M월"
+        
+        // 범위 설정 (월 단위 범위만 보이도록 설정)
+        calendar.scope = .month
         calendar.backgroundColor = isDarkMode ? UIColor.black : UIColor.white
         calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor.black
         //calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.white : UIColor.black
@@ -96,6 +95,19 @@ struct CalendarSetView: UIViewRepresentable {
         
         init(_ parent: CalendarSetView) {
             self.parent = parent
+        }
+        
+        // 현재 페이지(월)가 바뀌었을 때 호출되는 델리게이트 메서드
+        // 캘린더를 좌우로 스와이프해서 이전 달 / 다음 달로 이동할때 실행
+        func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                // 다크모드/라이트모드에 따른 외관 재적용
+                self.parent.updateCalendarAppearance(calendar)
+                calendar.setNeedsLayout()
+                calendar.layoutIfNeeded()
+                // 강제 리로드로 월 전환 후 스타일 적용
+                calendar.reloadData()
+            }
         }
         
         // 특정 날짜에 일기가 저장된 경우, 점으로 표시
