@@ -55,13 +55,25 @@ struct CalendarSetView: UIViewRepresentable {
         //calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleWeekendColor = isDarkMode ? UIColor.red.withAlphaComponent(0.8) : UIColor.red
+        // 선택한 날짜 기본 스타일 제거
+        calendar.appearance.selectionColor = .clear
+        //calendar.appearance.titleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
+        calendar.appearance.subtitleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
         
         // 오늘 날짜 스타일 (푸른색 테두리, 흰색 글자)
-        calendar.appearance.todayColor = UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
-        calendar.appearance.titleTodayColor = UIColor.white // 오늘 날짜 글자 흰색
-        calendar.appearance.subtitleTodayColor = UIColor.white // "오늘" 글자도 흰색
-        calendar.appearance.borderSelectionColor = UIColor.clear
+        //calendar.appearance.todayColor = UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
+        //calendar.appearance.todayColor = UIColor.white
+        //calendar.appearance.titleTodayColor = UIColor.white // 오늘 날짜 글자 흰색
+        //calendar.appearance.subtitleTodayColor = UIColor.white // "오늘" 글자도 흰색
+        //calendar.appearance.borderSelectionColor = UIColor.clear
         
+        calendar.appearance.todayColor = .clear
+        calendar.appearance.titleTodayColor = calendar.appearance.titleDefaultColor
+        // 오늘 날짜 하단 "오늘" 텍스트 색상 다크모드 대응
+        calendar.appearance.subtitleTodayColor = isDarkMode ? UIColor.white : UIColor.black
+        // "오늘" 글자 내리기
+        calendar.appearance.subtitleOffset = CGPoint(x: 0, y: 5)
+        calendar.appearance.selectionColor = .clear
         // 일요일은 항상 red / 다른 요일은 라이트 모드 black, 다크모드 white
         calendar.calendarWeekdayView.weekdayLabels.enumerated().forEach { index, label in
             if index == 0 {
@@ -114,10 +126,42 @@ struct CalendarSetView: UIViewRepresentable {
             return nil
         }
         
-        // 선택된 날짜 처리
-        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillSelectionColorFor date: Date) -> UIColor? {
-            //return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0) // 오늘 날짜와 동일한 색상 적용
-            return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
+        // 사용자가 날짜를 선택했을 때, 해당 날짜 숫자의 색상을 결정하는 함수
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleSelectionColorFor date: Date) -> UIColor? {
+            // 현재 캘린더가 보여주고 있는 달
+            let currentMonth = Calendar.current.component(.month, from: calendar.currentPage)
+            // 선택한 날짜의 달
+            let targetMonth = Calendar.current.component(.month, from: date)
+            // 선택한 날짜의 요일
+            let weekday = Calendar.current.component(.weekday, from: date)
+            
+            // 현재 달이 아닌 이전/다음 달 날짜는 회색 유지
+            if currentMonth != targetMonth {
+                return UIColor.lightGray
+            }
+            
+            // 요일에 따라 색상 다르게 설정
+            switch weekday {
+            case 1: // 일요일
+                return UIColor.red
+            case 7: // 토요일
+                return UIColor.red
+            default:
+                return calendar.appearance.titleDefaultColor // 평일: 기본 색
+            }
         }
+        
+        // 선택한 날짜의 . 색상 무조건 빨강으로
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
+            return [UIColor.red]
+        }
+        
+        // 선택된 날짜 처리
+        //        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillSelectionColorFor date: Date) -> UIColor? {
+        //            //return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0) // 오늘 날짜와 동일한 색상 적용
+        //            //return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
+        //            return UIColor.clear
+        //
+        //        }
     }
 }
