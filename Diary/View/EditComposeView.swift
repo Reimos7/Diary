@@ -140,7 +140,7 @@ struct EditComposeView: View {
                     //}
                     Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
                         .padding()
-                        .font(.footnote)
+                        .customFont(size: 16)
                         .foregroundStyle(.secondary)
                 }
             }

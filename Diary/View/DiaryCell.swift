@@ -39,7 +39,7 @@ struct DiaryCell: View {
             // 날짜 표시
             Text(DateFormatter.dateFormatter.string(from: data.date))
                 .padding()
-                .font(.footnote)
+                .customFont(size: 16)
                 .foregroundStyle(.primary) // 다크 모드 대응
             
             // 이미지가 있을 경우 표시

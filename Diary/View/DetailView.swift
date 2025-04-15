@@ -73,7 +73,7 @@ struct DetailView: View {
                     
                     Text(DateFormatter.dateFormatter.string(from: data.date))
                         .padding()
-                        .font(.footnote)
+                        .customFont(size: 16)
                         .foregroundStyle(.secondary)
                 }
             }

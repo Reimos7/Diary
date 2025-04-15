@@ -9,6 +9,9 @@ import SwiftUI
 
 struct SettingView: View {
     @Environment(\.dismiss) var dismiss
+    
+    @EnvironmentObject var manager: SwiftDataManager
+    
     var body: some View {
         NavigationStack {
             List {
@@ -57,6 +60,29 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
+                
+                ForEach(manager.diaryEntries.prefix(1), id: \.self) { data in
+                    ZStack {
+                        NavigationLink {
+                            FontView(data: data)
+                        } label: {
+                            EmptyView()
+                            
+                        }.opacity(0)
+                        HStack(spacing: 8) { //  간격을 적절히 조절 (원하는 만큼)
+                            Image("font_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary)
+                            
+                            Text("폰트")
+                            Spacer()
+                        }
+                    }
+                    .listRowSeparator(.hidden) // 줄 없애기
+                }
             }
             //.frame(maxWidth: .infinity, alignment: .leading)
             //.padding()
@@ -82,8 +108,4 @@ struct SettingView: View {
             }
         }
     }
-}
-
-#Preview {
-    SettingView()
 }

@@ -17,9 +17,22 @@
 		6EF18C3B2D623E7B005F33A6 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6EF18B832D60B19F005F33A6 /* Diary */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6EF18B862D60B19F005F33A6 /* Diary */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */,
+			);
 			path = Diary;
 			sourceTree = "<group>";
 		};
@@ -272,6 +285,7 @@
 				DEVELOPMENT_TEAM = 7282R3L9NX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Diary/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치에서 날씨 정보를 요청합니다";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "캡처한 화면을 앨범에 저장하기 위해 접근합니다";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -307,6 +321,7 @@
 				DEVELOPMENT_TEAM = 7282R3L9NX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Diary/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치에서 날씨 정보를 요청합니다";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "캡처한 화면을 앨범에 저장하기 위해 접근합니다";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
