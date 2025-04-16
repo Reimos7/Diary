@@ -40,250 +40,270 @@ struct EditComposeView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                ScrollView {
-                    // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
-                    ZStack {
-                        if let weatherIcon = data?.currentWeatherImage {
-                            Image(systemName: weatherIcon)
-                                .resizable()
-                                .frame(width: 82, height: 72)
-                                .offset(x: 1, y: 1)
-                                .foregroundStyle(.gray.opacity(0.3))
-                            
-                            Image(systemName: weatherIcon)
-                                .symbolRenderingMode(.multicolor)
-                                .resizable()
-                                .frame(width: 80, height: 70)
-                                .onAppear {
-                                    print(weatherIcon)
-                                }
-                        } else {
-                            
-                        }
-                    }
-                    .shadow(radius: 2)
-                    
-                    //HStack {
-                    // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
-                    if let paths = data?.imagePath, !paths.isEmpty {
-                        ForEach(paths, id: \.self) { path in
-                            if let url = URL(string: path) {
-                                // UIImage로 이미지 로드
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        // 이미지가 성공적으로 로드되면, UIImage로 변환하여 LongPressImageView에 전달
-                                        if let uiImage = UIImage(named: path) ?? loadUIImage(from: url) {
-                                            LongPressImageView(image: uiImage,
-                                                               imagePath: path,
-                                                               isLongPressedPhoto: $isLongPressedPhoto,
-                                                               selectedImages: $selectedImages,
-                                                               selectedImageForFullscreen: $selectedImageForFullscreen,
-                                                               diaryData: data)
-                                        } else {
-                                            // 이미지를 UIImage로 변환할 수 없는 경우
-                                            image
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 300, height: 300)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        }
-                                    case .empty:
-                                        ProgressView()
-                                    case .failure(_):
-                                        Text("이미지 로딩 실패")
-                                    @unknown default:
-                                        ProgressView()
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
+                        ZStack {
+                            if let weatherIcon = data?.currentWeatherImage {
+                                Image(systemName: weatherIcon)
+                                    .resizable()
+                                    .frame(width: 82, height: 72)
+                                    .offset(x: 1, y: 1)
+                                    .foregroundStyle(.gray.opacity(0.3))
+                                
+                                Image(systemName: weatherIcon)
+                                    .symbolRenderingMode(.multicolor)
+                                    .resizable()
+                                    .frame(width: 80, height: 70)
+                                    .onAppear {
+                                        print(weatherIcon)
                                     }
-                                }
                             } else {
-                                Text("이미지 불러오기 실패")
+                                
                             }
-                            
                         }
-                    }
-                    // 일기 입력 부분 
-                    ZStack(alignment: .topLeading) {
+                        .shadow(radius: 2)
                         
-                        TextEditor(text: $content)
-                        // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
-                            .padding(.horizontal, -5)
-                        // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
-                            .focused($focused)
-                        
-                        // placeholder - TextEidtor는 기본 제공 안됨
-                        if content.isEmpty {
-                            Text("일기를 입력해 주세요!")
-                                .foregroundStyle(.gray)
-                                .padding(.top, 8)
-                            //.padding(.leading, 2)
-                        }
-                        //ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
-                    }
-                    .padding()
-                    
-                    
-                    Spacer()
-                    
-                    
-                    // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
-                    // 키보드 올리기
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.focused = true
+                        //HStack {
+                        // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
+                        if let paths = data?.imagePath, !paths.isEmpty {
+                            ForEach(paths, id: \.self) { path in
+                                if let url = URL(string: path) {
+                                    // UIImage로 이미지 로드
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .success(let image):
+                                            // 이미지가 성공적으로 로드되면, UIImage로 변환하여 LongPressImageView에 전달
+                                            if let uiImage = UIImage(named: path) ?? loadUIImage(from: url) {
+                                                LongPressImageView(image: uiImage,
+                                                                   imagePath: path,
+                                                                   isLongPressedPhoto: $isLongPressedPhoto,
+                                                                   selectedImages: $selectedImages,
+                                                                   selectedImageForFullscreen: $selectedImageForFullscreen,
+                                                                   diaryData: data)
+                                            } else {
+                                                // 이미지를 UIImage로 변환할 수 없는 경우
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 300, height: 300)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            }
+                                        case .empty:
+                                            ProgressView()
+                                        case .failure(_):
+                                            Text("이미지 로딩 실패")
+                                        @unknown default:
+                                            ProgressView()
+                                        }
+                                    }
+                                } else {
+                                    Text("이미지 불러오기 실패")
+                                }
+                                
                             }
+                        }
+                        // 일기 입력 부분
+                        ZStack(alignment: .topLeading) {
                             
-                            if let data = data?.content {
-                                content = data
+                            TextEditor(text: $content)
+                            // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
+                                .padding(.horizontal, -5)
+                            // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
+                                .focused($focused)
+                            // 스크롤 타겟 ID , 스크롤 대상으로 설정
+                                .id("textEditorScroll")
+                            
+                            // placeholder - TextEidtor는 기본 제공 안됨
+                            if content.isEmpty {
+                                Text("일기를 입력해 주세요!")
+                                    .foregroundStyle(.gray)
+                                    .padding(.top, 8)
+                                //.padding(.leading, 2)
                             }
+                            //ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
                         }
-                    //}
-                    Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
                         .padding()
-                        .customFont(size: 16)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            // 키보드 버튼 (현재 시간, 키보드 내리기)
-            // EditComposeView는 시뮬레이터에서만 가능하고 실기기에서 사용 불가 코드
-            //            .toolbar {
-            //                ToolbarItemGroup(placement: .keyboard) {
-            //                    Button {
-            //                        content += DateFormatter.timeFormatter.string(from: Date())
-            //                    } label: {
-            //                        Image("clock_img")
-            //                            .resizable()
-            //                            .scaledToFit()
-            //                            .frame(width: 18, height: 18) // SF Symbol 크기와 유사하게 조정
-            //                            .symbolRenderingMode(.palette)
-            //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-            //                    }
-            //                    Spacer()
-            //                    Button {
-            //                        hideKeyboard()
-            //                    } label: {
-            //                        Image("keyboard_img")
-            //                            .resizable()
-            //                            .scaledToFit()
-            //                            .frame(width: 20, height: 20) // SF Symbol 크기와 유사하게 조정
-            //                            .symbolRenderingMode(.palette)
-            //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-            //                    }
-            //                }
-            //            }
-            
-            // 키보드 툴바 - 단일 툴바로 통합
-            .safeAreaInset(edge: .bottom, alignment: .center, spacing: 0) {
-                if focused {
-                    HStack {
-                        Button {
-                            content += DateFormatter.timeFormatter.string(from: Date())
-                        } label: {
-                            Image("clock_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18, height: 18)
-                                .foregroundStyle(Color.primary)
-                        }
+                        
                         
                         Spacer()
                         
-                        Button {
-                            focused = false
-                        } label: {
-                            Image("keyboard_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundStyle(Color.primary)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color(UIColor.systemBackground))
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showDismissAlert = true
-                    }
-                    label: {
-                        Image(systemName: "xmark")
-                        //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
-                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
-                    }
-                }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    // 사진은 일단 1장만 저장
-                    PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
-                        Image("gallery_img")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                    }
-                    .onChange(of: selectedItems) { _, newValue in
-                        Task {
-                            await updateSelectedImage(newItems: newValue)
-                        }
-                        // 새로운 이미지 선택시 휴지통 버튼 초기화
-                        isLongPressedPhoto = false
-                    }
-                    //ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        guard let data = data else { return }
-                        manager.updateDiaryData(entry: data, newContent: content)
-                        // 수정 버튼 누르면 키보드 내려서 showToast 사용자에게 보여주기
-                        self.focused = false
                         
-                        showToast = true
-                        // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            showToast = false
+                        // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
+                        // 키보드 올리기
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    self.focused = true
+                                    // 자동 스크롤
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        withAnimation {
+                                            // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                            proxy.scrollTo("textEditorScroll", anchor: .top)
+                                        }
+                                    }
+                                }
+                                
+                                if let data = data?.content {
+                                    content = data
+                                }
+                            }
+                        //}
+                        Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
+                            .padding()
+                            .customFont(size: 16)
+                            .foregroundStyle(.secondary)
+                    }
+                    //}
+                    
+                    // 키보드 버튼 (현재 시간, 키보드 내리기)
+                    // EditComposeView는 시뮬레이터에서만 가능하고 실기기에서 사용 불가 코드
+                    //            .toolbar {
+                    //                ToolbarItemGroup(placement: .keyboard) {
+                    //                    Button {
+                    //                        content += DateFormatter.timeFormatter.string(from: Date())
+                    //                    } label: {
+                    //                        Image("clock_img")
+                    //                            .resizable()
+                    //                            .scaledToFit()
+                    //                            .frame(width: 18, height: 18) // SF Symbol 크기와 유사하게 조정
+                    //                            .symbolRenderingMode(.palette)
+                    //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                    //                    }
+                    //                    Spacer()
+                    //                    Button {
+                    //                        hideKeyboard()
+                    //                    } label: {
+                    //                        Image("keyboard_img")
+                    //                            .resizable()
+                    //                            .scaledToFit()
+                    //                            .frame(width: 20, height: 20) // SF Symbol 크기와 유사하게 조정
+                    //                            .symbolRenderingMode(.palette)
+                    //                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                    //                    }
+                    //                }
+                    //            }
+                    
+                    // 키보드 툴바 - 단일 툴바로 통합
+                    .safeAreaInset(edge: .bottom, alignment: .center, spacing: 0) {
+                        if focused {
+                            HStack {
+                                Button {
+                                    content += DateFormatter.timeFormatter.string(from: Date())
+                                } label: {
+                                    Image("clock_img")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 18, height: 18)
+                                        .foregroundStyle(Color.primary)
+                                }
+                                
+                                Spacer()
+                                
+                                Button {
+                                    focused = false
+                                } label: {
+                                    Image("keyboard_img")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 20, height: 20)
+                                        .foregroundStyle(Color.primary)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color(UIColor.systemBackground))
+                        }
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                showDismissAlert = true
+                            }
+                            label: {
+                                Image(systemName: "xmark")
+                                //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
+                                    .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
+                            }
+                        }
+                        ToolbarItemGroup(placement: .topBarTrailing) {
+                            // 사진은 일단 1장만 저장
+                            PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                                Image("gallery_img")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                            }
+                            .onChange(of: selectedItems) { _, newValue in
+                                Task {
+                                    await updateSelectedImage(newItems: newValue)
+                                    
+                                    // 이미지 변경 후 자동 스크롤
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        withAnimation {
+                                            // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                            proxy.scrollTo("textEditorScroll", anchor: .top)
+                                        }
+                                    }
+                                }
+                                // 새로운 이미지 선택시 휴지통 버튼 초기화
+                                isLongPressedPhoto = false
+                            }
+                            //ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                guard let data = data else { return }
+                                manager.updateDiaryData(entry: data, newContent: content)
+                                // 수정 버튼 누르면 키보드 내려서 showToast 사용자에게 보여주기
+                                self.focused = false
+                                
+                                showToast = true
+                                // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    showToast = false
+                                    dismiss()
+                                }
+                            } label: {
+                                Image("checkmark_img")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                            }
+                            //  }
+                            
+                        }
+                    }
+                    .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
+                        Button("나가기", role: .destructive) {
                             dismiss()
                         }
-                    } label: {
-                        Image("checkmark_img")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                        
+                        Button("계속 작성", role: .cancel) {
+                            showDismissAlert = false
+                        }
+                    } message: {
+                        Text("작성한 글이 저장되지 않습니다!")
                     }
-                    //  }
                     
+                    // 저장하면 toast 메시지로 알려줌
+                    if showToast {
+                        VStack {
+                            Text("일기를 수정했어요!")
+                                .padding()
+                                .background(Color(.systemGray5))
+                                .foregroundStyle(.primary) // 다크모드에서도 자동 변경
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .transition(.opacity)
+                        .animation(.easeInOut, value: showToast)
+                        .padding(.bottom, 50)
+                        
+                    }
                 }
-            }
-            .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
-                Button("나가기", role: .destructive) {
-                    dismiss()
-                }
-                
-                Button("계속 작성", role: .cancel) {
-                    showDismissAlert = false
-                }
-            } message: {
-                Text("작성한 글이 저장되지 않습니다!")
-            }
-            
-            // 저장하면 toast 메시지로 알려줌
-            if showToast {
-                VStack {
-                    Text("일기를 수정했어요!")
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary) // 다크모드에서도 자동 변경
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .transition(.opacity)
-                .animation(.easeInOut, value: showToast)
-                .padding(.bottom, 50)
-                
             }
         }
-        
     }
     // 사용자가 새 이미지를 선택하면 기존 이미지를 삭제하고 새로운 이미지를 저장
     private func updateSelectedImage(newItems: [PhotosPickerItem]) async {

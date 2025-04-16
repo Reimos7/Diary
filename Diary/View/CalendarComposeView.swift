@@ -39,7 +39,8 @@ struct CalendarComposeView: View {
     @FocusState var focused: Bool
     
     var body: some View {
-        ScrollView {
+        ScrollViewReader { proxy in 
+            ScrollView {
             VStack(spacing: 0) {
                 // 캘린더에서 선택한 날짜를 보여줌
                 Text(DateFormatter.dateFormatter.string(from:selectedDate))
@@ -62,6 +63,8 @@ struct CalendarComposeView: View {
                         .padding(.horizontal, -5)
                     // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
                         .focused($focused)
+                    // 스크롤 타겟 ID , 스크롤 대상으로 설정
+                        .id("textEditorScroll")
                     
                     // placeholder - TextEidtor는 기본 제공 안됨
                     if content.isEmpty {
@@ -123,6 +126,14 @@ struct CalendarComposeView: View {
                                         // append로 하지말고 배열 전체를 덮어 쓰게해서 1장만 선택하게
                                         selectedImages = [image]
                                         //selectedImages.append(image)
+                                        
+                                        // 이미지 추가 후 자동 스크롤
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                            withAnimation {
+                                                // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                                proxy.scrollTo("textEditorScroll", anchor: .top)
+                                            }
+                                        }
                                     }
                                 }
                                 //selectedItems.removeAll()
@@ -210,6 +221,7 @@ struct CalendarComposeView: View {
                 .padding(.bottom, 50)
             }
         }
+      }
     }
 }
 
