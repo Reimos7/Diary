@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct SettingView: View {
-    @Environment(\.dismiss) var dismiss
+    // 이메일 
+    private var email = EmailManager(toAddress: EmailAddress.developerEmail, subject: "굿디 문의하기")
     
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) var openURL
+   
     @EnvironmentObject var manager: SwiftDataManager
     
     var body: some View {
@@ -87,24 +91,22 @@ struct SettingView: View {
                 Divider()
                 
                 ZStack {
-                    NavigationLink {
-                        // 문의하기 이메일 
+                    Button {
+                        email.send(openURL: openURL)
                     } label: {
-                        EmptyView()
-                        
-                    }.opacity(0)
-                    HStack(spacing: 8) {
-                        Image("email_img")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary)
-                        
-                        Text("문의하기")
-                        
-                        Spacer()
-                        
+                        HStack(spacing: 8) {
+                            Image("email_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary)
+                            
+                            Text("문의하기")
+                            
+                            Spacer()
+                            
+                        }
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
