@@ -65,10 +65,9 @@ struct SettingView: View {
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
                 
-                ForEach(manager.diaryEntries.prefix(1), id: \.self) { data in
                     ZStack {
                         NavigationLink {
-                            FontView(data: data)
+                            FontView()
                         } label: {
                             EmptyView()
                             
@@ -86,7 +85,6 @@ struct SettingView: View {
                         }
                     }
                     .listRowSeparator(.hidden) // 줄 없애기
-                }
                 
                 Divider()
                 

@@ -9,8 +9,6 @@ import SwiftUI
 
 struct FontView: View {
     
-    let data: Diary
-    
     @Environment(\.dismiss) var dismiss
     
     @EnvironmentObject var fontManager: FontManager
