@@ -162,13 +162,17 @@ struct SettingView: View {
             //.frame(maxWidth: .infinity, alignment: .leading)
             //.padding()
             .listStyle(.plain)
-            .navigationTitle("설정")
+            //.navigationTitle("설정")
             .navigationBarTitleDisplayMode(.inline)
             // 기본 뒤로 가기 버튼 숨김
             .navigationBarBackButtonHidden()
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
             .toolbar {
+                // navigationTitle 대신 커스텀 폰트 적용을 위해 구현
+                ToolbarItem(placement: .principal) {
+                    Text("설정")
+                }
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

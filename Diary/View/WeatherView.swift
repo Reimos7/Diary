@@ -55,18 +55,21 @@ struct WeatherView: View {
                             
                             HStack {
                                 Text(service.currentLocation ?? "없음")
-                                    .font(.title2)
+                                    //.font(.title2)
+                                    .customFont(size: 22)
                                     .bold()
                                 Spacer()
                             }
                             
                             Text(model.weather)
-                                .font(.body)
+                                //.font(.body)
+                                .customFont(size: 17)
                                 .padding(.bottom, -8)
                             
                             HStack(alignment: .lastTextBaseline) {
                                 Text(model.temperature)
-                                    .font(.system(size: 110))
+                                    //.font(.system(size: 110))
+                                    .customFont(size: 110)
                                     .fontWeight(.ultraLight)
                                     .minimumScaleFactor(0.5)
                                 Spacer()
@@ -80,17 +83,20 @@ struct WeatherView: View {
                             
                             HStack {
                                 Text("최고 \(model.maxTemperature) | 최저 \(model.minTemperature)")
-                                    .font(.footnote)
+                                    .customFont(size: 13)
+                                    //.font(.footnote)
                                 Spacer()
                                 Image(systemName: "sunrise.fill")
                                     .symbolRenderingMode(.multicolor)
                                 Text(model.sunrise)
-                                    .font(.footnote)
+                                    .customFont(size: 13)
+                                    //.font(.footnote)
                                 
                                 Image(systemName: "sunset.fill")
                                     .symbolRenderingMode(.multicolor)
                                 Text(model.sunset)
-                                    .font(.footnote)
+                                    .customFont(size: 13)
+                                    //.font(.footnote)
                             }
                         }
                     }

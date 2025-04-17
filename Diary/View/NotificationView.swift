@@ -63,6 +63,10 @@ struct NotificationView: View {
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
             .toolbar {
+                // navigationTitle 대신 커스텀 폰트 적용을 위해 구현
+                ToolbarItem(placement: .principal) {
+                    Text("알림 설정")
+                }
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -77,7 +81,7 @@ struct NotificationView: View {
             }
             
         }
-        .navigationTitle("알림 설정")
+        //.navigationTitle("알림 설정")
         // 실행 시 현재 권한 상태를 확인해 Toggle 초기값 설정
 //        .onAppear() {
 //            UNUserNotificationCenter.current().getNotificationSettings { settings in

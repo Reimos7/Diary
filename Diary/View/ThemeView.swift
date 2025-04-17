@@ -54,7 +54,7 @@ struct ThemeView: View {
                 .listRowSeparator(.hidden)
             }
             .listStyle(.plain)
-            .navigationTitle("테마 설정")
+            //.navigationTitle("테마 설정")
             .navigationBarTitleDisplayMode(.inline)
             // 시스템 모드 감지 후 반영
             .preferredColorScheme(getColorScheme())
@@ -63,6 +63,10 @@ struct ThemeView: View {
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
             .toolbar {
+                // navigationTitle 대신 커스텀 폰트 적용을 위해 구현
+                ToolbarItem(placement: .principal) {
+                    Text("테마 설정")
+                }
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

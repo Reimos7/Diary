@@ -52,9 +52,8 @@ struct ListView: View {
             .toolbar {
                 // 타이틀 직접 설정
                 ToolbarItem(placement: .principal) {
+                    // navigationTitle 대신 커스텀 폰트 적용을 위해 구현
                     Text("일기 목록")
-                        .font(.headline)
-                        .foregroundColor(Color(uiColor: .label)) // 다크모드 대응
                 }
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {

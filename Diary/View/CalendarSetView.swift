@@ -11,7 +11,9 @@ import FSCalendar
 struct CalendarSetView: UIViewRepresentable {
     //@Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
     @EnvironmentObject var manager: SwiftDataManager
+    @EnvironmentObject var fontManager: FontManager
     @Binding var selectedDate: Date
+    
     // 캘린더에서 날짜 직접 선택 시 실행할 콜백 함수
     var dateSelectAction: ((Date) -> Void)?
     
@@ -65,6 +67,16 @@ struct CalendarSetView: UIViewRepresentable {
         //calendar.appearance.titleTodayColor = UIColor.white // 오늘 날짜 글자 흰색
         //calendar.appearance.subtitleTodayColor = UIColor.white // "오늘" 글자도 흰색
         //calendar.appearance.borderSelectionColor = UIColor.clear
+        
+        // 커스텀 폰트 적용
+        // 날짜 숫자
+        calendar.appearance.titleFont = UIFont(name: fontManager.currentFont, size: 16) ?? UIFont.systemFont(ofSize: 16)
+        // "오늘" 텍스트
+        calendar.appearance.subtitleFont = UIFont(name: fontManager.currentFont, size: 10) ?? UIFont.systemFont(ofSize: 10)
+        // 요일 이름 일,월,화
+        calendar.appearance.weekdayFont = UIFont(name: fontManager.currentFont, size: 12) ?? UIFont.systemFont(ofSize: 12)
+        // 년/월
+        calendar.appearance.headerTitleFont = UIFont(name: fontManager.currentFont, size: 18) ?? UIFont.boldSystemFont(ofSize: 18)
         
         calendar.appearance.todayColor = .clear
         calendar.appearance.titleTodayColor = calendar.appearance.titleDefaultColor
