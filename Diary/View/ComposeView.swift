@@ -101,6 +101,12 @@ struct ComposeView: View {
                     }
                     .padding()
                 }
+                // 텍스트가 변경될 때마다 자동 스크롤 -> 자동 줄 바꿈
+                .onChange(of: content ) { _, _ in
+                    withAnimation {
+                        proxy.scrollTo("textEditorScroll", anchor: .bottom)
+                    }
+                }
                 // 기본 뒤로 가기 버튼 숨김
                 .navigationBarBackButtonHidden()
                 // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용

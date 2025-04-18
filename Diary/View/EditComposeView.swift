@@ -125,6 +125,12 @@ struct EditComposeView: View {
                         }
                         .padding()
                         
+                        // 텍스트가 변경될 때마다 자동 스크롤 -> 자동 줄 바꿈
+                        .onChange(of: content ) { _, _ in
+                            withAnimation {
+                                proxy.scrollTo("textEditorScroll", anchor: .bottom)
+                            }
+                        }
                         
                         Spacer()
                         
