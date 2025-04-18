@@ -108,39 +108,34 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
+                // TODO: 앱스토어 업데이트 이후 적용하기
+                
+                //                ZStack {
+                //                    NavigationLink {
+                //                        // 앱스토어 이동 뷰
+                //                    } label: {
+                //                        EmptyView()
+                //
+                //                    }.opacity(0)
+                //                    HStack(spacing: 8) {
+                //                        Image("store_img")
+                //                            .resizable()
+                //                            .scaledToFit()
+                //                            .frame(width: 24, height: 24)
+                //                            .symbolRenderingMode(.palette)
+                //                            .foregroundStyle(Color.primary)
+                //
+                //                        Text("앱 평가하기")
+                //
+                //                        Spacer()
+                //
+                //                    }
+                //                }
+                //                .listRowSeparator(.hidden) // 줄 없애기
+                
+                Divider()
                 
                 ZStack {
-                    NavigationLink {
-                        // 앱스토어 이동 뷰
-                    } label: {
-                        EmptyView()
-                        
-                    }.opacity(0)
-                    HStack(spacing: 8) {
-                        Image("store_img")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary)
-                        
-                        Text("앱 평가하기")
-                        
-                        Spacer()
-                        
-                    }
-                }
-                .listRowSeparator(.hidden) // 줄 없애기
-            
-                Divider()
-                    // 추후 업데이트 내용 보여주자
-                ZStack {
-                    NavigationLink {
-        
-                    } label: {
-                        EmptyView()
-                        
-                    }.opacity(0)
                     HStack(spacing: 8) {
                         Image("appVersion_img")
                             .resizable()
@@ -157,6 +152,32 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
+                
+                // TODO: 앱스토어 업데이트 이후 적용하기
+                // 추후 업데이트 내용 직접 보여주기
+                //                ZStack {
+                //                    NavigationLink {
+                //
+                //                    } label: {
+                //                        EmptyView()
+                //
+                //                    }.opacity(0)
+                //                    HStack(spacing: 8) {
+                //                        Image("appVersion_img")
+                //                            .resizable()
+                //                            .scaledToFit()
+                //                            .frame(width: 28, height: 28)
+                //                            .symbolRenderingMode(.palette)
+                //                            .foregroundStyle(Color.primary)
+                //
+                //                        Text("앱 버전")
+                //
+                //                        Spacer()
+                //
+                //                        Text("1.0.0")
+                //                    }
+                //                }
+                //                .listRowSeparator(.hidden) // 줄 없애기
             }
            
             //.frame(maxWidth: .infinity, alignment: .leading)
