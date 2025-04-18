@@ -37,7 +37,6 @@ struct ComposeView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-            NavigationStack {
                 VStack(spacing: 0) {
                     // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
                     ZStack {
@@ -226,30 +225,6 @@ struct ComposeView: View {
                                 .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                         }
                     }
-                    
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Button {
-                            content += DateFormatter.timeFormatter.string(from: Date())
-                        } label: {
-                            Image("clock_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 18, height: 18) // SF Symbol 크기와 유사하게 조정
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                        }
-                        Spacer()
-                        Button {
-                            hideKeyboard()
-                        } label: {
-                            Image("keyboard_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20) // SF Symbol 크기와 유사하게 조정
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                        }
-                    }
                 }
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -276,10 +251,10 @@ struct ComposeView: View {
                     .padding(.bottom, 50)
                     
                 }
-                
-            }
+           }
+        // 커스텀 키보드 toolbar
+        .customKeyboardToolbar(focused: $focused, content: $content)
         }
-    }
         // 이거는 안됨
         //.ignoresSafeArea(.keyboard, edges: .bottom)
     }
