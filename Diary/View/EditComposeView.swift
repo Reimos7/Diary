@@ -13,8 +13,6 @@ struct EditComposeView: View {
     // X 닫기 버튼을 누르면 현재 화면에서 나갈지 계속 있을지 alert
     @State private var showDismissAlert: Bool = false
     @State private var showToast: Bool = false
-    // 사진 선택기(Picker)를 보여줄지 여부
-    @State private var showPhotoPicker: Bool = false
     // 선택된 이미지를 길게 눌렀을때
     @State private var isLongPressedPhoto: Bool = false
     //PhotosPicker에서 선택된 사진을 저장하는 배열
@@ -27,6 +25,12 @@ struct EditComposeView: View {
     @State private var imagePath: [String] = []
     // 에러 감지 상태
     @State private var isPreSentedError: Bool = false
+    
+    // 사진 권한 알림 상태
+    // 사진 선택기(Picker)를 보여줄지 여부
+    @State private var showPhotoPicker: Bool = false
+    @State private var showPermissionAlert: Bool = false
+    @State private var permissionMessage: String = ""
     
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
@@ -162,6 +166,50 @@ struct EditComposeView: View {
                     // 커스텀 키보드 toolbar
                     .customKeyboardToolbar(focused: $focused, content: $content)
                     
+                    // PhotoPicker는 권한이 있을 때만 표시
+                    .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
+                    .onChange(of: selectedItems) { _, newValue in
+                        Task {
+                            await updateSelectedImage(newItems: newValue)
+                            
+                            // 이미지 변경 후 자동 스크롤
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation {
+                                    // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                    proxy.scrollTo("textEditorScroll", anchor: .top)
+                                }
+                            }
+                        }
+                        // 새로운 이미지 선택시 휴지통 버튼 초기화
+                        isLongPressedPhoto = false
+                    }
+                    
+                    // 권한 알림을 위한 알림창
+//                    .alert(isPresented: $showPermissionAlert) {
+//                        Alert(
+//                            title: Text("사진 접근 권한"),
+//                            message: Text(permissionMessage),
+//                            primaryButton: .default(Text("설정")) {
+//                                PhotoPermissionManager.openPhotoSetting()
+//                            },
+//                            secondaryButton: .cancel(Text("취소"))
+//                        )
+//                    }
+                    // 권한 거부된 경우 알림
+                    .alert(permissionMessage, isPresented: $showPermissionAlert) {
+                        Button("취소") {
+                            
+                        }
+                        // 설정으로 이동 후 사용자에게 권한 설정 유도
+                        if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
+                            PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
+                            Button("설정") {
+                                PhotoPermissionManager.openPhotoSetting()
+                            }
+                        }
+                    }
+
+                    
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
                             Button {
@@ -174,8 +222,10 @@ struct EditComposeView: View {
                             }
                         }
                         ToolbarItemGroup(placement: .topBarTrailing) {
-                            // 사진은 일단 1장만 저장
-                            PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                            // 사진은 일단 1장만 저장 - 권한 체크 후 바로 포토 피커 표시
+                            Button {
+                                checkPhotoPermission()
+                            } label: {
                                 Image("gallery_img")
                                     .resizable()
                                     .scaledToFit()
@@ -183,22 +233,7 @@ struct EditComposeView: View {
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                             }
-                            .onChange(of: selectedItems) { _, newValue in
-                                Task {
-                                    await updateSelectedImage(newItems: newValue)
-                                    
-                                    // 이미지 변경 후 자동 스크롤
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        withAnimation {
-                                            // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                            proxy.scrollTo("textEditorScroll", anchor: .top)
-                                        }
-                                    }
-                                }
-                                // 새로운 이미지 선택시 휴지통 버튼 초기화
-                                isLongPressedPhoto = false
-                            }
-                            //ToolbarItem(placement: .topBarTrailing) {
+                            
                             Button {
                                 guard let data = data else { return }
                                 manager.updateDiaryData(entry: data, newContent: content)
@@ -219,8 +254,6 @@ struct EditComposeView: View {
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                             }
-                            //  }
-                            
                         }
                     }
                     .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
@@ -253,6 +286,34 @@ struct EditComposeView: View {
             }
         }
     }
+    
+    // MARK: - 사진 권한 체크 및 포토 피커 표시 함수
+    private func checkPhotoPermission() {
+        PhotoPermissionManager.checkPhotoLibraryPermission { status in
+            switch status {
+            case .authorized:
+                // 권한이 있으면 사진 선택기 바로 표시
+                self.showPhotoPicker = true
+            case .limited:
+                // 제한된 권한도 일단 PhotoPicker 표시하고 메시지로 알림
+                self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
+                // 제한된 권한이 있으면 사진 선택기 바로 표시
+                self.showPhotoPicker = true
+                // self.showPhotoPermissionAlert = true
+            case .denied, .restricted:
+                // 권한이 거부된 경우 알림 표시
+                self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
+                self.showPermissionAlert = true
+            case .notDetermined:
+                // notDetermined 상태는 checkPhotoLibraryPermission 메서드에서 처리됨
+                // 권한 요청 후 콜백에서 다시 이 메서드가 호출됨
+                break
+            @unknown default:
+                break
+            }
+        }
+    }
+    
     // 사용자가 새 이미지를 선택하면 기존 이미지를 삭제하고 새로운 이미지를 저장
     private func updateSelectedImage(newItems: [PhotosPickerItem]) async {
         guard let data = data else {return}
@@ -299,5 +360,4 @@ struct EditComposeView: View {
             return nil
         }
     }
-    
 }

@@ -13,8 +13,6 @@ struct CalendarComposeView: View {
     //let selectedDate: Date
     @State private var content: String = ""
     @State private var showToast: Bool = false
-    // 사진 선택기(Picker)를 보여줄지 여부
-    @State private var showPhotoPicker: Bool = false
     // 선택된 이미지를 길게 눌렀을때
     @State private var isLongPressedPhoto: Bool = false
     // PhotosPicker에서 선택된 사진을 저장하는 배열
@@ -32,6 +30,12 @@ struct CalendarComposeView: View {
     // 에러 감지 상태
     @State private var isPreSentedError: Bool = false
     
+    // 사진 권한 관련 상태
+    // 사진 선택기(Picker)를 보여줄지 여부
+    @State private var showPhotoPicker: Bool = false
+    @State private var showPermissionAlert: Bool = false
+    @State private var permissionMessage: String = ""
+   
     @Binding var selectedDate: Date
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
@@ -110,8 +114,10 @@ struct CalendarComposeView: View {
                 }
                 
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    // 사진은 일단 1장만 저장
-                    PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                    // 사진 버튼을 눌렀을 때 권한 확인 후 PhotosPicker 표시
+                    Button {
+                        checkPhotoPermission()
+                    } label: {
                         Image("gallery_img")
                             .resizable()
                             .scaledToFit()
@@ -119,34 +125,7 @@ struct CalendarComposeView: View {
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
-                    .onChange(of: selectedItems) { _, newValue in
-                        Task { // 선택한 사진을 앱에 추가하는 비동기 작업 수행
-                            for item in newValue {
-                                // item.loadTransferable(type: Data.self) - 선택한 사진을 “파일 데이터”로 변환하는 작업
-                                // 변환된 데이터를 UIImage로 변환하여 앱에서 표시할 수 있는 이미지로 만듦
-                                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
-                                    // 새로운 이미지 선택시 휴지통 버튼 초기화
-                                    isLongPressedPhoto = false
-                                    // UI 업데이트는 메인 스레드에서 실행해야함 - 사진 추가는 UI 업데이트 작업이니까 메인 스레드에서 하기
-                                    DispatchQueue.main.async {
-                                        // 선택한 이미지 저장
-                                        // append로 하지말고 배열 전체를 덮어 쓰게해서 1장만 선택하게
-                                        selectedImages = [image]
-                                        //selectedImages.append(image)
-                                        
-                                        // 이미지 추가 후 자동 스크롤
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                            withAnimation {
-                                                // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                                proxy.scrollTo("textEditorScroll", anchor: .top)
-                                            }
-                                        }
-                                    }
-                                }
-                                //selectedItems.removeAll()
-                            }
-                        }
-                    }
+        
                     Button {
                         Task {
                             var savedPath: [String] = []
@@ -203,7 +182,70 @@ struct CalendarComposeView: View {
         }
         // 커스텀 키보드 toolbar
         .customKeyboardToolbar(focused: $focused, content: $content)
-      }
+            
+        // PhotoPicker는 권한이 있을 때만 표시
+        .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
+        .onChange(of: selectedItems) { _, newValue in
+            Task { // 선택한 사진을 앱에 추가하는 비동기 작업 수행
+                for item in newValue {
+                    if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                        // 새로운 이미지 선택시 휴지통 버튼 초기화
+                        isLongPressedPhoto = false
+                        // UI 업데이트는 메인 스레드에서 실행해야함
+                        DispatchQueue.main.async {
+                            // 선택한 이미지 저장 (1장만 선택)
+                            selectedImages = [image]
+                            
+                            // 이미지 추가 후 자동 스크롤
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation {
+                                    proxy.scrollTo("textEditorScroll", anchor: .top)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // 권한 거부된 경우 알림
+        .alert(permissionMessage, isPresented: $showPermissionAlert) {
+            Button("취소") {
+                
+            }
+            // 설정으로 이동 후 사용자에게 권한 설정 유도
+            if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
+                PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
+                Button("설정") {
+                    PhotoPermissionManager.openPhotoSetting()
+                }
+            }
+        }
+    }
+}
+    
+    // MARK: - 사진 권한 체크 및 포토 피커 표시 함수
+    private func checkPhotoPermission() {
+        PhotoPermissionManager.checkPhotoLibraryPermission { status in
+            switch status {
+            case .authorized:
+                // 권한이 허용된 경우 PhotoPicker 표시
+                self.showPhotoPicker = true
+            case .limited:
+                // 제한된 권한도 일단 PhotoPicker 표시하고 메시지로 알림
+                self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
+                //self.showPermissionAlert = true
+                self.showPhotoPicker = true
+            case .denied, .restricted:
+                // 권한이 거부된 경우 알림 표시
+                self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
+                self.showPermissionAlert = true
+            case .notDetermined:
+                // 권한이 결정되지 않은 경우 (이미 처리되었을 것이므로 일반적으로 여기까지 오지 않음)
+                break
+            @unknown default:
+                break
+            }
+        }
     }
 }
 
