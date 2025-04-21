@@ -34,9 +34,9 @@ struct MainView: View {
                     selectedDateNavigate = true
                 })
                 .frame(maxWidth: .infinity)
-                .frame(height: 400)
+                .frame(maxHeight: .infinity)
 
-                Spacer()
+                Spacer(minLength: 10)
                 
                 // MARK: - 오늘 글쓰기
                 NavigationLink {
@@ -49,6 +49,7 @@ struct MainView: View {
                         .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                 }
             }
+            .padding(.bottom, 10)
             
             // MARK: - 날짜 선택 시 해당 날짜 다이어리 작성페이지 이동
             .navigationDestination(isPresented: $selectedDateNavigate, destination: {
