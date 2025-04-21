@@ -42,6 +42,12 @@ struct DetailView: View {
                         }
                     }
                     .shadow(radius: 2)
+                    
+                    Text(DateFormatter.dateFormatter.string(from: data.date))
+                        .padding()
+                        .customFont(size: 16)
+                        //.foregroundStyle(.secondary)
+                    
                     // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
                     if let paths = data.imagePath, !paths.isEmpty {
                         ForEach(paths, id: \.self) { path in
@@ -71,10 +77,6 @@ struct DetailView: View {
                     
                     Spacer(minLength: 0)
                     
-                    Text(DateFormatter.dateFormatter.string(from: data.date))
-                        .padding()
-                        .customFont(size: 16)
-                        .foregroundStyle(.secondary)
                 }
             }
             // 이미지 클릭 시 전체 화면 표시

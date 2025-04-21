@@ -43,9 +43,10 @@ struct EditComposeView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
+            //VStack {
                 ScrollViewReader { proxy in
                     ScrollView {
+                        VStack(spacing: 0) {
                         // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
                         ZStack {
                             if let weatherIcon = data?.currentWeatherImage {
@@ -67,6 +68,11 @@ struct EditComposeView: View {
                             }
                         }
                         .shadow(radius: 2)
+                        
+                        Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
+                            .padding()
+                            .customFont(size: 16)
+                        //.foregroundStyle(.secondary)
                         
                         //HStack {
                         // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
@@ -111,6 +117,8 @@ struct EditComposeView: View {
                         ZStack(alignment: .topLeading) {
                             
                             TextEditor(text: $content)
+                            // TextEditor 글자 수 기준 동적으로 높이 조절 (일기 내용이 길어지면 스크롤 최소화)
+                                .frame(minHeight: content.count > 200 ? 350 : 200)
                             // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
                                 .padding(.horizontal, -5)
                             // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
@@ -136,32 +144,29 @@ struct EditComposeView: View {
                             }
                         }
                         
-                        Spacer()
+                        //Spacer()
                         
                         
                         // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
                         // 키보드 올리기
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    self.focused = true
-                                    // 자동 스크롤
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        withAnimation {
-                                            // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                            proxy.scrollTo("textEditorScroll", anchor: .top)
-                                        }
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                self.focused = true
+                                // 자동 스크롤
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    withAnimation {
+                                        // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                        proxy.scrollTo("textEditorScroll", anchor: .top)
                                     }
                                 }
-                                
-                                if let data = data?.content {
-                                    content = data
-                                }
                             }
+                            
+                            if let data = data?.content {
+                                content = data
+                            }
+                        }
                         //}
-                        Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
-                            .padding()
-                            .customFont(size: 16)
-                            .foregroundStyle(.secondary)
+                      }
                     }
                     // 커스텀 키보드 toolbar
                     .customKeyboardToolbar(focused: $focused, content: $content)
@@ -283,7 +288,7 @@ struct EditComposeView: View {
                         
                     }
                 }
-            }
+            //}
         }
     }
     
