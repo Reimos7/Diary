@@ -10,6 +10,7 @@ import SwiftData
 import FSCalendar
 
 struct MainView: View {
+    @Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var service: WeatherService
     @State private var selectedDate: Date = Date()
@@ -35,6 +36,8 @@ struct MainView: View {
                 })
                 .frame(maxWidth: .infinity)
                 .frame(maxHeight: .infinity)
+                // 다크/라이트 모드가 바뀔 때마다 뷰를 완전히 새로 그림
+                .id(colorScheme)
 
                 Spacer(minLength: 10)
                 

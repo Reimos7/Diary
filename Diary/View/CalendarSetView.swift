@@ -9,7 +9,7 @@ import FSCalendar
 
 // MARK: - 커스텀 캘린더 설정
 struct CalendarSetView: UIViewRepresentable {
-    //@Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
+    @Environment(\.colorScheme) var colorScheme  // 다크 모드 감지
     @EnvironmentObject var manager: SwiftDataManager
     @EnvironmentObject var fontManager: FontManager
     @Binding var selectedDate: Date
@@ -37,7 +37,9 @@ struct CalendarSetView: UIViewRepresentable {
     /// 다크 모드 여부에 따라 캘린더 색상을 동적으로 업데이트하는 함수
     func updateCalendarAppearance(_ calendar: FSCalendar) {
         // FSCalendar는 UIKit 컴포넌트이기 때문에, traitCollection을 이용하면 정확한 시점에 정확한 스타일을 적용 (colorScheme X)
-        let isDarkMode = calendar.traitCollection.userInterfaceStyle == .dark
+        //let isDarkMode = calendar.traitCollection.userInterfaceStyle == .dark
+        
+        let isDarkMode = colorScheme == .dark
         
         // 캘린더 배경 색상
         // 이전 달, 다음 달 버튼 숨기기
