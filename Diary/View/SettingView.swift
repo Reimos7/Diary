@@ -207,5 +207,9 @@ struct SettingView: View {
                 }
             }
         }
+        // 설정앱을 통해 알림 권한 요청 alert 
+        .onAppear {
+            NotificationManager.shared.requestAutorization()
+        }
     }
 }

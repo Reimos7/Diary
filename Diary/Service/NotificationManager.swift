@@ -32,6 +32,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
             scheduleNotification()
         } else {
             print("오늘 작성된 일기가 있어요")
+            // 일기가 있으면 알림 필요 없으니까 제거
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["diaryReminder"])
         }
     }
     
