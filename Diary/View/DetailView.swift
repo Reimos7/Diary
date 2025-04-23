@@ -136,9 +136,12 @@ struct DetailView: View {
                         captureScreenShot()
                         screenshotShareAlert = true  // 캡처 후 Alert 표시
                     } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
-                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
+                        Image("share_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
                     }
                     
                     Menu {
@@ -175,6 +178,10 @@ struct DetailView: View {
             
             // alert로 삭제
             .alert("삭제", isPresented: $showDeleteAlert) {
+                Button(role: .cancel) {
+                } label: {
+                    Text("취소")
+                }
                 Button(role: .destructive) {
                     manager.deleteDiaryData(entry: data)
                     dismiss()
