@@ -12,13 +12,6 @@ class FontManager: ObservableObject {
     // 폰트 설정이 변경되면 UserDefaults에 저장되고, 앱 재실행 후에도 유지
     @AppStorage("selectedFont") var currentFont: String = "dovemayo"
     
-//    @Published var currentFont: String {
-//        didSet {
-//            UserDefaults.standard.set(currentFont, forKey: "selectedFont")
-//            NotificationCenter.default.post(name: NSNotification.Name("FontChanged"), object: nil)
-//        }
-//    }
-
     static let fontList: [String] = ["dovemayo", "NanumPen", "Cafe24DongdongOTF", "Cafe24SyongsyongOTF"]
     
     init() {

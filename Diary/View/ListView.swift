@@ -35,12 +35,10 @@ struct ListView: View {
                     
                 }
                 .onDelete(perform: delete)
-
+                
             }
             .scrollContentBackground(.hidden) // 리스트 배경 제거
-            //.listStyle(.plain)
-            //.navigationTitle("일기 목록")
-        
+            
             // 화면이 나타날 때 데이터 로드
             .onAppear {
                 manager.fetchDiaryData(isDecending: sortByDateDesc)

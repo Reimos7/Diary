@@ -13,7 +13,7 @@ struct ThemeView: View {
     // 현재 다크/라이트 모드 감지
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
-
+    
     var body: some View {
         NavigationStack {
             List {
@@ -28,7 +28,7 @@ struct ThemeView: View {
                     }
                 }
                 .listRowSeparator(.hidden)
-
+                
                 Button {
                     selectTheme(.light)
                 } label: {
@@ -40,7 +40,7 @@ struct ThemeView: View {
                     }
                 }
                 .listRowSeparator(.hidden)
-
+                
                 Button {
                     selectTheme(.dark)
                 } label: {
@@ -81,12 +81,12 @@ struct ThemeView: View {
             }
         }
     }
-
+    
     // 테마 변경 함수 (하나만 선택되도록)
     private func selectTheme(_ theme: ThemeOption) {
         selectedTheme = theme  // 선택된 테마 저장
     }
-
+    
     // 현재 설정된 ColorScheme을 반환 (시스템 모드 선택 시 자동 반영)
     private func getColorScheme() -> ColorScheme? {
         switch selectedTheme {

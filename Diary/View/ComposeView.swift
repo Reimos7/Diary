@@ -64,9 +64,7 @@ struct ComposeView: View {
                                         print(model.icon)
                                     }
                             }
-                        }/*else if service.showLocationDeniedWeatherView {
-                            Text("위치 권한을 허용하면 날씨를 기록할 수 있어요!\n")
-                        }*/
+                        }
                     }
                     .shadow(radius: 2)
                     
@@ -77,7 +75,7 @@ struct ComposeView: View {
                     if !selectedImages.isEmpty {
                         VStack(spacing: 5) {
                             ForEach(selectedImages, id: \.self) { image in
-                                // 이미지를 길게 눌렀을때 휴지통 버튼을 통해 이미지 지우기 
+                                // 이미지를 길게 눌렀을때 휴지통 버튼을 통해 이미지 지우기
                                 LongPressImageView(image: image, isLongPressedPhoto: $isLongPressedPhoto, selectedImages: $selectedImages, selectedImageForFullscreen: $selectedImageForFullscreen)
                             }
                         }
@@ -85,7 +83,7 @@ struct ComposeView: View {
                     }
                     // 일기 입력 부분
                     ZStack(alignment: .topLeading) {
-                      
+                        
                         TextEditor(text: $content)
                         // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
                             .padding(.horizontal, -5)
@@ -93,15 +91,14 @@ struct ComposeView: View {
                             .focused($focused)
                         // 스크롤 타겟 ID , 스크롤 대상으로 설정
                             .id("textEditorScroll")
-                           
+                        
                         // placeholder - TextEidtor는 기본 제공 안됨
                         if content.isEmpty {
                             Text("일기를 입력해 주세요!")
                                 .foregroundStyle(.gray)
                                 .padding(.top, 8)
-                                //.padding(.leading, 2)
                         }
-                        //ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
+                        
                     }
                     .padding()
                 }
@@ -159,7 +156,6 @@ struct ComposeView: View {
                                     print("날씨 정보가 없을때 호출됨 ")
                                     manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: nil)
                                     
-                                    //manager.fetchDiaryData(isDecending: true)
                                     
                                     // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
                                     self.focused = false
@@ -173,16 +169,8 @@ struct ComposeView: View {
                                     return
                                 }
                                 
-//                                for image in selectedImages {
-//                                    if let path = FileManagerSet.saveImageToFileManager(image: image) {
-//                                        savedPath.append(path) //  저장된 경로를 추가
-//                                    }
-//                                }
-                                //imagePath = savedPath.isEmpty ? nil : savedPath
-                                
                                 manager.addDiaryData(content: content, date: Date(), imagePath: imagePath, currentWeatherImage: weather.icon)
-                                
-                                //manager.fetchDiaryData(isDecending: true)
+
                                 
                                 // 저장 버튼을 누르면 키보드 내려서 showToast 사용자에게 보여주기
                                 self.focused = false

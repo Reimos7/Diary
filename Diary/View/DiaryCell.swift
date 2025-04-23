@@ -12,7 +12,7 @@ struct DiaryCell: View {
     // 모든 기기에서 동일한 너비
     private let fixedWidth = UIScreen.main.bounds.width * 0.85
     @Environment(\.colorScheme) var colorScheme
-
+    
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
@@ -23,7 +23,7 @@ struct DiaryCell: View {
                         .frame(width: 82, height: 72)
                         .offset(x: 1, y: 1)
                         .foregroundStyle(.gray.opacity(0.3))
-
+                    
                     Image(systemName: weatherIcon)
                         .symbolRenderingMode(.multicolor)
                         .resizable()
@@ -32,7 +32,7 @@ struct DiaryCell: View {
                             print(weatherIcon)
                         }
                 } else {
-                   
+                    
                 }
             }
             
@@ -70,7 +70,6 @@ struct DiaryCell: View {
         // 가로 크기 고정
         .frame(width: fixedWidth)
         // 카드 형식의 UI
-        //.background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
         .background(RoundedRectangle(cornerRadius: 12)
             .fill(colorScheme == .dark ? Color(uiColor: .lightGray) : Color.white))
         // 그림자 효과

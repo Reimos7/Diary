@@ -25,7 +25,7 @@ class WeatherService: NSObject, ObservableObject {
     // 에러 문자열을 저장하는 속성
     @Published var lastError: String?
     // 위치 권한이 거부된 경우 weathetView 변경
-    @Published var showLocationDeniedWeatherView: Bool = false 
+    @Published var showLocationDeniedWeatherView: Bool = false
     // 위치 권한이 거부된 경우 alert
     @Published var showLocationDeniedAlert: Bool = false
    
@@ -37,9 +37,9 @@ class WeatherService: NSObject, ObservableObject {
         requestLocationPermission()
         
         // 앱 실행 시 강제로 날씨 데이터 가져오기
-           DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-               self.updateWeatherManually()
-           }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.updateWeatherManually()
+        }
         
         // 10분으로 설정 나중에는 조절해야함 무료플랜 하루 1000회
         // 1분 60 / 1시간 3600
@@ -52,11 +52,6 @@ class WeatherService: NSObject, ObservableObject {
         timer = Timer.publish(every: 300, on: .main, in: .common)
             .autoconnect()
             .sink { _ in
-                
-                // 현재 위치 가져오기
-//                guard let location = self.locationManager.location else {return}
-//                let lat = location.coordinate.latitude
-//                let lon = location.coordinate.longitude
                 
                 // timer로 호출된 날씨 확인용 로그
                 let now = Date()

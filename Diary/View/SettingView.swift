@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SettingView: View {
-    // 이메일 
+    // 이메일
     private var email = EmailManager(toAddress: EmailAddress.developerEmail, subject: "굿디 문의하기")
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.openURL) var openURL
-   
+    
     @EnvironmentObject var manager: SwiftDataManager
     
     var body: some View {
@@ -26,16 +26,16 @@ struct SettingView: View {
                         EmptyView()
                         
                     }.opacity(0)
-                    HStack(spacing: 8) { // ← 간격을 적절히 조절 (원하는 만큼)
+                    HStack(spacing: 8) {
                         Image("notification_img")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(Color.primary)
-
+                        
                         Text("알림")
-
+                        
                         Spacer()
                     }
                     
@@ -65,26 +65,26 @@ struct SettingView: View {
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
                 
-                    ZStack {
-                        NavigationLink {
-                            FontView()
-                        } label: {
-                            EmptyView()
-                            
-                        }.opacity(0)
-                        HStack(spacing: 8) { //  간격을 적절히 조절 (원하는 만큼)
-                            Image("font_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24)
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.primary)
-                            
-                            Text("폰트")
-                            Spacer()
-                        }
+                ZStack {
+                    NavigationLink {
+                        FontView()
+                    } label: {
+                        EmptyView()
+                        
+                    }.opacity(0)
+                    HStack(spacing: 8) {
+                        Image("font_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary)
+                        
+                        Text("폰트")
+                        Spacer()
                     }
-                    .listRowSeparator(.hidden) // 줄 없애기
+                }
+                .listRowSeparator(.hidden) // 줄 없애기
                 
                 Divider()
                 
@@ -108,30 +108,6 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
-                // TODO: 앱스토어 업데이트 이후 적용하기
-                
-                //                ZStack {
-                //                    NavigationLink {
-                //                        // 앱스토어 이동 뷰
-                //                    } label: {
-                //                        EmptyView()
-                //
-                //                    }.opacity(0)
-                //                    HStack(spacing: 8) {
-                //                        Image("store_img")
-                //                            .resizable()
-                //                            .scaledToFit()
-                //                            .frame(width: 24, height: 24)
-                //                            .symbolRenderingMode(.palette)
-                //                            .foregroundStyle(Color.primary)
-                //
-                //                        Text("앱 평가하기")
-                //
-                //                        Spacer()
-                //
-                //                    }
-                //                }
-                //                .listRowSeparator(.hidden) // 줄 없애기
                 
                 Divider()
                 
@@ -152,36 +128,7 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
-                
-                // TODO: 앱스토어 업데이트 이후 적용하기
-                // 추후 업데이트 내용 직접 보여주기
-                //                ZStack {
-                //                    NavigationLink {
-                //
-                //                    } label: {
-                //                        EmptyView()
-                //
-                //                    }.opacity(0)
-                //                    HStack(spacing: 8) {
-                //                        Image("appVersion_img")
-                //                            .resizable()
-                //                            .scaledToFit()
-                //                            .frame(width: 28, height: 28)
-                //                            .symbolRenderingMode(.palette)
-                //                            .foregroundStyle(Color.primary)
-                //
-                //                        Text("앱 버전")
-                //
-                //                        Spacer()
-                //
-                //                        Text("1.0.0")
-                //                    }
-                //                }
-                //                .listRowSeparator(.hidden) // 줄 없애기
             }
-           
-            //.frame(maxWidth: .infinity, alignment: .leading)
-            //.padding()
             .listStyle(.plain)
             //.navigationTitle("설정")
             .navigationBarTitleDisplayMode(.inline)
@@ -207,7 +154,7 @@ struct SettingView: View {
                 }
             }
         }
-        // 설정앱을 통해 알림 권한 요청 alert 
+        // 설정화면 통해 알림 권한 요청 alert
         .onAppear {
             NotificationManager.shared.requestAutorization()
         }

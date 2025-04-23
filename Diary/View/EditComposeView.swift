@@ -43,10 +43,9 @@ struct EditComposeView: View {
     
     var body: some View {
         NavigationStack {
-            //VStack {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 0) {
                         // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
                         ZStack {
                             if let weatherIcon = data?.currentWeatherImage {
@@ -72,9 +71,6 @@ struct EditComposeView: View {
                         Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
                             .padding()
                             .customFont(size: 16)
-                        //.foregroundStyle(.secondary)
-                        
-                        //HStack {
                         // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
                         if let paths = data?.imagePath, !paths.isEmpty {
                             ForEach(paths, id: \.self) { path in
@@ -131,9 +127,7 @@ struct EditComposeView: View {
                                 Text("일기를 입력해 주세요!")
                                     .foregroundStyle(.gray)
                                     .padding(.top, 8)
-                                //.padding(.leading, 2)
                             }
-                            //ResizableTextView(text: $content, placeholder: "일기를 입력해주세요!", maxTextWidth: UIScreen.main.bounds.width - 32)
                         }
                         .padding()
                         
@@ -143,9 +137,6 @@ struct EditComposeView: View {
                                 proxy.scrollTo("textEditorScroll", anchor: .bottom)
                             }
                         }
-                        
-                        //Spacer()
-                        
                         
                         // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
                         // 키보드 올리기
@@ -165,130 +156,115 @@ struct EditComposeView: View {
                                 content = data
                             }
                         }
-                        //}
-                      }
-                    }
-                    // 커스텀 키보드 toolbar
-                    .customKeyboardToolbar(focused: $focused, content: $content)
-                    
-                    // PhotoPicker는 권한이 있을 때만 표시
-                    .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
-                    .onChange(of: selectedItems) { _, newValue in
-                        Task {
-                            await updateSelectedImage(newItems: newValue)
-                            
-                            // 이미지 변경 후 자동 스크롤
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                withAnimation {
-                                    // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                    proxy.scrollTo("textEditorScroll", anchor: .top)
-                                }
-                            }
-                        }
-                        // 새로운 이미지 선택시 휴지통 버튼 초기화
-                        isLongPressedPhoto = false
-                    }
-                    
-                    // 권한 알림을 위한 알림창
-//                    .alert(isPresented: $showPermissionAlert) {
-//                        Alert(
-//                            title: Text("사진 접근 권한"),
-//                            message: Text(permissionMessage),
-//                            primaryButton: .default(Text("설정")) {
-//                                PhotoPermissionManager.openPhotoSetting()
-//                            },
-//                            secondaryButton: .cancel(Text("취소"))
-//                        )
-//                    }
-                    // 권한 거부된 경우 알림
-                    .alert(permissionMessage, isPresented: $showPermissionAlert) {
-                        Button("취소") {
-                            
-                        }
-                        // 설정으로 이동 후 사용자에게 권한 설정 유도
-                        if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
-                            PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
-                            Button("설정") {
-                                PhotoPermissionManager.openPhotoSetting()
-                            }
-                        }
-                    }
-
-                    
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button {
-                                showDismissAlert = true
-                            }
-                            label: {
-                                Image(systemName: "xmark")
-                                //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
-                                    .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
-                            }
-                        }
-                        ToolbarItemGroup(placement: .topBarTrailing) {
-                            // 사진은 일단 1장만 저장 - 권한 체크 후 바로 포토 피커 표시
-                            Button {
-                                checkPhotoPermission()
-                            } label: {
-                                Image("gallery_img")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                            }
-                            
-                            Button {
-                                guard let data = data else { return }
-                                manager.updateDiaryData(entry: data, newContent: content)
-                                // 수정 버튼 누르면 키보드 내려서 showToast 사용자에게 보여주기
-                                self.focused = false
-                                
-                                showToast = true
-                                // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                    showToast = false
-                                    dismiss()
-                                }
-                            } label: {
-                                Image("checkmark_img")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                            }
-                        }
-                    }
-                    .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
-                        Button("나가기", role: .destructive) {
-                            dismiss()
-                        }
-                        
-                        Button("계속 작성", role: .cancel) {
-                            showDismissAlert = false
-                        }
-                    } message: {
-                        Text("작성한 글이 저장되지 않습니다!")
-                    }
-                    
-                    // 저장하면 toast 메시지로 알려줌
-                    if showToast {
-                        VStack {
-                            Text("일기를 수정했어요!")
-                                .padding()
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary) // 다크모드에서도 자동 변경
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .transition(.opacity)
-                        .animation(.easeInOut, value: showToast)
-                        .padding(.bottom, 50)
-                        
                     }
                 }
-            //}
+                // 커스텀 키보드 toolbar
+                .customKeyboardToolbar(focused: $focused, content: $content)
+                
+                // PhotoPicker는 권한이 있을 때만 표시
+                .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
+                .onChange(of: selectedItems) { _, newValue in
+                    Task {
+                        await updateSelectedImage(newItems: newValue)
+                        
+                        // 이미지 변경 후 자동 스크롤
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation {
+                                // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
+                                proxy.scrollTo("textEditorScroll", anchor: .top)
+                            }
+                        }
+                    }
+                    // 새로운 이미지 선택시 휴지통 버튼 초기화
+                    isLongPressedPhoto = false
+                }
+                // 권한 거부된 경우 알림
+                .alert(permissionMessage, isPresented: $showPermissionAlert) {
+                    Button("취소") {
+                        
+                    }
+                    // 설정으로 이동 후 사용자에게 권한 설정 유도
+                    if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
+                        PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
+                        Button("설정") {
+                            PhotoPermissionManager.openPhotoSetting()
+                        }
+                    }
+                }
+                
+                
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showDismissAlert = true
+                        }
+                        label: {
+                            Image(systemName: "xmark")
+                                .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
+                        }
+                    }
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        // 사진은 일단 1장만 저장 - 권한 체크 후 바로 포토 피커 표시
+                        Button {
+                            checkPhotoPermission()
+                        } label: {
+                            Image("gallery_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                        }
+                        
+                        Button {
+                            guard let data = data else { return }
+                            manager.updateDiaryData(entry: data, newContent: content)
+                            // 수정 버튼 누르면 키보드 내려서 showToast 사용자에게 보여주기
+                            self.focused = false
+                            
+                            showToast = true
+                            // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                showToast = false
+                                dismiss()
+                            }
+                        } label: {
+                            Image("checkmark_img")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                        }
+                    }
+                }
+                .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
+                    Button("나가기", role: .destructive) {
+                        dismiss()
+                    }
+                    
+                    Button("계속 작성", role: .cancel) {
+                        showDismissAlert = false
+                    }
+                } message: {
+                    Text("작성한 글이 저장되지 않습니다!")
+                }
+                
+                // 저장하면 toast 메시지로 알려줌
+                if showToast {
+                    VStack {
+                        Text("일기를 수정했어요!")
+                            .padding()
+                            .background(Color(.systemGray5))
+                            .foregroundStyle(.primary) // 다크모드에서도 자동 변경
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    .transition(.opacity)
+                    .animation(.easeInOut, value: showToast)
+                    .padding(.bottom, 50)
+                    
+                }
+            }
         }
     }
     

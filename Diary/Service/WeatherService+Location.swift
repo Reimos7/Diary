@@ -94,13 +94,6 @@ extension WeatherService: CLLocationManagerDelegate {
         case .notDetermined:
             // 사용자가 권한 설정을 하지 않았다면 권한 설정 팝업 띄어주면서 사용 유도 
             locationManager.requestWhenInUseAuthorization()
-            //                // 위치 권한이 거부된 경우 currentLocation을 nil로 설정
-            //                currentLocation = nil
-            //                // 위치 권한이 거부된 경우 currentWeather을 nil로 설정
-            //                currentWeather = nil
-            //                showLocationDeniedWeatherView = true
-            //                locationDeniedWeatherView()
-            //                LocationPermissionDeniedAlert()
             
             self.lastError = "위치 서비스 사용 권한을 확인할 수 없습니다."
             // 사용자가 위치 권한을 '거부' 했거나 '제한됨' (자녀 보호 설정 같은 이유들로..)

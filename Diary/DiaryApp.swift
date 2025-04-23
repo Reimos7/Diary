@@ -29,14 +29,14 @@ struct DiaryApp: App {
             Diary.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
-
+    
     var body: some Scene {
         WindowGroup {
             Group {
@@ -45,7 +45,7 @@ struct DiaryApp: App {
                     LaunchScreenView()
                         .transition(.opacity)
                         .onAppear() {
-                            // 1.5초 후에 런치 스크린 숨기기 -> 너무 길면 안됨 
+                            // 1.5초 후에 런치 스크린 숨기기 -> 너무 길면 안됨
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                 withAnimation(.easeOut(duration: 0.3)) {
                                     isShowingLaunchScreen = false
@@ -58,7 +58,6 @@ struct DiaryApp: App {
                         MainView(model: .preview)
                     }
                     // 폰트 매니저
-                    //.environment(\.font, Font.custom(fontManager.currentFont, size: 16))
                     .environmentObject(fontManager)
                     .preferredColorScheme(getColorScheme())
                     .onChange(of: scenePhase, { _, newPhase in
@@ -77,18 +76,18 @@ struct DiaryApp: App {
         }
         .modelContainer(sharedModelContainer)
         // WeatherService는 앱 전체에서 공통적으로 사용하는거니까, environmentObject로 공유 하는게 좋음
-            .environmentObject(service)
-            .environmentObject(manager)
+        .environmentObject(service)
+        .environmentObject(manager)
     }
-       // 현재 선택된 테마를 적용하는 함수
-       private func getColorScheme() -> ColorScheme? {
-           switch selectedTheme {
-           case .system:
-               return nil  // 시스템 설정을 그대로 따름
-           case .light:
-               return .light
-           case .dark:
-               return .dark
-           }
-       }
+    // 현재 선택된 테마를 적용하는 함수
+    private func getColorScheme() -> ColorScheme? {
+        switch selectedTheme {
+        case .system:
+            return nil  // 시스템 설정을 그대로 따름
+        case .light:
+            return .light
+        case .dark:
+            return .dark
+        }
+    }
 }

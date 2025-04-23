@@ -13,20 +13,6 @@ import Alamofire
 extension WeatherService {
     // API 요청
     func fetchWeather(lat: Double, lon: Double) {
-//        굳이 없어도 되는 코드 api 중단할 필요 없다
-        
-//        let locationManager = CLLocationManager()
-//        
-//        // 권한 상태 확인
-//        let authorizationStatus = CLLocationManager.authorizationStatus()
-//        
-//        // 위치 권한이 결정되지 않았거나, 거부된 경우
-//        if authorizationStatus == .notDetermined || authorizationStatus == .denied  || authorizationStatus == .restricted {
-//            // 위치 권한이 없으면 API 요청을 중단하고 알림을 표시
-//            print("=========\n위치 권한이 없습니다. 날씨 정보를 요청하지 않습니다.\n=========")
-//            return
-//        }
-        
         let url = APIURL.weatherURL
         let parameters: [String: Any] = [
             "lat": lat,
@@ -35,8 +21,6 @@ extension WeatherService {
             "units": "metric",
             "lang": "kr"
         ]
-        // 기존 코드 
-        //AF.request(url, method: .get, parameters: parameters)
         
         //URLRequest에 캐싱을 방지하는 헤더 추가.
         AF.request(url, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: [

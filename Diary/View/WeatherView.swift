@@ -55,20 +55,17 @@ struct WeatherView: View {
                             
                             HStack {
                                 Text(service.currentLocation ?? "없음")
-                                    //.font(.title2)
                                     .customFont(size: 22)
                                     .bold()
                                 Spacer()
                             }
                             
                             Text(model.weather)
-                                //.font(.body)
                                 .customFont(size: 17)
                                 .padding(.bottom, -8)
                             
                             HStack(alignment: .lastTextBaseline) {
                                 Text(model.temperature)
-                                    //.font(.system(size: 110))
                                     .customFont(size: 110)
                                     .fontWeight(.ultraLight)
                                     .minimumScaleFactor(0.5)
@@ -84,19 +81,17 @@ struct WeatherView: View {
                             HStack {
                                 Text("최고 \(model.maxTemperature) | 최저 \(model.minTemperature)")
                                     .customFont(size: 13)
-                                    //.font(.footnote)
                                 Spacer()
+                                
                                 Image(systemName: "sunrise.fill")
                                     .symbolRenderingMode(.multicolor)
                                 Text(model.sunrise)
                                     .customFont(size: 13)
-                                    //.font(.footnote)
                                 
                                 Image(systemName: "sunset.fill")
                                     .symbolRenderingMode(.multicolor)
                                 Text(model.sunset)
                                     .customFont(size: 13)
-                                    //.font(.footnote)
                             }
                         }
                     }

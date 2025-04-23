@@ -21,7 +21,7 @@ struct LongPressImageView: View {
     @EnvironmentObject var manager: SwiftDataManager
     
     var diaryData: Diary?
-
+    
     var body: some View {
         ZStack {
             Image(uiImage: image)

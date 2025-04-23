@@ -10,7 +10,6 @@ import UserNotifications
 
 struct NotificationView: View {
     @AppStorage("isPushNotificationEnabled") private var isOnPushNotification: Bool = false
-    //@State private var isOnPushNotification: Bool = false
     @State private var showPushNotificationAlert: Bool = false
     @EnvironmentObject var service: WeatherService
     @EnvironmentObject var manager: SwiftDataManager
@@ -81,41 +80,9 @@ struct NotificationView: View {
             }
             
         }
-        //.navigationTitle("알림 설정")
-        // 실행 시 현재 권한 상태를 확인해 Toggle 초기값 설정
-//        .onAppear() {
-//            UNUserNotificationCenter.current().getNotificationSettings { settings in
-//                DispatchQueue.main.async {
-//                    switch settings.authorizationStatus {
-//                    case .authorized, .ephemeral, .provisional:
-//                        isOnPushNotification = true
-//                    default:
-//                        isOnPushNotification = false
-//                    }
-//                    
-//                }
-//                
-//            }
-//        }
     }
 }
 
 #Preview {
     NotificationView()
 }
-//                            UNUserNotificationCenter.current().getNotificationSettings { settings in
-//                                switch settings.authorizationStatus {
-//                                    // 아직 권한 요청을 안했으면 요청하기
-//                                case .notDetermined:
-//                                    NotificationManager.shared.requestAutorization()
-//                                    // 권한 거부 상태라면 alert 띄우기
-//                                case .denied:
-//                                    isOnPushNotification = false
-//                                    showPushNotificationAlert = true
-//                                case .authorized, .ephemeral, .provisional:
-//                                    //isOnPushNotification = true
-//                                    break
-//                                default:
-//                                    break
-//                                }
-//                            }

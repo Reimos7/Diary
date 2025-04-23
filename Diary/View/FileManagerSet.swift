@@ -11,11 +11,11 @@ import SwiftUI
 struct FileManagerSet {
     static func saveImageToFileManager(image: UIImage) -> String? {
         guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
-
+        
         let fileName = UUID().uuidString + ".jpg" // 랜덤한 파일명
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = directory.appendingPathComponent(fileName)
-
+        
         do {
             try data.write(to: fileURL)   // 파일 저장
             return fileURL.absoluteString // 경로를 String으로 반환
@@ -32,9 +32,9 @@ struct FileManagerSet {
             print("잘못된 경로: \(path)")
             return
         }
-
+        
         let filePath = fileURL.path // 실제 파일 경로 변환
-
+        
         if FileManager.default.fileExists(atPath: filePath) {
             do {
                 try FileManager.default.removeItem(atPath: filePath)
@@ -46,7 +46,7 @@ struct FileManagerSet {
             print("파일이 존재하지 않음: \(filePath)")
         }
     }
-
+    
     static func loadImageFromFileManager(path: String) -> UIImage? {
         guard let url = URL(string: path) else { return nil }
         if let data = try? Data(contentsOf: url) {

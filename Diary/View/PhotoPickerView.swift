@@ -50,7 +50,7 @@ struct PhotoPickerView<Content: View>: View {
         self.photoLibrary = photoLibrary
         self.content = content
     }
-
+    
     var body: some View {
         PhotosPicker(
             selection: $selectedPhotos,
@@ -74,10 +74,10 @@ struct PhotoPickerView<Content: View>: View {
             // loadTransferable - 선택된 에셋에 대해 로드하고 진행상황을 추적
             newPhoto.loadTransferable(type: Data.self) { result in
                 switch result {
-            //성공 시 해당 이미지가 아직 selectedImages에 없는, 즉 기존에 없던 이미지라면 추가해주고 아니라면 추가해주지 않습니다
+                    //성공 시 해당 이미지가 아직 selectedImages에 없는, 즉 기존에 없던 이미지라면 추가해주고 아니라면 추가해주지 않습니다
                 case .success(let data):
                     if let data = data, let newImage = UIImage(data: data) {
-            // pngData로 체크하는 이유는 그냥 Data를 가지고 체크하면 다시 Picker에서 같은 데이터를 선택하더라도 주소값을 다르게 가져가기에 동일한 이미지였는지 체크할 수 없기에 사용
+                        // pngData로 체크하는 이유는 그냥 Data를 가지고 체크하면 다시 Picker에서 같은 데이터를 선택하더라도 주소값을 다르게 가져가기에 동일한 이미지였는지 체크할 수 없기에 사용
                         if !selectedImages.contains(where: { $0.pngData() == newImage.pngData() }) {
                             
                             DispatchQueue.main.async {

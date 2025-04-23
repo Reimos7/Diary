@@ -85,13 +85,6 @@ struct SearchView: View {
                     }
                     .padding(.horizontal,5)
                     .frame(maxWidth: .infinity)
-                    //.background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6)))
-                    //.padding(.horizontal, 8)
-                    //                    .overlay {
-                    //                        RoundedRectangle(cornerRadius: 5)
-                    //                            .stroke(Color.gray, lineWidth: 0.5)
-                    //
-                    //                    }
                 }
                 // 검색 버튼 - 키보드 엔터키와 동일한 액션
                 ToolbarItem(placement: .topBarTrailing) {

@@ -36,9 +36,7 @@ struct FontView: View {
                             print(model.icon)
                         }
                 }
-            }/*else if service.showLocationDeniedWeatherView {
-              Text("위치 권한을 허용하면 날씨를 기록할 수 있어요!\n")
-              }*/
+            }
         }
         .shadow(radius: 2)
         
@@ -69,10 +67,6 @@ struct FontView: View {
             .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
-        //.frame(maxWidth: .infinity, alignment: .leading)
-        //.padding()
-        .listStyle(.plain)
-        //.navigationTitle("폰트 설정")
         .navigationBarTitleDisplayMode(.inline)
         // 기본 뒤로 가기 버튼 숨김
         .navigationBarBackButtonHidden()

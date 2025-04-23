@@ -29,7 +29,7 @@ struct DetailView: View {
                                 .frame(width: 82, height: 72)
                                 .offset(x: 1, y: 1)
                                 .foregroundStyle(.gray.opacity(0.3))
-
+                            
                             Image(systemName: weatherIcon)
                                 .symbolRenderingMode(.multicolor)
                                 .resizable()
@@ -38,7 +38,7 @@ struct DetailView: View {
                                     print(weatherIcon)
                                 }
                         } else {
-                           
+                            
                         }
                     }
                     .shadow(radius: 2)
@@ -46,7 +46,7 @@ struct DetailView: View {
                     Text(DateFormatter.dateFormatter.string(from: data.date))
                         .padding()
                         .customFont(size: 16)
-                        //.foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
                     
                     // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
                     if let paths = data.imagePath, !paths.isEmpty {
@@ -87,19 +87,7 @@ struct DetailView: View {
             .navigationBarBackButtonHidden()
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
-//            .toolbar {
-//                // 뒤로 가기 버튼
-//                ToolbarItem(placement: .topBarLeading) {
-//                    Button {
-//                        // 뒤로 가기 동작 (현재 뷰 닫기)
-//                        dismiss()
-//                    } label: {
-//                        Image(systemName: "chevron.left")
-//                            .foregroundColor(Color(uiColor: UIColor.label))
-//                    }
-//                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
-//                }
-//            }
+            
             // MARK: - 캡쳐 공유, 편집, 삭제 버튼
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -117,22 +105,6 @@ struct DetailView: View {
                 
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
-                        // ios 14 이하 버전에서 화면 캡쳐 후 앨범에 저장
-                        //                        let screenshot = UIApplication.shared.windows.first?.rootViewController?.view.changeUIImage()
-                        //                        if let screenshot = screenshot {
-                        //                            saveCaptureImageToAlbum(screenshot)
-                        //                        }
-                        //
-                        //                        iOS 15 이상에서 화면 캡처 후 저장
-                        //                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                        //                           let window = windowScene.windows.first,
-                        //                           let screenshot = window.rootViewController?.view.changeUIImage() {
-                        //                            // 캡쳐 이미지 저장 Toast 메시지
-                        //                            showToast = true
-                        //                            saveCaptureImageToAlbum(screenshot)
-                        //                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        //                                showToast = false
-                        //                            }
                         captureScreenShot()
                         screenshotShareAlert = true  // 캡처 후 Alert 표시
                     } label: {
@@ -149,7 +121,6 @@ struct DetailView: View {
                         Button { showEditComposeView = true } label: { Text("편집") }
                     } label: {
                         Image(systemName: "ellipsis")
-                            //.symbolRenderingMode(.hierarchical) // SF Symbol 기본 스타일 유지
                             .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
                     }
                 }
@@ -168,9 +139,6 @@ struct DetailView: View {
                 }
                 
                 Button("취소", role: .cancel) {
-                    //                    if let screenshot = screenshotImage {
-                    //                        shareScreenShot(screenshot)  // 저장 없이 바로 공유 실행
-                    //                    }
                 }
             } message: {
                 Text("확인을 통해 공유를 시작합니다")

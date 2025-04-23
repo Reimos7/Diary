@@ -36,9 +36,6 @@ struct CalendarSetView: UIViewRepresentable {
     
     /// 다크 모드 여부에 따라 캘린더 색상을 동적으로 업데이트하는 함수
     func updateCalendarAppearance(_ calendar: FSCalendar) {
-        // FSCalendar는 UIKit 컴포넌트이기 때문에, traitCollection을 이용하면 정확한 시점에 정확한 스타일을 적용 (colorScheme X)
-        //let isDarkMode = calendar.traitCollection.userInterfaceStyle == .dark
-        
         let isDarkMode = colorScheme == .dark
         
         // 캘린더 배경 색상
@@ -55,20 +52,12 @@ struct CalendarSetView: UIViewRepresentable {
         calendar.scope = .month
         calendar.backgroundColor = isDarkMode ? UIColor.black : UIColor.white
         calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor.black
-        //calendar.appearance.weekdayTextColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor.black
-        //calendar.appearance.titleWeekendColor = isDarkMode ? UIColor.red.withAlphaComponent(0.8) : UIColor.red
+        
         // 선택한 날짜 기본 스타일 제거
         calendar.appearance.selectionColor = .clear
         //calendar.appearance.titleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
         calendar.appearance.subtitleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
-        
-        // 오늘 날짜 스타일 (푸른색 테두리, 흰색 글자)
-        //calendar.appearance.todayColor = UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
-        //calendar.appearance.todayColor = UIColor.white
-        //calendar.appearance.titleTodayColor = UIColor.white // 오늘 날짜 글자 흰색
-        //calendar.appearance.subtitleTodayColor = UIColor.white // "오늘" 글자도 흰색
-        //calendar.appearance.borderSelectionColor = UIColor.clear
         
         // 커스텀 폰트 적용
         // 날짜 숫자
@@ -204,13 +193,5 @@ struct CalendarSetView: UIViewRepresentable {
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
             return [UIColor.red]
         }
-        
-        // 선택된 날짜 처리
-        //        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillSelectionColorFor date: Date) -> UIColor? {
-        //            //return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0) // 오늘 날짜와 동일한 색상 적용
-        //            //return UIColor(red: 0.3569, green: 0.8824, blue: 1, alpha: 1.0)
-        //            return UIColor.clear
-        //
-        //        }
     }
 }
