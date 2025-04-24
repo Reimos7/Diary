@@ -24,14 +24,16 @@ struct FontView: View {
                 if let model = service.currentWeather {
                     Image(systemName: model.icon)
                         .resizable()
-                        .frame(width: 82, height: 72)
+                        .scaledToFit()
+                        .frame(maxWidth: 100, maxHeight: 100)
                         .offset(x: 1, y: 1)
                         .foregroundStyle(.gray.opacity(0.3))
                     
                     Image(systemName: model.icon)
                         .symbolRenderingMode(.multicolor)
                         .resizable()
-                        .frame(width: 80, height: 70)
+                        .scaledToFit()
+                        .frame(maxWidth: 100, maxHeight: 100)
                         .onAppear {
                             print(model.icon)
                         }

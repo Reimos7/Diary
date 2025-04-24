@@ -20,14 +20,16 @@ struct DiaryCell: View {
                 if let weatherIcon = data.currentWeatherImage {
                     Image(systemName: weatherIcon)
                         .resizable()
-                        .frame(width: 82, height: 72)
+                        .scaledToFit()
+                        .frame(maxWidth: 100, maxHeight: 100)
                         .offset(x: 1, y: 1)
                         .foregroundStyle(.gray.opacity(0.3))
                     
                     Image(systemName: weatherIcon)
                         .symbolRenderingMode(.multicolor)
                         .resizable()
-                        .frame(width: 80, height: 70)
+                        .scaledToFit()
+                        .frame(maxWidth: 100, maxHeight: 100)
                         .onAppear {
                             print(weatherIcon)
                         }
