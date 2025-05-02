@@ -109,6 +109,34 @@ struct SettingView: View {
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
                 
+                ZStack {
+                    Button {
+                        // 앱스토어 리뷰 화면 이동
+                        let urlString = "https://apps.apple.com/app/id\(AppID.diaryAppID)?action=write-review"
+                        if let url = URL(string: urlString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        EmptyView()
+                        
+                    }.opacity(0)
+                    HStack(spacing: 8) {
+                        Image("store_img")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color.primary)
+                        
+                        Text("앱 평가하기")
+                        
+                        Spacer()
+                        
+                    }
+                }
+                .listRowSeparator(.hidden) // 줄 없애기
+                
+                
                 Divider()
                 
                 ZStack {
