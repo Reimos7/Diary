@@ -46,19 +46,15 @@ struct DiaryCell: View {
             
             // 이미지가 있을 경우 표시
             if let paths = data.imagePath, !paths.isEmpty {
-                ForEach(paths, id: \.self) { path in
-                    if let url = URL(string: path) {
-                        AsyncImage(url: url) { image in
-                            image.resizable()
-                                .scaledToFit()
-                                .frame(width: 300, height: 200)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        
+                ForEach(paths, id: \.self) { fileName in
+                    // 파일명을 받아 실제 UIImage로 변환
+                    if let image = FileManagerSet.loadImageFromFileManager(fileName: fileName) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 300, height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
-                    
                 }
             }
             // 내용

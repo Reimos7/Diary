@@ -22,7 +22,7 @@ struct ComposeView: View {
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
     //직접 실행할 PhotosPicker
     @State private var selectedItems: [PhotosPickerItem] = []
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
+    // [리팩토링] 절대경로 대신 파일명만 저장
     @State private var imagePath: [String]? = nil
     
     // 사진 권한 관련 상태
@@ -143,15 +143,18 @@ struct ComposeView: View {
                         
                         Button {
                             Task {
-                                var savedPath: [String] = []
+                                // 이미지 저장
+                                var savedFileNames: [String] = []
                                 
                                 for image in selectedImages {
-                                    if let path = FileManagerSet.saveImageToFileManager(image: image) {
-                                        savedPath.append(path) //  저장된 경로를 추가
+                                    // fileName는 실제 경로가 아니라 파일명
+                                    if let fileName = FileManagerSet.saveImageToFileManager(image: image) {
+                                        // 저장에 성공한 파일명을 배열에 추가
+                                        savedFileNames.append(fileName)
                                     }
                                 }
-                                
-                                imagePath = savedPath.isEmpty ? nil : savedPath
+                                // 이미지가 없으면 nil 처리
+                                imagePath = savedFileNames.isEmpty ? nil : savedFileNames
                                 
                                 // 현재 위치 즉, 날씨 정보 존재 유무에 따른 분기 처리
                                 guard let weather = service.currentWeather else {

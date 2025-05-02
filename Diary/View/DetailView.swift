@@ -10,7 +10,7 @@ struct DetailView: View {
     // 클릭한 이미지 풀 스크린
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
     // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
-    @State private var imageUrl: [URL] = []
+    //@State private var imageUrl: [URL] = []
     
     @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
@@ -49,27 +49,20 @@ struct DetailView: View {
                         .padding()
                         .customFont(size: 16)
                     //.foregroundStyle(.secondary)
-                    
-                    // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
+                
                     if let paths = data.imagePath, !paths.isEmpty {
-                        ForEach(paths, id: \.self) { path in
-                            if let url = URL(string: path) {
-                                AsyncImage(url: url) { image in
-                                    image.resizable()
-                                        .scaledToFit()
-                                        .frame(width: 300, height: 300)
-                                    // 풀 스크린 이미지 보기
-                                        .onTapGesture {
-                                            // contentsOfFile 로컬 파일에서 이미지를 불러옴
-                                            if let uiImage = UIImage(contentsOfFile: url.path) {
-                                                selectedImageForFullscreen = IdentifiableImage(image: uiImage)
-                                            }
-                                        }
-                                } placeholder: {
-                                    ProgressView()
-                                }
+                        ForEach(paths, id: \.self) { fileName in
+                            // 파일명을 받아 실제 UIImage로 변환
+                            if let image = FileManagerSet.loadImageFromFileManager(fileName: fileName) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 300, height: 300)
+                                    .onTapGesture {
+                                        selectedImageForFullscreen = IdentifiableImage(image: image)
+                                    }
                             } else {
-                                Text("이미지 불러오기 실패")
+                                Text("이미지를 불러올 수 없습니다")
                             }
                         }
                     }

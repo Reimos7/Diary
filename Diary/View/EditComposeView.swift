@@ -21,7 +21,7 @@ struct EditComposeView: View {
     @State private var selectedImages: [UIImage] = []
     //전체 화면에서 이미지를 볼 때 사용하는 변수 (이미지를 클릭하면 설정됨)
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 경로(파일 위치)를 저장하는 배열
+    // [리팩토링] 절대경로 대신 파일명만 저장
     @State private var imagePath: [String] = []
     // 에러 감지 상태
     @State private var isPreSentedError: Bool = false
@@ -73,42 +73,23 @@ struct EditComposeView: View {
                         Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
                             .padding()
                             .customFont(size: 16)
-                        // 저장된 이미지가 있으면 보여주고 없으면 ProgressView
+                        
+                        // [리팩토링] FileManager 기반 로컬 파일명으로 이미지 로딩 방식
                         if let paths = data?.imagePath, !paths.isEmpty {
                             ForEach(paths, id: \.self) { path in
-                                if let url = URL(string: path) {
-                                    // UIImage로 이미지 로드
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .success(let image):
-                                            // 이미지가 성공적으로 로드되면, UIImage로 변환하여 LongPressImageView에 전달
-                                            if let uiImage = UIImage(named: path) ?? loadUIImage(from: url) {
-                                                LongPressImageView(image: uiImage,
-                                                                   imagePath: path,
-                                                                   isLongPressedPhoto: $isLongPressedPhoto,
-                                                                   selectedImages: $selectedImages,
-                                                                   selectedImageForFullscreen: $selectedImageForFullscreen,
-                                                                   diaryData: data)
-                                            } else {
-                                                // 이미지를 UIImage로 변환할 수 없는 경우
-                                                image
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 300, height: 300)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            }
-                                        case .empty:
-                                            ProgressView()
-                                        case .failure(_):
-                                            Text("이미지 로딩 실패")
-                                        @unknown default:
-                                            ProgressView()
-                                        }
-                                    }
+                                // [리팩토링] 경로 문자열이 아닌 파일명 기준으로 로드
+                                if let image = FileManagerSet.loadImageFromFileManager(fileName: path) {
+                                    LongPressImageView(
+                                        image: image, // [리팩토링] AsyncImage 대신 직접 로드된 UIImage 전달
+                                        imagePath: path,
+                                        isLongPressedPhoto: $isLongPressedPhoto,
+                                        selectedImages: $selectedImages,
+                                        selectedImageForFullscreen: $selectedImageForFullscreen,
+                                        diaryData: data
+                                    )
                                 } else {
-                                    Text("이미지 불러오기 실패")
+                                    Text("이미지를 불러올 수 없습니다")
                                 }
-                                
                             }
                         }
                         // 일기 입력 부분
@@ -304,7 +285,7 @@ struct EditComposeView: View {
         // 기존 이미지 삭제 (파일 + SwiftData에서 경로 삭제함)
         if let paths = data.imagePath {
             for path in paths {
-                FileManagerSet.deleteImageFromFileManager(at: path)
+                FileManagerSet.deleteImageFromFileManager(fileName: path)
                 print("기존 이미지와 경로를 삭제했습니다: \(path)")
             }
         }

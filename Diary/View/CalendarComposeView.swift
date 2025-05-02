@@ -24,8 +24,7 @@ struct CalendarComposeView: View {
     @State private var selectedImages: [UIImage] = []
     // 전체 화면에서 이미지를 볼 때 사용하는 변수 (이미지를 클릭하면 설정됨)
     @State private var selectedImageForFullScreen: IdentifiableImage? = nil
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 **경로**(파일 위치)를 저장하는 배열
+    // [리팩토링] 절대경로 대신 파일명만 저장
     @State private var imagePath: [String]? = nil
     // 에러 감지 상태
     @State private var isPreSentedError: Bool = false
@@ -126,16 +125,18 @@ struct CalendarComposeView: View {
                         
                         Button {
                             Task {
-                                var savedPath: [String] = []
-                                // 선택한 이미지들을 파일로 저장하고, 저장된 경로를 기록
+                                var savedFileNames: [String] = []
+                                
                                 for image in selectedImages {
-                                    if let path = FileManagerSet.saveImageToFileManager(image: image) {
-                                        // 저장된 경로 추가
-                                        savedPath.append(path)
+                                    // fileName는 실제 경로가 아니라 파일명
+                                    if let fileName = FileManagerSet.saveImageToFileManager(image: image) {
+                                        // 저장에 성공한 파일명을 배열에 추가
+                                        savedFileNames.append(fileName)
                                     }
                                 }
                                 // 이미지가 없으면 nil 처리
-                                imagePath = savedPath.isEmpty ? nil : savedPath
+                                imagePath = savedFileNames.isEmpty ? nil : savedFileNames
+                                
                                 // 일기 데이터를 SwiftDataManager를 통해 저장, 캘린더에서 선택한 날짜로 저장
                                 manager.addDiaryData(content: content, date: selectedDate, imagePath: imagePath)
                                 

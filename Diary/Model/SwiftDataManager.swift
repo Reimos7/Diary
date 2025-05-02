@@ -115,7 +115,7 @@ class SwiftDataManager: ObservableObject {
         // 저장된 이미지 경로 존재 시 삭제
         if let paths = entry.imagePath {
             for path in paths {
-                FileManagerSet.deleteImageFromFileManager(at: path)
+                FileManagerSet.deleteImageFromFileManager(fileName: path)
             }
         }
         

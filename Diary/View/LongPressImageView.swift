@@ -52,7 +52,7 @@ struct LongPressImageView: View {
                     // 편집이니까 실제 경로 지우기 (이미지 삭제)
                     if let path = imagePath {
                         // 경로에 맞는 이미지 파일 삭제
-                        FileManagerSet.deleteImageFromFileManager(at: path)
+                        FileManagerSet.deleteImageFromFileManager(fileName: path)
                         
                         // SwiftData에서 이미지 경로 및 파일 삭제 (EditComposeView에서만)
                         if let diary = diaryData, var paths = diary.imagePath {
