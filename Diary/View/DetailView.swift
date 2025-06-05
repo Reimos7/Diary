@@ -38,6 +38,18 @@ struct DetailView: View {
                                 .frame(maxWidth: 100, maxHeight: 100)
                                 .onAppear {
                                     print(weatherIcon)
+                                    if let imagePaths = data.imagePath {
+                                            let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+                                            for fileName in imagePaths {
+                                                let fileURL = directory.appendingPathComponent(fileName)
+                                                let exists = FileManager.default.fileExists(atPath: fileURL.path)
+                                                print(" \(fileName) → 존재 여부: \(exists ? "있음" : "없음")")
+                                            }
+                                        } else {
+                                            print("imagePath가 nil 또는 비어 있음")
+                                        }
+                                    print("저장된 imagePath: \(data.imagePath ?? ["없음"])")
                                 }
                         } else {
                             

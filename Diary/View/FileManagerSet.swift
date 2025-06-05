@@ -49,10 +49,23 @@ struct FileManagerSet {
     static func loadImageFromFileManager(fileName: String) -> UIImage? {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = directory.appendingPathComponent(fileName)
-        
-        if let data = try? Data(contentsOf: fileURL) {
-            return UIImage(data: data)
+
+        print("로딩 시도 중인 경로: \(fileURL.path)")
+        let exists = FileManager.default.fileExists(atPath: fileURL.path)
+        print("파일 존재: \(exists)")
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            if let image = UIImage(data: data) {
+                print("UIImage 로드 성공")
+                return image
+            } else {
+                print("UIImage(data:) 실패 - 데이터는 있음")
+            }
+        } catch {
+            print("Data(contentsOf:) 실패: \(error)")
         }
+
         return nil
     }
 }

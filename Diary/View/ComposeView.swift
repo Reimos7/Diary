@@ -151,6 +151,12 @@ struct ComposeView: View {
                                     if let fileName = FileManagerSet.saveImageToFileManager(image: image) {
                                         // 저장에 성공한 파일명을 배열에 추가
                                         savedFileNames.append(fileName)
+                                        // 저장된 이미지 경로와 존재 여부 확인 코드
+                                        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                                        let path = directory.appendingPathComponent(fileName)
+                                        print("저장된 파일명: \(fileName)")
+                                        print("저장된 경로: \(path.path)")
+                                        print("파일 존재 여부: \(FileManager.default.fileExists(atPath: path.path) ? "존재함" : "존재하지 않음")")
                                     }
                                 }
                                 // 이미지가 없으면 nil 처리
