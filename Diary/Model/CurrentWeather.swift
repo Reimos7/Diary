@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import WeatherKit
 // MainView의 상단에서 보여줄 날씨
 struct CurrentWeather{
     //let name: String // 지역 명
@@ -30,26 +31,34 @@ extension CurrentWeather {
                               sunset: "오후 6:00")
     }
     
-    init?(data: CodableCurrentWeather) {
-        guard let weatherInfo = data.weather.first else {return nil}
-        // 디버깅 코드 추가
-        print("API 응답 아이콘 코드: \(weatherInfo.icon)")
+    init(from weather: Weather) {
+        let current = weather.currentWeather
+        let daily = weather.dailyForecast.forecast.first
+        // 낮과 밤에 따라 날씨 아이콘 적용 
+        self.icon = current.condition.sfSymbolName(isDaylight: current.isDaylight)
+        print(self.icon)
+        self.weather = current.condition.koreanDescription
+        print(self.weather)
+        self.temperature = current.temperature.value.temperatureString
+        self.maxTemperature = daily?.highTemperature.value.temperatureString ?? "--"
+        self.minTemperature = daily?.lowTemperature.value.temperatureString ?? "--"
         
-        // icon에 sfSymbol 넣기
-        icon = weatherInfo.icon.weatherImageName
-        weather = weatherInfo.description
-        temperature = data.main.temp.temperatureString
-        maxTemperature = data.main.temp_max.temperatureString
-        minTemperature = data.main.temp_min.temperatureString
-        // 날짜는 유닉스 시간으로 되어있음
-        var date = Date(timeIntervalSince1970: data.sys.sunrise)
-        sunrise = date.formatted(.dateTime.hour().minute())
+        // 일출 및 일몰 시간은 local 시간으로 변환
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "a h:mm"
         
-        date = Date(timeIntervalSince1970: data.sys.sunset)
-        sunset = date.formatted(.dateTime.hour().minute())
-        // 변환된 아이콘 코드 확인
-        print("변환된 SF Symbol: \(icon)")
-        print("현재 온도: \(data.main.temp), 최고 온도: \(data.main.temp_max), 최저 온도: \(data.main.temp_min)")
+        if let sunriseDate = daily?.sun.sunrise {
+            self.sunrise = formatter.string(from: sunriseDate)
+        } else {
+            self.sunrise = "--"
+        }
+        
+        if let sunsetDate = daily?.sun.sunset {
+            self.sunset = formatter.string(from: sunsetDate)
+        } else {
+            self.sunset = "--"
+        }
         
     }
 }

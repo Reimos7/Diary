@@ -49,8 +49,8 @@ extension WeatherService: CLLocationManagerDelegate {
                 // UI 업데이트는 항상 메인 스레드에서 실행해야 함
                 // UI 업데이트를 위한 코드이므로 반드시 메인 스레드에서 실행해야 함
                 // 변환된 주소를 currentLocation에 저장 (UI에서 표시)
-                DispatchQueue.main.async {
-                    self.currentLocation = address
+                DispatchQueue.main.async { [weak self] in
+                    self?.currentLocation = address
                 }
             } catch {
                 print("주소 변환 실패: \(error.localizedDescription)")
@@ -76,7 +76,7 @@ extension WeatherService: CLLocationManagerDelegate {
         //위치 업데이트 후 날씨 정보 가져오기
         fetchWeather(lat: lat, lon: lon)
         // 위치 업데이트가 끝나면, 더이상 위치를 받지 않도록 중지 (위치 업데이트 중지) 배터리도 절약됨
-        //manager.stopUpdatingLocation()
+        manager.stopUpdatingLocation()
     }
     
     // 위치 권한 상태 변경 처리
@@ -133,7 +133,10 @@ extension WeatherService: CLLocationManagerDelegate {
         if let location = locationManager.location {
             let lat = location.coordinate.latitude
             let lon = location.coordinate.longitude
-            fetchWeather(lat: lat, lon: lon)
+            //fetchWeather(lat: lat, lon: lon)
+            // 더 정확한 위치를 호출
+            locationManager.requestLocation()
+            print(#function)
             print("현재 요청된 위도: \(lat), 경도: \(lon)")
         }
     }

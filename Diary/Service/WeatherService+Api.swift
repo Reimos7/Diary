@@ -9,37 +9,26 @@
 import Foundation
 import CoreLocation
 import Alamofire
+@preconcurrency import WeatherKit
 
 extension WeatherService {
+    private static var call = 0
     // API 요청
     func fetchWeather(lat: Double, lon: Double) {
-        let url = APIURL.weatherURL
-        let parameters: [String: Any] = [
-            "lat": lat,
-            "lon": lon,
-            "appid": APIKey.weatherKey,
-            "units": "metric",
-            "lang": "kr"
-        ]
-        
-        //URLRequest에 캐싱을 방지하는 헤더 추가.
-        AF.request(url, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: [
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache"
-        ])
-        .validate(statusCode: 200..<300)
-        .responseDecodable(of: CodableCurrentWeather.self) { [weak self] response in
-            switch response.result {
-            case .success(let weatherData):
-                DispatchQueue.main.async {
-                    self?.currentWeather = CurrentWeather(data: weatherData)
-                    print("------ API 원본 응답 ------")
-                    print("응답데이터\(weatherData)")
-                    print("-------------------------")
-                    
+        Self.call += 1
+        print(#function, "날씨 API 요청됨: \(Self.call)")
+        Task { 
+            let location = CLLocation(latitude: lat, longitude: lon)
+            
+            do {
+                let weather = try await service.weather(for: location)
+                DispatchQueue.main.async { [weak self] in
+                    self?.currentWeather = CurrentWeather(from: weather)
                 }
-            case .failure(let error):
-                print("Weather API Error: \(error.localizedDescription)")
+            } catch {
+                DispatchQueue.main.async { [weak self] in
+                    self?.lastError = error.localizedDescription
+                }
             }
         }
     }

@@ -16,8 +16,8 @@ struct DiaryApp: App {
     // 저장된 테마 상태 - 처음은 시스템으로 시작
     @AppStorage("selectedTheme") private var selectedTheme: ThemeOption = .system
     
-    // 런타임에 사용하는거니까, 프리뷰 파라미터를 사용하지 않고, false값을 그대로 사용
-    let service = WeatherService()
+    @StateObject private var service = WeatherService()
+    
     @StateObject private var manager = SwiftDataManager()
     // 폰트 변경
     @StateObject private var fontManager = FontManager()
@@ -43,12 +43,16 @@ struct DiaryApp: App {
                 if isShowingLaunchScreen {
                     // 런치 스크린만 표시
                     LaunchScreenView()
+                        .environmentObject(service) //  강제 초기화 유도
                         .transition(.opacity)
                         .onAppear() {
-                            // 1.5초 후에 런치 스크린 숨기기 -> 너무 길면 안됨
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            // 1초 후에 런치 스크린 숨기기 -> 너무 길면 안됨
+                            print("런치 스크린 표시 - 날씨 업데이트 전")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                 withAnimation(.easeOut(duration: 0.3)) {
                                     isShowingLaunchScreen = false
+                                    //print("런치 스크린 종료 후 날씨 업데이트 시작 ")
+                                    //service.updateWeatherManually()
                                 }
                             }
                         }
@@ -60,8 +64,12 @@ struct DiaryApp: App {
                     // 폰트 매니저
                     .environmentObject(fontManager)
                     .preferredColorScheme(getColorScheme())
-                    .onChange(of: scenePhase, { _, newPhase in
-                        if newPhase == .active {
+                                        
+                    .onChange(of: scenePhase) { _, newPhase in
+                        switch newPhase {
+                        case .active:
+                            print("앱이 활성화됨 - 날씨 업데이트")
+                            
                             // 알림 설정이 켜져 있을 때만 처리
                             if UserDefaults.standard.bool(forKey: "isPushNotificationEnabled") {
                                 // 알림 권한 요청
@@ -69,8 +77,22 @@ struct DiaryApp: App {
                                 // 알림 조건 확인
                                 NotificationManager.shared.checkScheduleNotification(entries: manager.diaryEntries)
                             }
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                service.updateWeatherManually()
+                            }
+                            
+                        case .inactive:
+                            print("앱이 비활성화 됨")
+                            
+                            
+                        case .background:
+                            print("앱이 백그라운드로 이동함")
+                            
+                        @unknown default:
+                            break
                         }
-                    })
+                    }
                 }
             }
         }

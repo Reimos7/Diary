@@ -5,16 +5,17 @@
 //  Created by Reimos on 2/17/25.
 //
 
-import Foundation
 import CoreLocation
-import Alamofire
 import Combine
 import UIKit
+import WeatherKit
 
 // 날씨 API 및 위치 설정
-class WeatherService: NSObject, ObservableObject {
+final class WeatherService: NSObject, ObservableObject {
     // location으로 좌표를 얻은 다음에 좌표를 주소로 바꿔서 표시
     let locationManager: CLLocationManager
+    // WeatherKit 사용
+    let service = WeatherKit.WeatherService()
     // Combine의 Cancellable을 사용해 --분마다 자동 업데이트하는 타이머 생성
     private var timer: AnyCancellable? // combine을 이용한 타이머
     
@@ -35,12 +36,37 @@ class WeatherService: NSObject, ObservableObject {
         locationManager = CLLocationManager()
         super.init()
         requestLocationPermission()
+        print(#function ,"-------------- init 잘 실행됨 --------------")
         
-        // 앱 실행 시 강제로 날씨 데이터 가져오기
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.updateWeatherManually()
-        }
+//        // 앱이 포그라운드 상태로 돌아오면 날씨 업데이트
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+//        
+//        // 앱 활성화 시 날씨 업데이트
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
+        // 타이머 설정
+        setupTimer()
+    }
+    
+//    @objc func handleEnterForeground() {
+//        print("앱이 포그라운드로 진입함")
+//        // 앱 실행 시 강제로 날씨 데이터 가져오기
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//            self.updateWeatherManually()
+//        }
+//    }
+    
+//    @objc func handleBecomeActive() {
+//        print("앱이 활성화됨")
+//        DispatchQueue.main.asyncAfter(deadline: .now() ) {
+//            self.updateWeatherManually()
+//                
+//        }
+//        
+//    }
+    
+    // 타이머 설정
+    private func setupTimer() {
         // 10분으로 설정 나중에는 조절해야함 무료플랜 하루 1000회
         // 1분 60 / 1시간 3600
         /*
@@ -49,10 +75,9 @@ class WeatherService: NSObject, ObservableObject {
          포그라운드 활성 상태일 때만 sink가 실행 됨
          그러므로 백그라운드로 전환되면 타이머가 정지됨
          */
-        timer = Timer.publish(every: 300, on: .main, in: .common)
+        timer = Timer.publish(every: 600, on: .main, in: .common)
             .autoconnect()
-            .sink { _ in
-                
+            .sink { [weak self] _ in
                 // timer로 호출된 날씨 확인용 로그
                 let now = Date()
                 let dateFormatter = DateFormatter()
@@ -62,12 +87,17 @@ class WeatherService: NSObject, ObservableObject {
                 print("-------설정 시간마다 자동 업데이트 실행: \(currentTime)------")
                 // 실행
                 //self.fetchWeather(lat: lat, lon: lon)
-                self.updateWeatherManually()
-            }
-        
-        // 앱이 다시 포그라운드 상태로 돌아오면 최신 날씨 가져오기
-        NotificationCenter.default.addObserver(self, selector: #selector(updateWeatherManually), name: UIApplication.willEnterForegroundNotification, object: nil)
+                self?.updateWeatherManually()
+        }
     }
+    
+    // 메모리 해제 시 옵저버 제거
+    deinit {
+        print("deinit")
+        NotificationCenter.default.removeObserver(self)
+        timer?.cancel()
+    }
+    
     // 위치 권한 설정
     // 사용자의 위치 접근 권한을 요청하고, 이후 위치 정보를 받아오도록 설정
     private func requestLocationPermission() {
