@@ -152,7 +152,7 @@ struct SettingView: View {
                         
                         Spacer()
                         
-                        Text("1.1.1")
+                        Text("1.1.2")
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
