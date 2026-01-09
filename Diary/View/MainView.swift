@@ -16,8 +16,11 @@ struct MainView: View {
     @State private var selectedDate: Date = Date()
     //날짜 선택시 네비게이션
     @State private var selectedDateNavigate = false
-    
+
     let model: CurrentWeather?
+
+    // 위젯 딥링크로 일기 작성 화면 이동
+    @Binding var shouldNavigateToCompose: Bool
     
     var body: some View {
         NavigationStack {
@@ -58,6 +61,10 @@ struct MainView: View {
             .navigationDestination(isPresented: $selectedDateNavigate, destination: {
                 CalendarComposeView(selectedDate: $selectedDate)
             })
+            // MARK: - 위젯 딥링크로 일기 작성 화면 이동
+            .navigationDestination(isPresented: $shouldNavigateToCompose) {
+                ComposeView(model: model)
+            }
             .padding()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

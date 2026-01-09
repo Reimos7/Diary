@@ -8,16 +8,55 @@
 
 /* Begin PBXBuildFile section */
 		6E658E322D639F0400C525EB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6E658E312D639F0400C525EB /* Alamofire */; };
+		6EE64E782EB7668D0015D6C3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */; };
+		6EE64E792EB7668D0015D6C3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */; };
+		6EE64E862EB7668F0015D6C3 /* DiaryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6EF18BCD2D6100EC005F33A6 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 6EF18BCC2D6100EC005F33A6 /* FSCalendar */; };
 		6EF18C3C2D623E7B005F33A6 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 6EF18C3B2D623E7B005F33A6 /* .gitignore */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		6EE64E842EB7668F0015D6C3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6EF18B7C2D60B19F005F33A6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6EE64E752EB7668D0015D6C3;
+			remoteInfo = DiaryWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6EE64E592EB7648D0015D6C3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6EE64E862EB7668F0015D6C3 /* DiaryWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DiaryWidgetExtension.entitlements; sourceTree = "<group>"; };
+		6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DiaryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		6EF18B842D60B19F005F33A6 /* Diary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Diary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EF18C3B2D623E7B005F33A6 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6E0ADB312EBDF41800382882 /* Exceptions for "Diary" folder in "DiaryWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Model/Model.swift,
+				Model/SharedModelContainer.swift,
+			);
+			target = 6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */;
+		};
 		6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -25,13 +64,29 @@
 			);
 			target = 6EF18B832D60B19F005F33A6 /* Diary */;
 		};
+		6EE64E8A2EB7668F0015D6C3 /* Exceptions for "DiaryWidget" folder in "DiaryWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		6EE64E7A2EB7668D0015D6C3 /* DiaryWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6EE64E8A2EB7668F0015D6C3 /* Exceptions for "DiaryWidget" folder in "DiaryWidgetExtension" target */,
+			);
+			path = DiaryWidget;
+			sourceTree = "<group>";
+		};
 		6EF18B862D60B19F005F33A6 /* Diary */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */,
+				6E0ADB312EBDF41800382882 /* Exceptions for "Diary" folder in "DiaryWidgetExtension" target */,
 			);
 			path = Diary;
 			sourceTree = "<group>";
@@ -39,6 +94,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6EE64E732EB7668D0015D6C3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EE64E792EB7668D0015D6C3 /* SwiftUI.framework in Frameworks */,
+				6EE64E782EB7668D0015D6C3 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EF18B812D60B19F005F33A6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -51,11 +115,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6EE64E432EB7648B0015D6C3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */,
+				6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6EF18B7B2D60B19F005F33A6 = {
 			isa = PBXGroup;
 			children = (
+				6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */,
 				6EF18C3B2D623E7B005F33A6 /* .gitignore */,
 				6EF18B862D60B19F005F33A6 /* Diary */,
+				6EE64E7A2EB7668D0015D6C3 /* DiaryWidget */,
+				6EE64E432EB7648B0015D6C3 /* Frameworks */,
 				6EF18B852D60B19F005F33A6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -64,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				6EF18B842D60B19F005F33A6 /* Diary.app */,
+				6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -71,6 +148,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6EE64E872EB7668F0015D6C3 /* Build configuration list for PBXNativeTarget "DiaryWidgetExtension" */;
+			buildPhases = (
+				6EE64E722EB7668D0015D6C3 /* Sources */,
+				6EE64E732EB7668D0015D6C3 /* Frameworks */,
+				6EE64E742EB7668D0015D6C3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6EE64E7A2EB7668D0015D6C3 /* DiaryWidget */,
+			);
+			name = DiaryWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = DiaryWidgetExtension;
+			productReference = 6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		6EF18B832D60B19F005F33A6 /* Diary */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6EF18B942D60B1A0005F33A6 /* Build configuration list for PBXNativeTarget "Diary" */;
@@ -78,10 +177,12 @@
 				6EF18B802D60B19F005F33A6 /* Sources */,
 				6EF18B812D60B19F005F33A6 /* Frameworks */,
 				6EF18B822D60B19F005F33A6 /* Resources */,
+				6EE64E592EB7648D0015D6C3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6EE64E852EB7668F0015D6C3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6EF18B862D60B19F005F33A6 /* Diary */,
@@ -102,9 +203,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					6EE64E752EB7668D0015D6C3 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					6EF18B832D60B19F005F33A6 = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -129,11 +233,19 @@
 			projectRoot = "";
 			targets = (
 				6EF18B832D60B19F005F33A6 /* Diary */,
+				6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6EE64E742EB7668D0015D6C3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EF18B822D60B19F005F33A6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -145,6 +257,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6EE64E722EB7668D0015D6C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EF18B802D60B19F005F33A6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,7 +273,73 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		6EE64E852EB7668F0015D6C3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */;
+			targetProxy = 6EE64E842EB7668F0015D6C3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		6EE64E882EB7668F0015D6C3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DiaryWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 113;
+				DEVELOPMENT_TEAM = S6TPHNS4Y6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DiaryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DiaryWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.reimos7.goodd.DiaryWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6EE64E892EB7668F0015D6C3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = DiaryWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 113;
+				DEVELOPMENT_TEAM = S6TPHNS4Y6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DiaryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DiaryWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.reimos7.goodd.DiaryWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		6EF18B922D60B1A0005F33A6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -283,7 +468,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Diary/Diary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 112;
+				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_ASSET_PATHS = "\"Diary/Preview Content\"";
 				DEVELOPMENT_TEAM = S6TPHNS4Y6;
 				ENABLE_PREVIEWS = YES;
@@ -321,7 +506,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Diary/Diary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 112;
+				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_ASSET_PATHS = "\"Diary/Preview Content\"";
 				DEVELOPMENT_TEAM = S6TPHNS4Y6;
 				ENABLE_PREVIEWS = YES;
@@ -355,6 +540,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6EE64E872EB7668F0015D6C3 /* Build configuration list for PBXNativeTarget "DiaryWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6EE64E882EB7668F0015D6C3 /* Debug */,
+				6EE64E892EB7668F0015D6C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6EF18B7F2D60B19F005F33A6 /* Build configuration list for PBXProject "Diary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

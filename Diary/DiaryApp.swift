@@ -7,35 +7,29 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 @main
 struct DiaryApp: App {
     // 런치 스크린 표시 여부
     @State private var isShowingLaunchScreen: Bool = true
-    
+
     // 저장된 테마 상태 - 처음은 시스템으로 시작
     @AppStorage("selectedTheme") private var selectedTheme: ThemeOption = .system
-    
+
     @StateObject private var service = WeatherService()
-    
+
     @StateObject private var manager = SwiftDataManager()
     // 폰트 변경
     @StateObject private var fontManager = FontManager()
-    
+
     @Environment(\.scenePhase) private var scenePhase
+
+    // 위젯에서 딥링크로 전달받을 상태
+    @State private var shouldNavigateToCompose: Bool = false
     
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Diary.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    // 위젯과 공유하는 ModelContainer
+    var sharedModelContainer: ModelContainer = SharedModelContainer.create()
     
     var body: some Scene {
         WindowGroup {
@@ -59,17 +53,23 @@ struct DiaryApp: App {
                 } else {
                     // 메인 뷰 표시
                     GlobalFontView(size: 16) {
-                        MainView(model: .preview)
+                        MainView(
+                            model: .preview,
+                            shouldNavigateToCompose: $shouldNavigateToCompose
+                        )
                     }
                     // 폰트 매니저
                     .environmentObject(fontManager)
                     .preferredColorScheme(getColorScheme())
-                                        
+                    // 위젯에서 딥링크로 앱 열기
+                    .onOpenURL { url in
+                        handleDeepLink(url)
+                    }
                     .onChange(of: scenePhase) { _, newPhase in
                         switch newPhase {
                         case .active:
                             print("앱이 활성화됨 - 날씨 업데이트")
-                            
+
                             // 알림 설정이 켜져 있을 때만 처리
                             if UserDefaults.standard.bool(forKey: "isPushNotificationEnabled") {
                                 // 알림 권한 요청
@@ -77,18 +77,21 @@ struct DiaryApp: App {
                                 // 알림 조건 확인
                                 NotificationManager.shared.checkScheduleNotification(entries: manager.diaryEntries)
                             }
-                            
+
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                 service.updateWeatherManually()
                             }
-                            
+
+                            // 위젯 갱신
+                            WidgetCenter.shared.reloadAllTimelines()
+
                         case .inactive:
                             print("앱이 비활성화 됨")
-                            
-                            
+
+
                         case .background:
                             print("앱이 백그라운드로 이동함")
-                            
+
                         @unknown default:
                             break
                         }
@@ -110,6 +113,21 @@ struct DiaryApp: App {
             return .light
         case .dark:
             return .dark
+        }
+    }
+
+    // 딥링크 처리 함수
+    private func handleDeepLink(_ url: URL) {
+        print("딥링크 수신: \(url)")
+
+        // diary://compose 형태로 전달됨
+        if url.scheme == "diary", url.host == "compose" {
+            print("일기 작성 화면으로 이동")
+            // 런치 스크린 종료 후 네비게이션
+            isShowingLaunchScreen = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                shouldNavigateToCompose = true
+            }
         }
     }
 }
