@@ -1,4 +1,8 @@
 APIKey.swift
+
+# Secret
+**/Secret/
+
 Diary.xcodeproj/project.xcworkspace/xcshareddata/
 
 # Created by https://www.toptal.com/developers/gitignore/api/swift,xcode,macos
