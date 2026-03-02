@@ -1,5 +1,5 @@
 {
-  "sourceLanguage" : "ko",
+  "sourceLanguage" : "en",
   "strings" : {
     "%lld" : {
       "localizations" : {
@@ -10,6 +10,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld"
@@ -74,6 +80,12 @@
             "state" : "translated",
             "value" : "1.3.0"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1.3.0"
+          }
         }
       }
     },
@@ -86,6 +98,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuration"
+          }
+        },
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configuration"
@@ -106,6 +124,12 @@
             "state" : "translated",
             "value" : "Favorite Emoji"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorite Emoji"
+          }
         }
       }
     },
@@ -118,6 +142,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GoodDi"
+          }
+        },
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GoodDi"
@@ -138,6 +168,12 @@
             "state" : "translated",
             "value" : "This is an example widget."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is an example widget."
+          }
         }
       }
     },
@@ -153,6 +189,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "強風"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "강풍"
           }
         }
       }
@@ -170,6 +212,12 @@
             "state" : "translated",
             "value" : "激しい嵐"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "강한 폭풍우"
+          }
         }
       }
     },
@@ -185,6 +233,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "冬の混合降水"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "겨울 혼합강수"
           }
         }
       }
@@ -223,6 +277,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "局地的な雷雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "국지적 뇌우"
           }
         }
       }
@@ -284,6 +344,12 @@
             "state" : "translated",
             "value" : "煙霧"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "깊은 안개"
+          }
         }
       }
     },
@@ -321,6 +387,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "吹雪"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날림눈"
           }
         }
       }
@@ -360,6 +432,12 @@
             "state" : "translated",
             "value" : "雷雨"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "뇌우"
+          }
         }
       }
     },
@@ -375,6 +453,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雪"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "눈"
           }
         }
       }
@@ -392,6 +476,12 @@
             "state" : "translated",
             "value" : "にわか雪"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "눈날림"
+          }
         }
       }
     },
@@ -407,6 +497,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "吹雪"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "눈보라"
           }
         }
       }
@@ -446,6 +542,12 @@
             "state" : "translated",
             "value" : "大雪"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대설"
+          }
         }
       }
     },
@@ -462,6 +564,12 @@
             "state" : "translated",
             "value" : "おおむね晴れ"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대체로 맑음"
+          }
         }
       }
     },
@@ -477,6 +585,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "おおむね曇り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대체로 흐림"
           }
         }
       }
@@ -515,6 +629,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "晴れ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "맑음"
           }
         }
       }
@@ -621,6 +741,12 @@
             "state" : "translated",
             "value" : "一部曇り"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "부분적으로 흐림"
+          }
         }
       }
     },
@@ -636,6 +762,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비"
           }
         }
       }
@@ -763,6 +895,12 @@
             "state" : "translated",
             "value" : "そよ風"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "산들바람"
+          }
         }
       }
     },
@@ -778,6 +916,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "散発的な雷雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "산발적 뇌우"
           }
         }
       }
@@ -861,6 +1005,12 @@
             "state" : "translated",
             "value" : "霧"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "안개"
+          }
         }
       }
     },
@@ -920,6 +1070,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不明"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알 수 없음"
           }
         }
       }
@@ -1079,7 +1235,7 @@
       }
     },
     "앱을 완전히 종료 후 다시 시작하면 언어가 변경됩니다" : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1091,6 +1247,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アプリを再起動すると、言語の設定が適用されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 완전히 종료 후 다시 시작하면 언어가 변경됩니다"
           }
         }
       }
@@ -1175,6 +1337,12 @@
             "state" : "translated",
             "value" : "着氷性の雨"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "얼어붙는 비"
+          }
         }
       }
     },
@@ -1190,6 +1358,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "着氷性の霧雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "얼어붙는 이슬비"
           }
         }
       }
@@ -1207,6 +1381,12 @@
             "state" : "translated",
             "value" : "もや"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연무"
+          }
         }
       }
     },
@@ -1222,6 +1402,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "熱帯低気圧"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "열대폭풍"
           }
         }
       }
@@ -1349,6 +1535,12 @@
             "state" : "translated",
             "value" : "ひょう"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "우박"
+          }
         }
       }
     },
@@ -1474,6 +1666,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "霧雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이슬비"
           }
         }
       }
@@ -1711,6 +1909,12 @@
             "state" : "translated",
             "value" : "みぞれ"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진눈깨비"
+          }
         }
       }
     },
@@ -1859,6 +2063,12 @@
             "state" : "translated",
             "value" : "猛暑"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폭염"
+          }
         }
       }
     },
@@ -1941,6 +2151,12 @@
             "state" : "translated",
             "value" : "晴れ間のにわか雪"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "햇살 속 눈날림"
+          }
         }
       }
     },
@@ -1956,6 +2172,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "天気雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "햇살 속 소나기"
           }
         }
       }
@@ -1973,6 +2195,12 @@
             "state" : "translated",
             "value" : "ハリケーン"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허리케인"
+          }
         }
       }
     },
@@ -1989,6 +2217,12 @@
             "state" : "translated",
             "value" : "大雨"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "호우"
+          }
         }
       }
     },
@@ -2004,6 +2238,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "極寒"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "혹한"
           }
         }
       }
@@ -2065,6 +2305,12 @@
             "state" : "translated",
             "value" : "黄砂"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "황사"
+          }
         }
       }
     },
@@ -2080,6 +2326,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "曇り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "흐림"
           }
         }
       }

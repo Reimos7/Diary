@@ -68,23 +68,20 @@ struct LanguageView: View {
         List {
             ForEach(languages, id: \.code) { language in
                 Button {
-                    // @AppStorage 값만 바꾸면 DiaryApp의 .environment(\.locale)이
-                    // SwiftUI 반응형 시스템을 통해 전체 뷰를 즉시 새 언어로 다시 그림
+                    // @AppStorage에 언어 코드 저장
+                    // UserDefaults.standard에 즉시 반영됨
+                    // DiaryApp의 .environment(\.locale)이 자동 반응하여 UI 갱신
                     appLanguage = language.code
 
                     // 위젯에도 언어 설정 공유
                     // 위젯은 별도 프로세스이므로 App Group UserDefaults를 통해 공유
                     let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)
                     sharedDefaults?.set(language.code, forKey: "appLanguage")
-                    sharedDefaults?.synchronize()
 
                     // 위젯 갱신 요청
                     WidgetCenter.shared.reloadAllTimelines()
 
-                    // 날씨 데이터를 새 언어로 다시 가져오기
-                    // CurrentWeather의 날씨 설명(weather)과 위치명(currentLocation)은
-                    // 날씨를 가져올 때 String으로 저장되므로, 언어 변경 후 다시 호출해야
-                    // 새 locale에 맞는 텍스트로 업데이트됨
+                    // 날씨 데이터를 새 언어로 다시 가져오기 (위치 주소도 새 언어로 변환)
                     service.updateWeatherManually()
                 } label: {
                     HStack {

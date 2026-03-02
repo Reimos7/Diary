@@ -7,22 +7,58 @@
 import CoreLocation
 import UIKit
 
+// 한국어 문자 포함 여부 확인 (CLGeocoder fallback 판단용)
+// CLGeocoder가 일본어 locale로 한국 주소를 번역하지 못해 한글을 그대로 반환하는 경우를 감지
+private extension String {
+    var containsKorean: Bool {
+        self.range(of: "[가-힣]", options: .regularExpression) != nil
+    }
+}
+
 // WeatherService가 CLLocationManagerDelegate를 확장(Extension)하여 위치 관련 기능을 추가함
 extension WeatherService: CLLocationManagerDelegate {
     
     private func updateAddress(from location: CLLocation) async throws -> String {
-        
+
         // CLGeocoder 객체 생성 (리버스 지오 코딩을 위한 도구)
         let geocoder = CLGeocoder()
-        
-        // 앱 언어 설정에 맞게 위도/경도를 주소로 변환
-        let placemarks = try await geocoder.reverseGeocodeLocation(location, preferredLocale: appLocale)
-        
+
+        // 주소 변환에 사용할 Locale 결정
+        // 한국어: 한글 주소 (강남구 삼성동)
+        // 영어: 영문 주소 (Gangnam-gu Samseong-dong)
+        // 일본어: 일본어 주소 (新宿区 등) — 일본 내 주소는 일본어로 잘 반환됨
+        //         한국 주소는 CLGeocoder가 일본어 번역을 못하므로 영문(로마자)으로 fallback
+        // 기타: 영문(en)으로 fallback
+        let currentLangCode = appLocale.language.languageCode?.identifier ?? "en"
+        let geocodeLocale: Locale = {
+            if supportedLanguages.contains(currentLangCode) {
+                return appLocale
+            }
+            return Locale(identifier: "en")
+        }()
+
+        let placemarks = try await geocoder.reverseGeocodeLocation(location, preferredLocale: geocodeLocale)
+
         // placemarks에 접근해서 주소 정보를 빼옴
         if let placemark = placemarks.first {
             // 우리나라 기준 "구"에 해당하는 값은 locality 속성에 있고, "동"에 해당하는 값은 subLocality 속성에 저장됨
             if let gu = placemark.locality, let dong = placemark.subLocality {
-                return "\(gu) \(dong)" // 변환된 주소 반환 (ex: 강남구 삼성동)
+                let address = "\(gu) \(dong)"
+
+                // 앱 언어가 한국어가 아닌데 반환된 주소에 한국어가 포함된 경우
+                // (예: 일본어로 설정했지만 한국 주소를 CLGeocoder가 번역 못해서 한글 반환)
+                // -> 영어 locale로 다시 요청하여 로마자 주소를 받아옴
+                if currentLangCode != "ko" && address.containsKorean {
+                    let enGeocoder = CLGeocoder()
+                    let enPlacemarks = try await enGeocoder.reverseGeocodeLocation(location, preferredLocale: Locale(identifier: "en"))
+                    if let enPlacemark = enPlacemarks.first,
+                       let enGu = enPlacemark.locality,
+                       let enDong = enPlacemark.subLocality {
+                        return "\(enGu) \(enDong)"
+                    }
+                }
+
+                return address
             } else {
                 // 구,동이 아닌 다른형태 -> 외국 등등
                 return placemark.name ?? localizedString("알수없음")
