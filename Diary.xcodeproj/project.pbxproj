@@ -55,6 +55,7 @@
 		6E0ADB312EBDF41800382882 /* Exceptions for "Diary" folder in "DiaryWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"/Localized: InfoPlist.strings",
 				Model/Model.swift,
 				Model/SharedModelContainer.swift,
 			);
@@ -63,6 +64,7 @@
 		6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"/Localized: InfoPlist.strings",
 				Info.plist,
 			);
 			target = 6EF18B832D60B19F005F33A6 /* Diary */;
@@ -75,6 +77,16 @@
 			target = 6EE64E752EB7668D0015D6C3 /* DiaryWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		6ED7D2892F5562A60031D15E /* Exceptions for "Diary" folder in "Compile Sources" phase from "Diary" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 6EF18B802D60B19F005F33A6 /* Sources */;
+			membershipExceptions = (
+				"/Localized: InfoPlist.strings",
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6EE64E7A2EB7668D0015D6C3 /* DiaryWidget */ = {
@@ -89,6 +101,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				6E9D17942DADE1D0009F930D /* Exceptions for "Diary" folder in "Diary" target */,
+				6ED7D2892F5562A60031D15E /* Exceptions for "Diary" folder in "Compile Sources" phase from "Diary" target */,
 				6E0ADB312EBDF41800382882 /* Exceptions for "Diary" folder in "DiaryWidgetExtension" target */,
 			);
 			path = Diary;
