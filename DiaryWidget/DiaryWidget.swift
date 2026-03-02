@@ -35,6 +35,12 @@ struct TodayDiaryProvider: TimelineProvider {
 
     // Timeline: 실제 위젯 데이터 제공
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodayDiaryEntry>) -> Void) {
+        // App Group에서 사용자가 앱에서 선택한 언어를 읽어서 위젯에도 적용
+        // 위젯은 앱과 별도 프로세스이므로 App Group UserDefaults를 통해 언어를 공유받음
+        let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)
+        // 미지원 언어 사용자는 영어로 fallback (앱과 동일한 정책)
+        let appLanguage = sharedDefaults?.string(forKey: "appLanguage") ?? "en"
+
         // 현재 날짜
         let currentDate = Date()
 
@@ -44,12 +50,13 @@ struct TodayDiaryProvider: TimelineProvider {
         // 이번 달의 모든 일기 날짜 가져오기
         let diaryDates = fetchThisMonthDiaryDates()
 
-        // Entry 생성
+        // Entry 생성 (언어 코드도 함께 전달)
         let entry = TodayDiaryEntry(
             date: currentDate,
             todayDiary: todayDiary,
             hasWrittenToday: todayDiary != nil,
-            diaryDates: diaryDates
+            diaryDates: diaryDates,
+            appLanguage: appLanguage
         )
 
         // Timeline 정책 설정
@@ -141,6 +148,7 @@ struct TodayDiaryEntry: TimelineEntry {
     let todayDiary: DiarySnapshot? // 오늘의 일기 (없을 수 있음)
     let hasWrittenToday: Bool // 오늘 작성 여부
     let diaryDates: Set<Date> // 이번 달에 일기가 작성된 날짜들 (캘린더용)
+    var appLanguage: String = "en" // 앱에서 선택한 언어 (위젯에 locale 적용용, 미지원 언어는 영어 fallback)
 }
 
 // MARK: - Diary Snapshot (위젯용 가벼운 모델)
@@ -376,18 +384,18 @@ struct LargeWidgetView: View {
                 .padding(.top, 8)
 
                 // 캘린더 그리드
-                CalendarGridView(currentDate: entry.date, diaryDates: entry.diaryDates)
+                CalendarGridView(currentDate: entry.date, diaryDates: entry.diaryDates, appLanguage: entry.appLanguage)
 
                 Spacer(minLength: 0)
             }
         }
     }
 
-    // "yyyy년 M월" 형식
+    // 로케일에 맞게 년/월 표시 (한: "2026년 2월" / 영: "February 2026" / 일: "2026年2月")
     private var headerDateString: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy년 M월"
+        formatter.locale = Locale(identifier: entry.appLanguage)
+        formatter.setLocalizedDateFormatFromTemplate("yyyy MMMM")
         return formatter.string(from: entry.date)
     }
 }
@@ -396,10 +404,16 @@ struct LargeWidgetView: View {
 struct CalendarGridView: View {
     let currentDate: Date
     let diaryDates: Set<Date>
+    var appLanguage: String = "en"
     @Environment(\.colorScheme) var colorScheme
 
     private let calendar = Calendar.current
-    private let weekdaySymbols = ["일", "월", "화", "수", "목", "금", "토"]
+    // 앱 언어 설정에 맞게 요일 표시 (한: 일,월,화.. / 영: S,M,T.. / 일: 日,月,火..)
+    private var weekdaySymbols: [String] {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: appLanguage)
+        return formatter.veryShortWeekdaySymbols
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -539,12 +553,15 @@ struct DiaryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodayDiaryProvider()) { entry in
             TodayDiaryWidgetEntryView(entry: entry)
+                // 앱에서 선택한 언어를 위젯에도 적용 (앱의 DiaryApp과 동일한 방식)
+                .environment(\.locale, Locale(identifier: entry.appLanguage))
                 .containerBackground(for: .widget) {
                     Color.clear
                 }
         }
-        .configurationDisplayName("오늘의 일기")
-        .description("오늘 작성한 일기를 확인하세요")
+        // LocalizedStringKey로 전달 -> String Catalog에서 번역 자동 적용
+        .configurationDisplayName(Text("오늘의 일기"))
+        .description(Text("오늘 작성한 일기를 확인하세요"))
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

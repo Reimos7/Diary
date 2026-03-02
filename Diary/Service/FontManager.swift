@@ -10,7 +10,7 @@ import SwiftUI
 class FontManager: ObservableObject {
     // @AppStorage로 UserDefaults와 연동되어 선택된 폰트를 저장
     // 폰트 설정이 변경되면 UserDefaults에 저장되고, 앱 재실행 후에도 유지
-    @AppStorage("selectedFont") var currentFont: String = "dovemayo"
+    @AppStorage("selectedFont") var currentFont: String = "Cafe24DongdongOTF"
     
     static let fontList: [String] = ["dovemayo", "NanumPen", "Cafe24DongdongOTF", "Cafe24SyongsyongOTF"]
     
@@ -18,7 +18,7 @@ class FontManager: ObservableObject {
         if let savedFont = UserDefaults.standard.string(forKey: "selectedFont") {
             self.currentFont = savedFont
         } else {
-            self.currentFont = "dovemayo"
+            self.currentFont = "Cafe24DongdongOTF"
         }
     }
     
@@ -29,13 +29,13 @@ class FontManager: ObservableObject {
     static func displayName(for font: String) -> String {
         switch font {
         case "dovemayo":
-            return "둘기마요"
+            return "Dovemayo"
         case "NanumPen":
-            return "나눔펜"
+            return "Nanum Pen"
         case "Cafe24DongdongOTF":
-            return "카페24 동동"
+            return "Cafe24 Dongdong"
         case "Cafe24SyongsyongOTF":
-            return "카페24 숑숑"
+            return "Cafe24 Syongsyong"
         default:
             return font
         }

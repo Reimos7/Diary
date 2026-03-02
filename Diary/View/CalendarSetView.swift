@@ -41,12 +41,15 @@ struct CalendarSetView: UIViewRepresentable {
         // 캘린더 배경 색상
         // 이전 달, 다음 달 버튼 숨기기
         calendar.appearance.headerMinimumDissolvedAlpha = 0 // 내비게이션 화살표 숨기기
-        // 캘린더 로케일 설정 (한국어)
-        calendar.locale = Locale(identifier: "ko_KR")
+        // 캘린더 로케일 설정 (앱 언어 설정에 따라 변경, 기본값은 시스템 언어)
+        calendar.locale = appLocale
         // 셀 크기 조정
         calendar.rowHeight = 80
-        // 캘린더 헤더의 날짜 형식
-        calendar.appearance.headerDateFormat = "yyyy년 M월"
+        // 캘린더 헤더의 날짜 형식 (로케일에 맞게 자동 변환)
+        let headerFormatter = DateFormatter()
+        headerFormatter.locale = appLocale
+        headerFormatter.setLocalizedDateFormatFromTemplate("yyyy MMMM")
+        calendar.appearance.headerDateFormat = headerFormatter.dateFormat
         
         // 범위 설정 (월 단위 범위만 보이도록 설정)
         calendar.scope = .month
@@ -159,7 +162,9 @@ struct CalendarSetView: UIViewRepresentable {
         func calendar(_ calendar: FSCalendar, subtitleFor date: Date) -> String? {
             let today = Date()
             if Calendar.current.isDate(date, inSameDayAs: today) {
-                return "오늘"
+                // localizedString()을 사용하여 앱 내 언어 설정에 맞게 "오늘" 표시
+                // (String(localized:locale:)의 locale은 번역 선택이 아닌 포맷팅에만 영향)
+                return localizedString("오늘")
             }
             return nil
         }

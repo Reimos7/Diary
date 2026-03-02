@@ -29,7 +29,7 @@ struct WeatherView: View {
                     .cornerRadius(20)
                     
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("사용자 위치 권한이 필요합니다\n터치를 통해 위치 권한을 허용해 주세요\n날씨 정보를 가져올게요!")
+                        Text( "사용자 위치 권한이 필요합니다\n터치를 통해 위치 권한을 허용해 주세요\n날씨 정보를 가져올게요!")
                     }
                     .padding()
                 }
@@ -65,7 +65,7 @@ struct WeatherView: View {
                                 .padding(.bottom, -8)
                             
                             HStack(alignment: .lastTextBaseline) {
-                                Text(model.temperature)
+                                Text(model.temperatureAttributed)
                                     .customFont(size: 110)
                                     .fontWeight(.ultraLight)
                                     .minimumScaleFactor(0.5)

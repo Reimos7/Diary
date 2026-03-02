@@ -15,6 +15,10 @@ struct SettingView: View {
     @Environment(\.openURL) var openURL
     
     @EnvironmentObject var manager: SwiftDataManager
+
+    // LanguageView에서 언어가 바뀌면 이 값도 자동 업데이트되어 우측 텍스트가 즉시 반영
+    // 기본값: 시스템 언어가 지원 목록에 있으면 그 언어, 없으면 영어
+    @AppStorage("appLanguage") private var appLanguage: String = resolvedSystemLanguage()
     
     var body: some View {
         NavigationStack {
@@ -85,9 +89,34 @@ struct SettingView: View {
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
-                
+
+                // 언어 설정 - LanguageView로 이동 
+                ZStack {
+                    NavigationLink {
+                        LanguageView()
+                    } label: {
+                        EmptyView()
+                    }.opacity(0)
+                    HStack(spacing: 8) {
+                        Image(systemName: "globe")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundStyle(Color.primary)
+
+                        Text("언어")
+
+                        Spacer()
+
+                        // 현재 설정된 언어 표시
+                        Text(currentLanguageDisplayName())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .listRowSeparator(.hidden) // 줄 없애기
+
                 Divider()
-                
+
                 ZStack {
                     Button {
                         email.send(openURL: openURL)
@@ -152,7 +181,7 @@ struct SettingView: View {
                         
                         Spacer()
                         
-                        Text("1.1.2")
+                        Text("1.3.0")
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
@@ -185,6 +214,16 @@ struct SettingView: View {
         // 설정화면 통해 알림 권한 요청 alert
         .onAppear {
             NotificationManager.shared.requestAutorization()
+        }
+    }
+
+    // 현재 앱에 설정된 언어를 사용자에게 보여줄 이름으로 변환
+    private func currentLanguageDisplayName() -> String {
+        switch appLanguage {
+        case "ko": return "한국어"
+        case "en": return "English"
+        case "ja": return "日本語"
+        default: return appLanguage
         }
     }
 }

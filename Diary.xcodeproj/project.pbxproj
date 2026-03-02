@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6E658E322D639F0400C525EB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6E658E312D639F0400C525EB /* Alamofire */; };
+		6ED7D2652F51F9750031D15E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7D2642F51F9750031D15E /* Localizable.xcstrings */; };
+		6ED7D2662F52F7270031D15E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7D2642F51F9750031D15E /* Localizable.xcstrings */; };
 		6EE64E782EB7668D0015D6C3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */; };
 		6EE64E792EB7668D0015D6C3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */; };
 		6EE64E862EB7668F0015D6C3 /* DiaryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -41,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DiaryWidgetExtension.entitlements; sourceTree = "<group>"; };
+		6ED7D2642F51F9750031D15E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DiaryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -127,6 +130,7 @@
 		6EF18B7B2D60B19F005F33A6 = {
 			isa = PBXGroup;
 			children = (
+				6ED7D2642F51F9750031D15E /* Localizable.xcstrings */,
 				6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */,
 				6EF18C3B2D623E7B005F33A6 /* .gitignore */,
 				6EF18B862D60B19F005F33A6 /* Diary */,
@@ -215,11 +219,13 @@
 				};
 			};
 			buildConfigurationList = 6EF18B7F2D60B19F005F33A6 /* Build configuration list for PBXProject "Diary" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ja,
+				ko,
 			);
 			mainGroup = 6EF18B7B2D60B19F005F33A6;
 			minimizedProjectReferenceProxies = 1;
@@ -243,6 +249,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6ED7D2662F52F7270031D15E /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +257,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6ED7D2652F51F9750031D15E /* Localizable.xcstrings in Resources */,
 				6EF18C3C2D623E7B005F33A6 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +408,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -459,6 +468,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

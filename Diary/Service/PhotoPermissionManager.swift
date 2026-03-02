@@ -40,19 +40,19 @@ struct PhotoPermissionManager {
         }
     }
     
-    // 사용자 권한 설명 메시지
+    // 사용자 권한 설명 메시지 (다국어 지원)
     static func photoPermissionMessage(for status: PHAuthorizationStatus) -> String {
         switch status {
         case  .denied, .restricted:
-            return "일기 사진 첨부를 위해 접근 권한이 필요합니다."
+            return String(localized: "일기 사진 첨부를 위해 접근 권한이 필요합니다.")
         case .limited:
-            return "사진 일부만 접근 가능합니다. 전체 권한을 허용하려면 설정을 확인해 주세요."
+            return String(localized: "사진 일부만 접근 가능합니다. 전체 권한을 허용하려면 설정을 확인해 주세요.")
         case .authorized:
-            return "사진 접근이 허용되었습니다."
+            return String(localized: "사진 접근이 허용되었습니다.")
         case .notDetermined:
-            return "사진 접근 권한이 아직 요청되지 않았습니다."
+            return String(localized: "사진 접근 권한이 아직 요청되지 않았습니다.")
         @unknown default:
-            return "알 수 없는 권한 상태입니다."
+            return String(localized: "알 수 없는 권한 상태입니다.")
         }
     }
 }

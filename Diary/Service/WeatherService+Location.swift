@@ -15,8 +15,8 @@ extension WeatherService: CLLocationManagerDelegate {
         // CLGeocoder 객체 생성 (리버스 지오 코딩을 위한 도구)
         let geocoder = CLGeocoder()
         
-        // 지정된 위도/경도를 한국어(Ko_kr)로 변환
-        let placemarks = try await geocoder.reverseGeocodeLocation(location, preferredLocale: Locale(identifier: "Ko_kr"))
+        // 앱 언어 설정에 맞게 위도/경도를 주소로 변환
+        let placemarks = try await geocoder.reverseGeocodeLocation(location, preferredLocale: appLocale)
         
         // placemarks에 접근해서 주소 정보를 빼옴
         if let placemark = placemarks.first {
@@ -25,11 +25,11 @@ extension WeatherService: CLLocationManagerDelegate {
                 return "\(gu) \(dong)" // 변환된 주소 반환 (ex: 강남구 삼성동)
             } else {
                 // 구,동이 아닌 다른형태 -> 외국 등등
-                return placemark.name ?? "알수없음"
+                return placemark.name ?? localizedString("알수없음")
             }
         }
         // placemark 정보가 없을 경우 기본값 반환
-        return "알수없음"
+        return localizedString("알수없음")
     }
     
     // 위치 데이터를 처리하는 함수 (위치 데이터를 받아서 주소로 변환)
@@ -95,7 +95,7 @@ extension WeatherService: CLLocationManagerDelegate {
             // 사용자가 권한 설정을 하지 않았다면 권한 설정 팝업 띄어주면서 사용 유도 
             locationManager.requestWhenInUseAuthorization()
             
-            self.lastError = "위치 서비스 사용 권한을 확인할 수 없습니다."
+            self.lastError = String(localized: "위치 서비스 사용 권한을 확인할 수 없습니다.")
             // 사용자가 위치 권한을 '거부' 했거나 '제한됨' (자녀 보호 설정 같은 이유들로..)
         case .denied, .restricted:
             /*  위치 권한이 거부된 상태에서 CLLocationManager가 오류를 지속적으로 발생시키거나 이벤트 루프를 점유 하면 UIKit 터치 이벤트 전달이 정상적으로 안될 가능성이 크다 -> 그러므로 거부된 상태에서 CLLocationManager 동작을 완전히 중단 시켜야 함, 위치 권한이 거부된 상태에서 startUpdatingLocation()이 실행되고 있으면 내부적으로 delegate에서 didFailWithError가 반복적으로 호출되면서 UI 이벤트 루프를 방해함
@@ -111,10 +111,10 @@ extension WeatherService: CLLocationManagerDelegate {
             locationDeniedWeatherView()
             LocationPermissionDeniedAlert()
             
-            lastError = "위치 서비스 사용 권한이 없습니다."
+            lastError = String(localized: "위치 서비스 사용 권한이 없습니다.")
             // 기타 예상하지 못한 경우
         default:
-            lastError = "알 수 없는 오류가 발생 했습니다."
+            lastError = String(localized: "알 수 없는 오류가 발생 했습니다.")
         }
         
         

@@ -12,7 +12,7 @@ struct LaunchScreenView: View {
         Image("LaunchImage")
             .resizable()
             .frame(width: 150, height: 150)
-        Text("GoodD")
+        Text("GoodDi")
             .font(.custom("dovemayo", size: 26))
     }
 }

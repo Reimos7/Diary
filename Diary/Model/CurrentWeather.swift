@@ -6,13 +6,15 @@
 //
 
 import Foundation
+import SwiftUI
 import WeatherKit
 // MainView의 상단에서 보여줄 날씨
 struct CurrentWeather{
     //let name: String // 지역 명
     let icon: String
     let weather: String
-    let temperature: String
+    let temperature: String      // 숫자+°+ 단위 (예: "54°F")
+    let temperatureAttributed: AttributedString  // °와 단위 사이 kern 조절된 버전 (WeatherView 메인 온도용)
     let maxTemperature: String
     let minTemperature: String
     let sunrise: String
@@ -25,6 +27,7 @@ extension CurrentWeather {
         return CurrentWeather(icon: "sun.max.fill",
                               weather: "맑음",
                               temperature: Double.randomTempertureString,
+                              temperatureAttributed: Double.random(in: -10...30).temperatureAttributedString,
                               maxTemperature: Double.randomTempertureString,
                               minTemperature: Double.randomTempertureString,
                               sunrise: "오전 6:00",
@@ -40,13 +43,14 @@ extension CurrentWeather {
         self.weather = current.condition.koreanDescription
         print(self.weather)
         self.temperature = current.temperature.value.temperatureString
+        self.temperatureAttributed = current.temperature.value.temperatureAttributedString
         self.maxTemperature = daily?.highTemperature.value.temperatureString ?? "--"
         self.minTemperature = daily?.lowTemperature.value.temperatureString ?? "--"
         
-        // 일출 및 일몰 시간은 local 시간으로 변환
+        // 일출 및 일몰 시간은 앱 언어 설정에 맞게 변환 (한: "오전 6:30" / 영: "6:30 AM")
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "a h:mm"
+        formatter.locale = appLocale
+        formatter.setLocalizedDateFormatFromTemplate("a h:mm")
         
         if let sunriseDate = daily?.sun.sunrise {
             self.sunrise = formatter.string(from: sunriseDate)

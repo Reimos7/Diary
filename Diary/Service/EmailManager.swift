@@ -12,14 +12,9 @@ struct EmailManager {
     let toAddress: String
     // 제목
     let subject: String
-    // 메일 내용
+    // 메일 내용 (다국어 지원)
     var body: String {
-    """
-    문의해 주셔서 감사합니다.
-    더 좋은 서비스를 위해 항상 노력하겠습니다.
-    
-    문의하기:  
-    """
+        String(localized: "문의해 주셔서 감사합니다.\n더 좋은 서비스를 위해 항상 노력하겠습니다.\n\n문의하기:")
     }
     
     // openURL
