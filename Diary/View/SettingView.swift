@@ -178,10 +178,12 @@ struct SettingView: View {
                             .foregroundStyle(Color.primary)
                         
                         Text("앱 버전")
-                        
+
                         Spacer()
-                        
-                        Text("1.3.0")
+
+                        // Info.plist의 실제 버전(CFBundleShortVersionString)을 읽어 표시.
+                        // 하드코딩하지 않으므로 버전을 올려도 이 코드는 수정할 필요가 없다.
+                        Text(Bundle.main.appVersion)
                     }
                 }
                 .listRowSeparator(.hidden) // 줄 없애기
