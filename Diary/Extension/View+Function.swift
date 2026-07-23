@@ -81,5 +81,17 @@ extension View {
     }
 }
 
+// 화면 진입 추적
+// 사용법: 어떤 View의 body 맨 바깥에 .trackScreen("Main") 처럼 한 줄만 붙이면
+// 해당 화면이 표시될 때마다 Firebase Analytics에 screen_view 이벤트가 전송된다.
+// (화면마다 onAppear + logEvent를 직접 쓰는 중복을 없애기 위한 헬퍼)
+extension View {
+    func trackScreen(_ name: String) -> some View {
+        onAppear {
+            AnalyticsManager.log(.screenViewed(name: name))
+        }
+    }
+}
+
 
 

@@ -85,6 +85,8 @@ struct ThemeView: View {
     // 테마 변경 함수 (하나만 선택되도록)
     private func selectTheme(_ theme: ThemeOption) {
         selectedTheme = theme  // 선택된 테마 저장
+        // Analytics: 테마 변경(기능 인기도 계측)
+        AnalyticsManager.log(.themeChanged(theme: theme.rawValue))
     }
     
     // 현재 설정된 ColorScheme을 반환 (시스템 모드 선택 시 자동 반영)

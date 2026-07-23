@@ -56,6 +56,8 @@ struct FontView: View {
             ForEach(FontManager.fontList, id: \.self) { font in
                 Button {
                     fontManager.changeFont(to: font)
+                    // Analytics: 폰트 변경(기능 인기도 계측)
+                    AnalyticsManager.log(.fontChanged(font: font))
                 } label: {
                     HStack {
                         Text(FontManager.displayName(for: font))

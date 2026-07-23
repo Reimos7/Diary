@@ -142,6 +142,10 @@ struct DetailView: View {
                             showToast = false
                         }
                         shareScreenShot(screenshot)  //  저장 후 공유 실행
+
+                        // Analytics: 공유/캡처 이벤트(바이럴 지표)
+                        // 공유가 많으면 광고 대신 오가닉 성장 여지가 크다는 신호
+                        AnalyticsManager.log(.diaryShared(type: "image"))
                     }
                 }
                 
@@ -185,6 +189,9 @@ struct DetailView: View {
                 .padding(.bottom, 50)
             }
         }
+        // Analytics: 일기 상세(열람) 화면 진입 추적.
+        // 체류가 긴 핵심 화면이라 배너광고 위치 판단의 근거가 된다.
+        .trackScreen("Detail")
     }
     
     private func captureScreenShot() {

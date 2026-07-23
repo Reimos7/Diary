@@ -215,6 +215,8 @@ struct SettingView: View {
         .onAppear {
             NotificationManager.shared.requestAutorization()
         }
+        // Analytics: 설정 화면 진입 추적
+        .trackScreen("Setting")
     }
 
     // 현재 앱에 설정된 언어를 사용자에게 보여줄 이름으로 변환

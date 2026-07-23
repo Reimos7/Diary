@@ -106,8 +106,10 @@ struct SearchView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.focused = true
                 }
-                
+
             }
+            // Analytics: 검색 화면 진입 추적
+            .trackScreen("Search")
             // 검색 기능 구현
             // prompt는 placeholder다
             // searchable은 서치바를 추가해주고 입력한 검색어를 바인딩해줌 나머지는 알아서 구현해아 함

@@ -115,5 +115,7 @@ struct MainView: View {
                 Text("앱 사용을 위해 설정에서 위치 권한을 허용해주세요.")
             }
         }
+        // Analytics: 메인 화면 진입 추적
+        .trackScreen("Main")
     }
 }

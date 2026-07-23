@@ -55,10 +55,33 @@ class SwiftDataManager: ObservableObject {
         saveContext()
         print("저장 완료됨>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
+        // Analytics: 일기 저장 이벤트. 이미지/날씨 첨부 여부 + 오늘 몇 번째 저장인지 함께 집계.
+        // save_count_today는 나중에 "n번째 저장마다 전면광고" 같은 빈도 설계의 근거가 된다.
+        AnalyticsManager.log(.diarySaved(
+            hasImage: !(imagePath?.isEmpty ?? true),
+            hasWeather: currentWeatherImage != nil,
+            saveCountToday: Self.incrementTodaySaveCount()
+        ))
+
         // 위젯 갱신
         reloadWidget()
     }
-    
+
+    // 오늘의 저장 횟수를 1 증가시키고 그 값을 반환한다.
+    // 날짜가 바뀌면 자동으로 0부터 다시 센다. (전면광고 빈도 제한의 기준값)
+    private static func incrementTodaySaveCount() -> Int {
+        let defaults = UserDefaults.standard
+        let todayKey = DateFormatter.dateScheduleNotificationFormatter.string(from: Date())
+        // 저장된 날짜가 오늘과 다르면 카운터를 리셋한다.
+        if defaults.string(forKey: "saveCountDate") != todayKey {
+            defaults.set(todayKey, forKey: "saveCountDate")
+            defaults.set(0, forKey: "saveCountValue")
+        }
+        let next = defaults.integer(forKey: "saveCountValue") + 1
+        defaults.set(next, forKey: "saveCountValue")
+        return next
+    }
+
     // Read 일기 목록 조회 , 파라미터로 오름차순, 내림차순 결정
     func fetchDiaryData(isDecending: Bool) -> [Diary] {
         guard let context = context else {return []}
@@ -100,6 +123,9 @@ class SwiftDataManager: ObservableObject {
             )
             // 검색 결과를 diaryEntries에 저장하여 화면을 업데이트
             self.diaryEntries = try context.fetch(fetchDescriptor)
+
+            // Analytics: 검색 이벤트. 검색어 원문 대신 길이만 집계(개인정보 보호).
+            AnalyticsManager.log(.diarySearched(keyword: keyword))
         } catch {
             print("검색 실패: \(error.localizedDescription)")
         }
@@ -111,6 +137,9 @@ class SwiftDataManager: ObservableObject {
         // 내용 업데이트
         entry.content = newContent
         saveContext()
+
+        // Analytics: 일기 수정 이벤트
+        AnalyticsManager.log(.diaryUpdated)
 
         // 위젯 갱신
         reloadWidget()
@@ -129,6 +158,9 @@ class SwiftDataManager: ObservableObject {
         // 데이터 삭제
         context.delete(entry)
         saveContext()
+
+        // Analytics: 일기 삭제 이벤트
+        AnalyticsManager.log(.diaryDeleted)
 
         // 위젯 갱신
         reloadWidget()

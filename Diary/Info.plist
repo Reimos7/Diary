@@ -9,6 +9,10 @@
 		<string>Cafe24Dongdong-v2.0.otf</string>
 		<string>Cafe24Syongsyong-v2.0.otf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>

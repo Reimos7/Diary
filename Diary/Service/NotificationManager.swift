@@ -97,10 +97,19 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     
     
     // 해당 함수는 willPresent 과 didReceive 에 따라 작동하는 함수다. 알림이 울릴 때와, 알림을 받았을 때 어떤 작업을 처리할지 작성하면 된다
+    // 앱이 포그라운드(화면에 떠 있는 상태)일 때 알림이 도착하면 호출
+    // 로컬 알림·FCM 푸시 모두 이 경로를 탄다
+    // .banner를 추가해 앱을 켜고 있을 때도 상단 배너로 보이게 한다
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.list , .sound])
+        completionHandler([.banner, .list, .sound])
     }
+
+    // 사용자가 알림을 "탭"해서 앱에 진입했을 때 호출
+    // FCM 푸시의 payload는 response.notification.request.content.userInfo로 접근
+    // (특정 화면으로 딥링크시키고 싶으면 여기서 userInfo를 파싱해 분기)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        print("알림 탭됨. payload: \(userInfo)")
         completionHandler()
     }
 }

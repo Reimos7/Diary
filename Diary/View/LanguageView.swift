@@ -73,6 +73,9 @@ struct LanguageView: View {
                     // DiaryApp의 .environment(\.locale)이 자동 반응하여 UI 갱신
                     appLanguage = language.code
 
+                    // Analytics: 언어 변경(기능 인기도 계측)
+                    AnalyticsManager.log(.languageChanged(language: language.code))
+
                     // 위젯에도 언어 설정 공유
                     // 위젯은 별도 프로세스이므로 App Group UserDefaults를 통해 공유
                     let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)

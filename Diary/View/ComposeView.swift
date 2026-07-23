@@ -208,8 +208,10 @@ struct ComposeView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.focused = true
                     }
+                    // Analytics: 작성 화면 진입(깔때기 입구). 저장까지의 전환율 분석용
+                    AnalyticsManager.log(.composeStarted(entryPoint: "main"))
                 }
-                
+
                 // 이미지 클릭 시 전체 화면 표시
                 .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
                     FullscreenImageView(image: fullScreenImage.image)

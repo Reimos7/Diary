@@ -11,6 +11,10 @@ import WidgetKit
 
 @main
 struct DiaryApp: App {
+    // Firebase 초기화를 담당하는 AppDelegate를 SwiftUI 생명주기에 연결한다
+    // 이 선언이 있어야 AppDelegate.application(_:didFinishLaunchingWithOptions:)가 실제로 호출
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     // 런치 스크린 표시 여부
     @State private var isShowingLaunchScreen: Bool = true
 

@@ -83,8 +83,10 @@ struct CalendarComposeView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         self.focused = true
                     }
+                    // Analytics: 작성 화면 진입(캘린더 경로). 진입 경로별 전환율 비교용
+                    AnalyticsManager.log(.composeStarted(entryPoint: "calendar"))
                 }
-                
+
                 // 텍스트가 변경될 때마다 자동 스크롤 -> 자동 줄 바꿈
                 .onChange(of: content ) { _, _ in
                     withAnimation {

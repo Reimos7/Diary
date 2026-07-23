@@ -10,6 +10,9 @@
 		6E658E322D639F0400C525EB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6E658E312D639F0400C525EB /* Alamofire */; };
 		6ED7D2652F51F9750031D15E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7D2642F51F9750031D15E /* Localizable.xcstrings */; };
 		6ED7D2662F52F7270031D15E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7D2642F51F9750031D15E /* Localizable.xcstrings */; };
+		6EDF2E483002400900466F17 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6EDF2E473002400900466F17 /* FirebaseAnalytics */; };
+		6EDF2E4A3002400900466F17 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6EDF2E493002400900466F17 /* FirebaseCrashlytics */; };
+		6EDF2E4C3002400900466F17 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 6EDF2E4B3002400900466F17 /* FirebaseMessaging */; };
 		6EE64E782EB7668D0015D6C3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */; };
 		6EE64E792EB7668D0015D6C3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */; };
 		6EE64E862EB7668F0015D6C3 /* DiaryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -44,6 +47,7 @@
 /* Begin PBXFileReference section */
 		6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DiaryWidgetExtension.entitlements; sourceTree = "<group>"; };
 		6ED7D2642F51F9750031D15E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6EDF2E553006268200466F17 /* DiaryWidgetExtensionRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DiaryWidgetExtensionRelease.entitlements; sourceTree = "<group>"; };
 		6EE64E462EB7648B0015D6C3 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		6EE64E762EB7668D0015D6C3 /* DiaryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DiaryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE64E772EB7668D0015D6C3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -124,7 +128,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EF18BCD2D6100EC005F33A6 /* FSCalendar in Frameworks */,
+				6EDF2E4A3002400900466F17 /* FirebaseCrashlytics in Frameworks */,
+				6EDF2E4C3002400900466F17 /* FirebaseMessaging in Frameworks */,
 				6E658E322D639F0400C525EB /* Alamofire in Frameworks */,
+				6EDF2E483002400900466F17 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +150,7 @@
 		6EF18B7B2D60B19F005F33A6 = {
 			isa = PBXGroup;
 			children = (
+				6EDF2E553006268200466F17 /* DiaryWidgetExtensionRelease.entitlements */,
 				6ED7D2642F51F9750031D15E /* Localizable.xcstrings */,
 				6E0ADAC02EBDF0B200382882 /* DiaryWidgetExtension.entitlements */,
 				6EF18C3B2D623E7B005F33A6 /* .gitignore */,
@@ -195,6 +203,7 @@
 				6EF18B812D60B19F005F33A6 /* Frameworks */,
 				6EF18B822D60B19F005F33A6 /* Resources */,
 				6EE64E592EB7648D0015D6C3 /* Embed Foundation Extensions */,
+				6EDF2E543005D23400466F17 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -208,6 +217,9 @@
 			packageProductDependencies = (
 				6EF18BCC2D6100EC005F33A6 /* FSCalendar */,
 				6E658E312D639F0400C525EB /* Alamofire */,
+				6EDF2E473002400900466F17 /* FirebaseAnalytics */,
+				6EDF2E493002400900466F17 /* FirebaseCrashlytics */,
+				6EDF2E4B3002400900466F17 /* FirebaseMessaging */,
 			);
 			productName = Diary;
 			productReference = 6EF18B842D60B19F005F33A6 /* Diary.app */;
@@ -245,6 +257,7 @@
 			packageReferences = (
 				6EF18BCB2D6100EC005F33A6 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				6E658E302D639F0400C525EB /* XCRemoteSwiftPackageReference "Alamofire" */,
+				6EDF2E463002400900466F17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6EF18B852D60B19F005F33A6 /* Products */;
@@ -276,6 +289,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6EDF2E543005D23400466F17 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6EE64E722EB7668D0015D6C3 /* Sources */ = {
@@ -336,7 +372,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = DiaryWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DiaryWidgetExtensionRelease.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 120;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -496,6 +532,7 @@
 				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_ASSET_PATHS = "\"Diary/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Diary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "굿디";
@@ -533,6 +570,7 @@
 				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_ASSET_PATHS = "\"Diary/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Diary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "굿디";
@@ -601,6 +639,14 @@
 				minimumVersion = 5.10.2;
 			};
 		};
+		6EDF2E463002400900466F17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.16.0;
+			};
+		};
 		6EF18BCB2D6100EC005F33A6 /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WenchaoD/FSCalendar.git";
@@ -616,6 +662,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6E658E302D639F0400C525EB /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		6EDF2E473002400900466F17 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6EDF2E463002400900466F17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		6EDF2E493002400900466F17 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6EDF2E463002400900466F17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		6EDF2E4B3002400900466F17 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6EDF2E463002400900466F17 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		6EF18BCC2D6100EC005F33A6 /* FSCalendar */ = {
 			isa = XCSwiftPackageProductDependency;
