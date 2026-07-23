@@ -42,6 +42,8 @@ struct ListView: View {
             // 화면이 나타날 때 데이터 로드
             .onAppear {
                 manager.fetchDiaryData(isDecending: sortByDateDesc)
+                // Analytics: 일기 목록 화면 진입 추적. 광고 예정 위치이므로 체류/노출 근거로 사용.
+                AnalyticsManager.log(.screenViewed(name: "List"))
             }
             // 기본 뒤로 가기 버튼 숨김
             .navigationBarBackButtonHidden()
