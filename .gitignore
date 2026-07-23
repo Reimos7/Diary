@@ -3,6 +3,9 @@ APIKey.swift
 # Secret
 **/Secret/
 
+# 추적 제외 (프로젝트 소개 문서)
+README.md
+
 Diary.xcodeproj/project.xcworkspace/xcshareddata/
 
 # Created by https://www.toptal.com/developers/gitignore/api/swift,xcode,macos
