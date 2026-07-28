@@ -1631,6 +1631,7 @@
       }
     },
     "이미지를 불러올 수 없습니다" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -147,7 +147,7 @@ struct DetailView: View {
                 .fill(AppColor.divider)
                 .frame(width: 1)
                 .frame(maxHeight: .infinity)
-                //.offset(y: -30) 
+                //.offset(y: -30)
 
             VStack(spacing: AppSpacing.lg) {
                 // 날씨 아이콘 + 설명 (우측 정렬)

@@ -3,6 +3,9 @@
 //  Diary
 //
 //  Created by Reimos on 2/22/25.
+//  새 디자인: 상세/작성 화면과 동일한 틀. 기존 일기를 불러와 편집.
+//  틀: [사진] → 날짜(우측) → 가로 구분선 → 왼쪽 세로선 [우측 날씨 + 가운데 본문(입력)]
+//  편집 특성상 사진 삭제는 실제 파일 + SwiftData에서도 즉시 삭제된다.
 //
 
 import SwiftUI
@@ -10,297 +13,356 @@ import PhotosUI
 
 struct EditComposeView: View {
     @State private var content: String = ""
-    // X 닫기 버튼을 누르면 현재 화면에서 나갈지 계속 있을지 alert
     @State private var showDismissAlert: Bool = false
     @State private var showToast: Bool = false
-    // 선택된 이미지를 길게 눌렀을때
     @State private var isLongPressedPhoto: Bool = false
-    //PhotosPicker에서 선택된 사진을 저장하는 배열
     @State private var selectedItems: [PhotosPickerItem] = []
-    // 사용자가 선택한 이미지들을 저장하는 배열
     @State private var selectedImages: [UIImage] = []
-    //전체 화면에서 이미지를 볼 때 사용하는 변수 (이미지를 클릭하면 설정됨)
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
-    // [리팩토링] 절대경로 대신 파일명만 저장
     @State private var imagePath: [String] = []
-    // 에러 감지 상태
-    @State private var isPreSentedError: Bool = false
-    
-    // 사진 권한 알림 상태
-    // 사진 선택기(Picker)를 보여줄지 여부
+
+    // 사진 권한
     @State private var showPhotoPicker: Bool = false
     @State private var showPermissionAlert: Bool = false
     @State private var permissionMessage: String = ""
-    
+
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
-    @State private var imageUrl: [URL] = []
-    // FocusState 이용하여 자동으로 키보드 보여주기
     @FocusState var focused: Bool
-    
+
     let data: Diary?
-    
+
+    // 편집 대상 일기가 가진 사진 파일명 목록
+    private var photoPaths: [String] { data?.imagePath ?? [] }
+    private var hasPhotos: Bool { !photoPaths.isEmpty }
+
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
-                        ZStack {
-                            if let weatherIcon = data?.currentWeatherImage {
-                                Image(systemName: weatherIcon)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: 100, maxHeight: 100)
-                                    .offset(x: 1, y: 1)
-                                    .foregroundStyle(.gray.opacity(0.3))
-                                
-                                Image(systemName: weatherIcon)
-                                    .symbolRenderingMode(.multicolor)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: 100, maxHeight: 100)
-                                    .onAppear {
-                                        print(weatherIcon)
-                                    }
-                            } else {
-                                
+            GeometryReader { geo in
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // 1) 사진 블록 (기존 일기의 사진, 전체 너비 히어로)
+                            if hasPhotos {
+                                photoSection
                             }
-                        }
-                        .shadow(radius: 2)
-                        
-                        Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date.now))
-                            .padding()
-                            .customFont(size: 16)
-                        
-                        // [리팩토링] FileManager 기반 로컬 파일명으로 이미지 로딩 방식
-                        if let paths = data?.imagePath, !paths.isEmpty {
-                            ForEach(paths, id: \.self) { path in
-                                // [리팩토링] 경로 문자열이 아닌 파일명 기준으로 로드
-                                if let image = FileManagerSet.loadImageFromFileManager(fileName: path) {
-                                    LongPressImageView(
-                                        image: image, // [리팩토링] AsyncImage 대신 직접 로드된 UIImage 전달
-                                        imagePath: path,
-                                        isLongPressedPhoto: $isLongPressedPhoto,
-                                        selectedImages: $selectedImages,
-                                        selectedImageForFullscreen: $selectedImageForFullscreen,
-                                        diaryData: data
-                                    )
-                                } else {
-                                    Text("이미지를 불러올 수 없습니다")
-                                }
-                            }
-                        }
-                        // 일기 입력 부분
-                        ZStack(alignment: .topLeading) {
-                            
-                            TextEditor(text: $content)
-                            // TextEditor 글자 수 기준 동적으로 높이 조절 (일기 내용이 길어지면 스크롤 최소화)
-                                .frame(minHeight: content.count > 200 ? 350 : 200)
-                            // TextEditor 기본 여백 때문에 좌우 바깥 공간을 5만큼 줄이기
-                                .padding(.horizontal, -5)
-                            // 포커스를 맞춰서 화면이 열리면 키보드 자동으로 올라오게 함
-                                .focused($focused)
-                            // 스크롤 타겟 ID , 스크롤 대상으로 설정
-                                .id("textEditorScroll")
-                            
-                            // placeholder - TextEidtor는 기본 제공 안됨
-                            if content.isEmpty {
-                                Text("일기를 입력해 주세요!")
-                                    .foregroundStyle(.gray)
-                                    .padding(.top, 8)
-                            }
-                        }
-                        .padding()
-                        
-                        // 텍스트가 변경될 때마다 자동 스크롤 -> 자동 줄 바꿈
-                        .onChange(of: content ) { _, _ in
-                            withAnimation {
-                                proxy.scrollTo("textEditorScroll", anchor: .bottom)
-                            }
-                        }
-                        
-                        // 화면이 표시되는 시점에 초기화 코드 구현, 메모가 전달 되었으면 편집할 내용 표시
-                        // 키보드 올리기
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.focused = true
-                                // 자동 스크롤
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    withAnimation {
-                                        // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                        proxy.scrollTo("textEditorScroll", anchor: .top)
-                                    }
-                                }
-                            }
-                            
-                            if let data = data?.content {
-                                content = data
-                            }
+
+                            // 2) 날짜 (기존 일기 날짜, 우측 정렬)
+                            dateSection
+
+                            // 3) 가로 구분선
+                            Rectangle()
+                                .fill(AppColor.divider)
+                                .frame(height: 1)
+
+                            // 4) 왼쪽 세로선 + [우측 날씨 + 가운데 본문 입력]
+                            contentSection(fillHeight: fillHeight(for: geo.size.height))
                         }
                     }
-                }
-                // 커스텀 키보드 toolbar
-                .customKeyboardToolbar(focused: $focused, content: $content)
-                
-                // PhotoPicker는 권한이 있을 때만 표시
-                .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
-                .onChange(of: selectedItems) { _, newValue in
-                    Task {
-                        await updateSelectedImage(newItems: newValue)
-                        
-                        // 이미지 변경 후 자동 스크롤
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            withAnimation {
-                                // ScrollViewReader를 통해 textEditorScroll ID로 스크롤 이동
-                                proxy.scrollTo("textEditorScroll", anchor: .top)
-                            }
+                    .background(AppColor.background.ignoresSafeArea())
+                    .onChange(of: content) { _, _ in
+                        withAnimation { proxy.scrollTo("textEditorScroll", anchor: .bottom) }
+                    }
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self.focused = true
+                        }
+                        // 기존 일기 내용 불러오기
+                        if let existing = data?.content {
+                            content = existing
                         }
                     }
-                    // 새로운 이미지 선택시 휴지통 버튼 초기화
-                    isLongPressedPhoto = false
-                }
-                // 권한 거부된 경우 알림
-                .alert(permissionMessage, isPresented: $showPermissionAlert) {
-                    Button("취소") {
-                        
+                    .customKeyboardToolbar(focused: $focused, content: $content)
+                    .photosPicker(isPresented: $showPhotoPicker, selection: $selectedItems, maxSelectionCount: 1, matching: .images)
+                    .onChange(of: selectedItems) { _, newValue in
+                        Task {
+                            await updateSelectedImage(newItems: newValue)
+                        }
+                        isLongPressedPhoto = false
                     }
-                    // 설정으로 이동 후 사용자에게 권한 설정 유도
-                    if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
-                        PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
-                        Button("설정") {
-                            PhotoPermissionManager.openPhotoSetting()
+                    .alert(permissionMessage, isPresented: $showPermissionAlert) {
+                        Button("취소") {}
+                        if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .denied ||
+                            PHPhotoLibrary.authorizationStatus(for: .readWrite) == .restricted {
+                            Button("설정") { PhotoPermissionManager.openPhotoSetting() }
                         }
                     }
-                }
-                
-                
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            showDismissAlert = true
-                        }
-                        label: {
-                            Image(systemName: "xmark")
-                                .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
-                        }
+                    .toolbar { toolbarContent }
+                    .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
+                        Button("나가기", role: .destructive) { dismiss() }
+                        Button("계속 작성", role: .cancel) { showDismissAlert = false }
+                    } message: {
+                        Text("작성한 글이 저장되지 않습니다!")
                     }
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        // 사진은 일단 1장만 저장 - 권한 체크 후 바로 포토 피커 표시
-                        Button {
-                            checkPhotoPermission()
-                        } label: {
-                            Image("gallery_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                        }
-                        
-                        Button {
-                            guard let data = data else { return }
-                            manager.updateDiaryData(entry: data, newContent: content)
-                            // 수정 버튼 누르면 키보드 내려서 showToast 사용자에게 보여주기
-                            self.focused = false
-                            
-                            showToast = true
-                            // 저장하면 toast 메시지로 알려주고 1초 뒤에 dissmiss 실행
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                showToast = false
-                                dismiss()
-                            }
-                        } label: {
-                            Image("checkmark_img")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                    .overlay(alignment: .bottom) {
+                        if showToast {
+                            Text("일기를 수정했어요!")
+                                .customFont(size: 15)
+                                .padding()
+                                .background(AppColor.surface)
+                                .foregroundStyle(AppColor.textPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: AppRadius.small))
+                                .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)
+                                .transition(.opacity)
+                                .animation(.easeInOut, value: showToast)
+                                .padding(.bottom, 50)
                         }
                     }
-                }
-                .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
-                    Button("나가기", role: .destructive) {
-                        dismiss()
-                    }
-                    
-                    Button("계속 작성", role: .cancel) {
-                        showDismissAlert = false
-                    }
-                } message: {
-                    Text("작성한 글이 저장되지 않습니다!")
-                }
-                
-                // 저장하면 toast 메시지로 알려줌
-                if showToast {
-                    VStack {
-                        Text("일기를 수정했어요!")
-                            .padding()
-                            .background(Color(.systemGray5))
-                            .foregroundStyle(.primary) // 다크모드에서도 자동 변경
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
-                    .transition(.opacity)
-                    .animation(.easeInOut, value: showToast)
-                    .padding(.bottom, 50)
-                    
                 }
             }
         }
     }
-    
-    // MARK: - 사진 권한 체크 및 포토 피커 표시 함수
+
+    // MARK: - 사진 블록 (전체 너비 히어로 + 길게 눌러 휴지통, 삭제 시 SwiftData 반영)
+
+    private var photoSection: some View {
+        VStack(spacing: AppSpacing.sm) {
+            ForEach(photoPaths, id: \.self) { path in
+                if let image = FileManagerSet.loadImageFromFileManager(fileName: path) {
+                    ZStack {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 320)
+                            .clipped()
+                            .colorMultiply(isLongPressedPhoto ? .gray : .white)
+                            .onTapGesture {
+                                selectedImageForFullscreen = IdentifiableImage(image: image)
+                            }
+                            .onLongPressGesture {
+                                isLongPressedPhoto.toggle()
+                            }
+
+                        if isLongPressedPhoto {
+                            Button {
+                                deletePhoto(path: path)
+                                isLongPressedPhoto = false
+                            } label: {
+                                Image("trash_img")
+                                    .resizable()
+                                    .frame(width: 50, height: 50)
+                                    .padding()
+                                    .background(AppColor.surface)
+                                    .clipShape(RoundedRectangle(cornerRadius: AppRadius.small))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
+            FullscreenImageView(image: fullScreenImage.image)
+        }
+    }
+
+    /// 편집 화면에서 사진 삭제: 파일 삭제 + SwiftData의 imagePath에서 제거 후 저장.
+    private func deletePhoto(path: String) {
+        FileManagerSet.deleteImageFromFileManager(fileName: path)
+        if let diary = data, var paths = diary.imagePath {
+            paths.removeAll { $0 == path }
+            diary.imagePath = paths.isEmpty ? nil : paths
+            manager.saveContext()
+        }
+    }
+
+    // MARK: - 날짜 (우측 정렬)
+
+    private var dateSection: some View {
+        HStack {
+            Spacer()
+            Text(DateFormatter.dateFormatter.string(from: data?.date ?? Date()))
+                .customFont(size: 17)
+                .foregroundStyle(AppColor.textPrimary)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
+    }
+
+    // MARK: - 본문 영역 (왼쪽 세로선 + 우측 날씨 + 가운데 입력)
+
+    private func contentSection(fillHeight: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            Rectangle()
+                .fill(AppColor.divider)
+                .frame(width: 1)
+                .frame(maxHeight: .infinity)
+
+            VStack(spacing: AppSpacing.lg) {
+                // 날씨 (기존 일기의 날씨, 우측 정렬)
+                weatherBlock
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+
+                // 본문 입력 (가운데 정렬)
+                ZStack(alignment: .top) {
+                    TextEditor(text: $content)
+                        .customFont(size: 17)
+                        .foregroundStyle(AppColor.textPrimary)
+                        .multilineTextAlignment(.center)
+                        .scrollContentBackground(.hidden)
+                        .background(AppColor.background)
+                        .frame(minHeight: 220)
+                        .focused($focused)
+                        .id("textEditorScroll")
+
+                    if content.isEmpty {
+                        Text("일기를 입력해 주세요!")
+                            .customFont(size: 17)
+                            .foregroundStyle(AppColor.textSecondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 8)
+                            .allowsHitTesting(false)
+                    }
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.lg)
+        }
+        .frame(minHeight: fillHeight)
+        .padding(.leading, AppSpacing.md)
+    }
+
+    // MARK: - 날씨 블록 (우측 정렬)
+
+    @ViewBuilder
+    private var weatherBlock: some View {
+        if let symbol = data?.currentWeatherImage {
+            VStack(alignment: .trailing, spacing: AppSpacing.xs) {
+                Image(systemName: symbol)
+                    .symbolRenderingMode(.multicolor)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
+                if !weatherDescription.isEmpty {
+                    Text(weatherDescription)
+                        .customFont(size: 14)
+                        .foregroundStyle(AppColor.textSecondary)
+                }
+            }
+        }
+    }
+
+    /// 저장된 날씨 심볼 이름을 한글 설명으로 변환 (상세 화면과 동일 규칙).
+    private var weatherDescription: String {
+        guard let s = data?.currentWeatherImage else { return "" }
+        switch true {
+        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
+            return "눈"
+        case s.contains("bolt"):
+            return "천둥번개"
+        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"):
+            return "비"
+        case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"):
+            return "안개"
+        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"):
+            return "바람"
+        case s.contains("cloud.sun"), s.contains("cloud.moon"):
+            return "구름 조금"
+        case s.contains("cloud"):
+            return "흐림"
+        case s.contains("sun.max"), s.contains("moon.stars"):
+            return "맑음"
+        default:
+            return ""
+        }
+    }
+
+    private func fillHeight(for totalHeight: CGFloat) -> CGFloat {
+        let reserved: CGFloat = hasPhotos ? 400 : 140
+        return max(totalHeight - reserved, 240)
+    }
+
+    // MARK: - 툴바 (기존 기능 유지)
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button {
+                showDismissAlert = true
+            } label: {
+                Image(systemName: "xmark")
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+        }
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Button {
+                checkPhotoPermission()
+            } label: {
+                Image("gallery_img")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 26, height: 26)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+            Button {
+                saveEdit()
+            } label: {
+                Image("checkmark_img")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+        }
+    }
+
+    // MARK: - 저장 (기존 로직: 내용 업데이트)
+
+    private func saveEdit() {
+        guard let data = data else { return }
+        manager.updateDiaryData(entry: data, newContent: content)
+        self.focused = false
+        showToast = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            showToast = false
+            dismiss()
+        }
+    }
+
+    // MARK: - 사진 권한 체크
+
     private func checkPhotoPermission() {
         PhotoPermissionManager.checkPhotoLibraryPermission { status in
             switch status {
             case .authorized:
-                // 권한이 있으면 사진 선택기 바로 표시
                 self.showPhotoPicker = true
             case .limited:
-                // 제한된 권한도 일단 PhotoPicker 표시하고 메시지로 알림
                 self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
-                // 제한된 권한이 있으면 사진 선택기 바로 표시
                 self.showPhotoPicker = true
-                // self.showPhotoPermissionAlert = true
             case .denied, .restricted:
-                // 권한이 거부된 경우 알림 표시
                 self.permissionMessage = PhotoPermissionManager.photoPermissionMessage(for: status)
                 self.showPermissionAlert = true
             case .notDetermined:
-                // notDetermined 상태는 checkPhotoLibraryPermission 메서드에서 처리됨
-                // 권한 요청 후 콜백에서 다시 이 메서드가 호출됨
                 break
             @unknown default:
                 break
             }
         }
     }
-    
-    // 사용자가 새 이미지를 선택하면 기존 이미지를 삭제하고 새로운 이미지를 저장
+
+    // 새 이미지를 선택하면 기존 이미지를 삭제하고 새 이미지를 저장 (기존 로직 유지)
     private func updateSelectedImage(newItems: [PhotosPickerItem]) async {
-        guard let data = data else {return}
-        
-        // 기존 이미지 삭제 (파일 + SwiftData에서 경로 삭제함)
+        guard let data = data else { return }
+
+        // 기존 이미지 파일 삭제
         if let paths = data.imagePath {
             for path in paths {
                 FileManagerSet.deleteImageFromFileManager(fileName: path)
-                print("기존 이미지와 경로를 삭제했습니다: \(path)")
             }
         }
-        
-        // SwiftData에서 기존 경로 삭제
-        data.imagePath = nil // 기존 이미지 경로 제거
-        try? manager.saveContext() // SwiftData 변경 사항 저장
-        
-        // 기존 UI 데이터 초기화
+        data.imagePath = nil
+        try? manager.saveContext()
+
         imagePath.removeAll()
         selectedItems.removeAll()
-        
-        // 새로운 이미지 추가
+
+        // 새 이미지 저장
         for item in newItems {
-            if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+            if let loaded = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: loaded) {
                 if let savedPath = FileManagerSet.saveImageToFileManager(image: image) {
                     imagePath.append(savedPath)
                 }
@@ -309,19 +371,7 @@ struct EditComposeView: View {
                 }
             }
         }
-        // SwiftData에 새로운 이미지 경로 업데이트
         data.imagePath = imagePath.isEmpty ? nil : imagePath
-        try? manager.saveContext() // 변경 사항 바로 저장
-    }
-    
-    // URL에서 UIImage 로드하는 함수 추가
-    func loadUIImage(from url: URL) -> UIImage? {
-        do {
-            let data = try Data(contentsOf: url)
-            return UIImage(data: data)
-        } catch {
-            print("이미지 로드 실패: \(error)")
-            return nil
-        }
+        try? manager.saveContext()
     }
 }
