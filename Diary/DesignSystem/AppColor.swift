@@ -39,6 +39,6 @@ enum AppColor {
     static let saturday = Color(hex: "#8FA9C0")
 
     // MARK: - 기타
-    /// 은은한 구분선.
-    static let divider = Color(hex: "#EDE8E0")
+    /// 은은한 구분선. 배경과 자연스럽게 구분되도록 살짝 진한 웜그레이.
+    static let divider = Color(hex: "#D9CFC0")
 }

@@ -9,158 +9,84 @@ struct DetailView: View {
     @State private var showDeleteAlert: Bool = false
     // 클릭한 이미지 풀 스크린
     @State private var selectedImageForFullscreen: IdentifiableImage? = nil
-    // 선택한 이미지를 파일로 저장한 후 해당 파일의 URL을 저장하는 배열
-    //@State private var imageUrl: [URL] = []
-    
+
     @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
-    
+
     let data: Diary
-    
+
+    // 사진 보유 여부. 이 값으로 "사진 블록"만 켜고 끈다. 나머지 레이아웃은 동일.
+    private var hasPhotos: Bool {
+        !(data.imagePath?.isEmpty ?? true)
+    }
+
     var body: some View {
         NavigationStack {
-            VStack {
-                ScrollView {
-                    // ComposeView를 통해 현재 날씨 아이콘을 가져오게 되면 보여주기
-                    ZStack {
-                        if let weatherIcon = data.currentWeatherImage {
-                            Image(systemName: weatherIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: 100, maxHeight: 100)
-                                .offset(x: 1, y: 1)
-                                .foregroundStyle(.gray.opacity(0.3))
-                            
-                            Image(systemName: weatherIcon)
-                                .symbolRenderingMode(.multicolor)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: 100, maxHeight: 100)
-                                .onAppear {
-                                    print(weatherIcon)
-                                    if let imagePaths = data.imagePath {
-                                            let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            GeometryReader { geo in
+                ZStack(alignment: .bottom) {
+                    AppColor.background.ignoresSafeArea()
 
-                                            for fileName in imagePaths {
-                                                let fileURL = directory.appendingPathComponent(fileName)
-                                                let exists = FileManager.default.fileExists(atPath: fileURL.path)
-                                                print(" \(fileName) → 존재 여부: \(exists ? "있음" : "없음")")
-                                            }
-                                        } else {
-                                            print("imagePath가 nil 또는 비어 있음")
-                                        }
-                                    print("저장된 imagePath: \(data.imagePath ?? ["없음"])")
-                                }
-                        } else {
-                            
-                        }
-                    }
-                    .shadow(radius: 2)
-                    
-                    Text(DateFormatter.dateFormatter.string(from: data.date))
-                        .padding()
-                        .customFont(size: 16)
-                    //.foregroundStyle(.secondary)
-                
-                    if let paths = data.imagePath, !paths.isEmpty {
-                        ForEach(paths, id: \.self) { fileName in
-                            // 파일명을 받아 실제 UIImage로 변환
-                            if let image = FileManagerSet.loadImageFromFileManager(fileName: fileName) {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 300, height: 300)
-                                    .onTapGesture {
-                                        selectedImageForFullscreen = IdentifiableImage(image: image)
-                                    }
-                            } else {
-                                Text("이미지를 불러올 수 없습니다")
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // 1) 사진 블록 — 있을 때만. 없으면 아래 내용이 자연히 위로 당겨진다.
+                            if hasPhotos {
+                                photoSection
                             }
+
+                            // 2) 날짜 (우측 정렬)
+                            dateSection
+
+                            // 3) 가로 구분선 (원래대로 전체 너비)
+                            Rectangle()
+                                .fill(AppColor.divider)
+                                .frame(height: 1)
+
+                            // 4) 세로 구분선으로 감싼 본문 영역 (날씨 + 설명 + 본문)
+                            contentSection(fillHeight: fillHeight(for: geo.size.height))
                         }
                     }
-                    
-                    Text(data.content)
-                        .padding()
-                    
-                    Spacer(minLength: 0)
-                    
+
+                    // 캡쳐 저장 완료 토스트
+                    if showToast {
+                        Text("스크린샷 앨범 저장 성공")
+                            .customFont(size: 15)
+                            .padding()
+                            .background(AppColor.surface)
+                            .foregroundStyle(AppColor.textPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: AppRadius.small))
+                            .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)
+                            .transition(.opacity)
+                            .animation(.easeInOut, value: showToast)
+                            .padding(.bottom, 50)
+                    }
                 }
             }
-            // 이미지 클릭 시 전체 화면 표시
             .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
                 FullscreenImageView(image: fullScreenImage.image)
             }
-            // 기본 뒤로 가기 버튼 숨김
             .navigationBarBackButtonHidden()
-            // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
-            
-            // MARK: - 캡쳐 공유, 편집, 삭제 버튼
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // 뒤로 가기 버튼
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // 뒤로 가기 동작 (현재 뷰 닫기)
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(Color(uiColor: UIColor.label))
-                    }
-                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
-                }
-                
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        captureScreenShot()
-                        screenshotShareAlert = true  // 캡처 후 Alert 표시
-                    } label: {
-                        Image("share_img")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 26, height: 26) // SF Symbol 크기와 유사하게 조정
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
-                    }
-                    
-                    Menu {
-                        Button(role: .destructive) { showDeleteAlert = true } label: { Text("삭제") }
-                        Button { showEditComposeView = true } label: { Text("편집") }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(Color(uiColor: UIColor.label)) //  다크모드 대응
-                    }
-                }
-                
-            }
+            .toolbar { toolbarContent }
             .alert("일기를 앨범에 저장하시겠습니까?", isPresented: $screenshotShareAlert) {
                 Button("확인") {
                     if let screenshot = screenshotImage {
-                        saveCaptureImageToAlbum(screenshot)  // 앨범 저장
+                        saveCaptureImageToAlbum(screenshot)
                         showToast = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             showToast = false
                         }
-                        shareScreenShot(screenshot)  //  저장 후 공유 실행
-
+                        shareScreenShot(screenshot)
                         // Analytics: 공유/캡처 이벤트(바이럴 지표)
-                        // 공유가 많으면 광고 대신 오가닉 성장 여지가 크다는 신호
                         AnalyticsManager.log(.diaryShared(type: "image"))
                     }
                 }
-                
-                Button("취소", role: .cancel) {
-                }
+                Button("취소", role: .cancel) {}
             } message: {
                 Text("확인을 통해 공유를 시작합니다")
             }
-            
-            // alert로 삭제
             .alert("삭제", isPresented: $showDeleteAlert) {
-                Button(role: .cancel) {
-                } label: {
-                    Text("취소")
-                }
+                Button("취소", role: .cancel) {}
                 Button(role: .destructive) {
                     manager.deleteDiaryData(entry: data)
                     dismiss()
@@ -170,30 +96,171 @@ struct DetailView: View {
             } message: {
                 Text("일기를 삭제할까요?")
             }
-            
-            
             .fullScreenCover(isPresented: $showEditComposeView) {
                 EditComposeView(data: data)
             }
-            // 캡쳐 이미지를 저장하면 Toast 메시지로 알려줌
-            if showToast {
-                VStack {
-                    Text("스크린샷 앨범 저장 성공")
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .transition(.opacity)
-                .animation(.easeInOut, value: showToast)
-                .padding(.bottom, 50)
-            }
         }
-        // Analytics: 일기 상세(열람) 화면 진입 추적.
-        // 체류가 긴 핵심 화면이라 배너광고 위치 판단의 근거가 된다.
         .trackScreen("Detail")
     }
-    
+
+    // MARK: - 사진 블록 (있을 때만)
+
+    private var photoSection: some View {
+        VStack(spacing: AppSpacing.sm) {
+            if let paths = data.imagePath {
+                ForEach(paths, id: \.self) { fileName in
+                    if let image = FileManagerSet.loadImageFromFileManager(fileName: fileName) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 320)
+                            .clipped()
+                            .onTapGesture {
+                                selectedImageForFullscreen = IdentifiableImage(image: image)
+                            }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - 날짜 (우측 정렬)
+
+    private var dateSection: some View {
+        HStack {
+            Spacer()
+            Text(DateFormatter.dateFormatter.string(from: data.date))
+                .customFont(size: 17)
+                .foregroundStyle(AppColor.textPrimary)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
+    }
+
+    // MARK: - 본문 영역 (세로 구분선으로 감싼 날씨 + 설명 + 본문)
+
+    private func contentSection(fillHeight: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            // 왼쪽 세로선만 (아래까지 채움)
+            Rectangle()
+                .fill(AppColor.divider)
+                .frame(width: 1)
+                .frame(maxHeight: .infinity)
+                //.offset(y: -30) 
+
+            VStack(spacing: AppSpacing.lg) {
+                // 날씨 아이콘 + 설명 (우측 정렬)
+                VStack(alignment: .trailing, spacing: AppSpacing.xs) {
+                    weatherIcon(size: 48)
+
+                    // 날씨 설명 (B): 저장된 날씨 데이터를 한글 설명으로 표시
+                    if !weatherDescription.isEmpty {
+                        Text(weatherDescription)
+                            .customFont(size: 14)
+                            .foregroundStyle(AppColor.textSecondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+
+                // 본문 (가운데 정렬, 넉넉한 줄간격)
+                Text(data.content)
+                    .customFont(size: 18)
+                    .foregroundStyle(AppColor.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(8)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, AppSpacing.sm)
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.lg)
+        }
+        .frame(minHeight: fillHeight)
+        // 왼쪽 세로선을 화면 끝에서 살짝 안쪽으로 → 공책 여백선처럼 보이게
+        .padding(.leading, AppSpacing.md)
+    }
+
+    /// 세로선이 아래까지 채워지도록 본문 영역의 최소 높이를 계산.
+    /// 사진이 있으면 위 공간을 그만큼 빼서 스크롤과 자연스럽게 맞춘다.
+    private func fillHeight(for totalHeight: CGFloat) -> CGFloat {
+        let reserved: CGFloat = hasPhotos ? 400 : 140
+        return max(totalHeight - reserved, 240)
+    }
+
+    // MARK: - 날씨 아이콘 (공통)
+
+    @ViewBuilder
+    private func weatherIcon(size: CGFloat) -> some View {
+        if let symbol = data.currentWeatherImage {
+            Image(systemName: symbol)
+                .symbolRenderingMode(.multicolor)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+        }
+    }
+
+    /// 저장된 날씨 심볼 이름을 한글 설명으로 변환한다.
+    /// (일기에는 SF Symbol 이름만 저장되므로 키워드로 판별)
+    private var weatherDescription: String {
+        guard let s = data.currentWeatherImage else { return "" }
+        switch true {
+        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
+            return "눈"
+        case s.contains("bolt"):
+            return "천둥번개"
+        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"):
+            return "비"
+        case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"):
+            return "안개"
+        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"):
+            return "바람"
+        case s.contains("cloud.sun"), s.contains("cloud.moon"):
+            return "구름 조금"
+        case s.contains("cloud"):
+            return "흐림"
+        case s.contains("sun.max"), s.contains("moon.stars"):
+            return "맑음"
+        default:
+            return ""
+        }
+    }
+
+    // MARK: - 툴바
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+            .tint(.clear)
+        }
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            Button {
+                captureScreenShot()
+                screenshotShareAlert = true
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+            Menu {
+                Button(role: .destructive) { showDeleteAlert = true } label: { Text("삭제") }
+                Button { showEditComposeView = true } label: { Text("편집") }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundStyle(AppColor.textPrimary)
+            }
+        }
+    }
+
+    // MARK: - 캡처/공유 (기존 기능 유지)
+
     private func captureScreenShot() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first,
@@ -201,16 +268,27 @@ struct DetailView: View {
             self.screenshotImage = screenshot
         }
     }
-    
-    //  기본 공유 시트에서 "이미지 + 텍스트"를 포함하도록 수정
+
     private func shareScreenShot(_ screenshot: UIImage) {
         let shareText = "일기 캡쳐본"
         let activityViewController = UIActivityViewController(activityItems: [shareText, screenshot], applicationActivities: nil)
-        
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first,
            let rootViewController = window.rootViewController {
             rootViewController.present(activityViewController, animated: true)
         }
     }
+}
+
+#Preview("사진 없음") {
+    // 사진이 없는 경우 = 사진 블록만 빠지고 나머지는 그대로 위로 당겨진 레이아웃.
+    DetailView(data: Diary(
+        content: "오랜만에 친구들과 바다를 보러 강릉에 다녀왔다.",
+        date: Date(),
+        imagePath: nil,
+        currentWeatherImage: "cloud.sun.fill"
+    ))
+    .environmentObject(SwiftDataManager())
+    .environmentObject(FontManager())
 }
