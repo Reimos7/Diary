@@ -53,14 +53,15 @@ struct CalendarSetView: UIViewRepresentable {
         
         // 범위 설정 (월 단위 범위만 보이도록 설정)
         calendar.scope = .month
-        calendar.backgroundColor = isDarkMode ? UIColor.black : UIColor.white
-        calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor.black
-        calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor.black
-        
+        // 새 디자인 팔레트 적용 (라이트 우선, 다크는 추후)
+        calendar.backgroundColor = isDarkMode ? UIColor.black : UIColor(AppColor.background)
+        calendar.appearance.headerTitleColor = isDarkMode ? UIColor.white : UIColor(AppColor.textPrimary)
+        calendar.appearance.titleDefaultColor = isDarkMode ? UIColor.white : UIColor(AppColor.textPrimary)
+
         // 선택한 날짜 기본 스타일 제거
         calendar.appearance.selectionColor = .clear
         //calendar.appearance.titleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
-        calendar.appearance.subtitleSelectionColor = isDarkMode ? UIColor.white : UIColor.black
+        calendar.appearance.subtitleSelectionColor = isDarkMode ? UIColor.white : UIColor(AppColor.textPrimary)
         
         // 커스텀 폰트 적용
         // 날짜 숫자
@@ -74,20 +75,20 @@ struct CalendarSetView: UIViewRepresentable {
         
         calendar.appearance.todayColor = .clear
         calendar.appearance.titleTodayColor = calendar.appearance.titleDefaultColor
-        // 오늘 날짜 하단 "오늘" 텍스트 색상 다크모드 대응
-        calendar.appearance.subtitleTodayColor = isDarkMode ? UIColor.white : UIColor.black
+        // 오늘 날짜 하단 "오늘" 텍스트 색상
+        calendar.appearance.subtitleTodayColor = isDarkMode ? UIColor.white : UIColor(AppColor.accent)
         // "오늘" 글자 내리기
         calendar.appearance.subtitleOffset = CGPoint(x: 0, y: 5)
         calendar.appearance.selectionColor = .clear
-        // 일요일은 항상 red, 토요일은 blue 평일은 라이트 모드 black, 다크모드 white
+        // 일요일은 뮤트 로즈, 토요일은 더스티 블루, 평일은 웜그레이 (라이트 기준)
         calendar.calendarWeekdayView.weekdayLabels.enumerated().forEach { index, label in
             switch index {
             case 0:  // 일요일
-                label.textColor = .systemRed
+                label.textColor = UIColor(AppColor.sunday)
             case 6:  // 토요일
-                label.textColor = .systemBlue
+                label.textColor = UIColor(AppColor.saturday)
             default:
-                label.textColor = isDarkMode ? .white : .black
+                label.textColor = isDarkMode ? .white : UIColor(AppColor.textPrimary)
             }
         }
     }
@@ -120,9 +121,9 @@ struct CalendarSetView: UIViewRepresentable {
         @MainActor func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
             return parent.manager.hasDiaryentry(for: date) ? 1 : 0
         }
-        // 이벤트 점 색상을 빨간색으로 변경
+        // 이벤트 점 색상을 포인트 색(더스티 블루)으로
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-            return [UIColor.red]
+            return [UIColor(AppColor.accent)]
         }
         
         // 캘린더 날짜 색상 적용 함수
@@ -140,10 +141,10 @@ struct CalendarSetView: UIViewRepresentable {
                 return UIColor.lightGray
             }
             switch weekday {
-            case 1: return .systemRed      // 일요일
-            case 7: return .systemBlue     // 토요일
+            case 1: return UIColor(AppColor.sunday)     // 일요일
+            case 7: return UIColor(AppColor.saturday)   // 토요일
             default:
-                return calendar.traitCollection.userInterfaceStyle == .dark ? .white : .black
+                return calendar.traitCollection.userInterfaceStyle == .dark ? .white : UIColor(AppColor.textPrimary)
             }
         }
         // 날짜 선택 시 콜백 호출
@@ -186,17 +187,17 @@ struct CalendarSetView: UIViewRepresentable {
             // 요일에 따라 색상 다르게 설정
             switch weekday {
             case 1: // 일요일
-                return UIColor.systemRed
+                return UIColor(AppColor.sunday)
             case 7:  // 토요일
-                return UIColor.systemBlue
+                return UIColor(AppColor.saturday)
             default:
                 return calendar.appearance.titleDefaultColor // 평일: 기본 색
             }
         }
-        
-        // 선택한 날짜의 . 색상 무조건 빨강으로
+
+        // 선택한 날짜의 이벤트 점 색상도 포인트 색으로
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-            return [UIColor.red]
+            return [UIColor(AppColor.accent)]
         }
     }
 }

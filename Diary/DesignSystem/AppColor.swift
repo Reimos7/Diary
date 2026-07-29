@@ -41,4 +41,13 @@ enum AppColor {
     // MARK: - 기타
     /// 은은한 구분선. 배경과 자연스럽게 구분되도록 살짝 진한 웜그레이.
     static let divider = Color(hex: "#D9CFC0")
+
+    /// 캘린더에서 "일기가 있는 날"에 칠하는 파스텔 색 모음. 날짜별로 다르게(랜덤) 사용.
+    static let calendarPastels: [Color] = [
+        Color(hex: "#D8CCF0"), // 라벤더
+        Color(hex: "#FFD9C0"), // 피치
+        Color(hex: "#C4E4D6"), // 민트
+        Color(hex: "#F2CCCC"), // 로즈
+        Color(hex: "#C9DCF0")  // 스카이
+    ]
 }
