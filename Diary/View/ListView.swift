@@ -58,17 +58,6 @@ struct ListView: View {
                         .customFont(size: 20)
                         .foregroundStyle(AppColor.textPrimary)
                 }
-                // 뒤로 가기 버튼
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(AppColor.textPrimary)
-                    }
-                    .tint(.clear)
-                }
-                
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {

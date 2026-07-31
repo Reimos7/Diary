@@ -18,6 +18,9 @@ struct HomeView: View {
     @EnvironmentObject var service: WeatherService
     @EnvironmentObject var manager: SwiftDataManager
 
+    // 위젯 딥링크로 작성 화면을 열지 여부 (탭바에서 전달받음)
+    @Binding var shouldNavigateToCompose: Bool
+
     // 표지 사진 파일명(FileManager에 저장된 이름). 없으면 빈 문자열 → 기본 그라데이션 표시.
     @AppStorage("coverImageFileName") private var coverImageFileName: String = ""
 
@@ -25,24 +28,45 @@ struct HomeView: View {
     @State private var coverPickerItem: PhotosPickerItem?
     // 로드된 표지 이미지 (파일명으로부터 불러온 결과)
     @State private var coverImage: UIImage?
+    // 오늘 일기 쓰기 화면 표시 여부
+    @State private var showCompose = false
+    // 표지를 길게 눌러 삭제 모드인지
+    @State private var isLongPressedCover = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                headerSection
-                weatherCard
-                coverSection
-                writeButton
+        ZStack {
+            // 배경만 화면 전체(안전영역 무시), 콘텐츠는 안전영역 존중 → 상단 안 잘림
+            AppColor.background.ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                    headerSection
+                    weatherCard
+                    coverSection
+                    writeButton
+                }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, AppSpacing.lg)
+                .padding(.bottom, AppSpacing.xl)
             }
-            .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.lg)
-            .padding(.bottom, AppSpacing.xl)
         }
-        .background(AppColor.background.ignoresSafeArea())
         .onAppear(perform: loadCoverImage)
         // 사용자가 표지 사진을 새로 고르면 저장 후 화면 갱신
         .onChange(of: coverPickerItem) { _, newItem in
             Task { await handlePickedCover(newItem) }
+        }
+        // 위젯 딥링크로 작성 화면 열기
+        .onChange(of: shouldNavigateToCompose) { _, newValue in
+            if newValue {
+                showCompose = true
+                shouldNavigateToCompose = false
+            }
+        }
+        // 오늘 일기 쓰기 화면 (전체 화면)
+        .fullScreenCover(isPresented: $showCompose) {
+            NavigationStack {
+                ComposeView(model: service.currentWeather)
+            }
         }
     }
 
@@ -113,52 +137,93 @@ struct HomeView: View {
     // MARK: - 표지 사진
 
     private var coverSection: some View {
-        ZStack(alignment: .bottomTrailing) {
-            // 표지 이미지가 있으면 사진, 없으면 은은한 기본 그라데이션
-            if let coverImage {
-                Image(uiImage: coverImage)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                LinearGradient(
-                    colors: [AppColor.accentSoft, AppColor.surface],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .overlay(
-                    Text("나만의 표지를 더해보세요")
-                        .customFont(size: 15)
-                        .foregroundStyle(AppColor.textSecondary)
-                )
-            }
-
-            // 표지 변경 버튼
-            PhotosPicker(selection: $coverPickerItem, matching: .images) {
-                HStack(spacing: AppSpacing.xs) {
-                    Image(systemName: "pencil")
-                    Text("표지 변경")
-                        .customFont(size: 13)
+        // 폴라로이드(흰 액자) 스타일: 흰 테두리 + 하단 두꺼운 여백 + 그림자
+        //
+        // [핵심] 빈 컨테이너(Color.clear)로 규격(전체너비 × 300)을 먼저 고정하고,
+        // 이미지는 그 위에 오버레이로 얹는다. 이러면 이미지 원본 크기가 커도
+        // 레이아웃에 영향을 주지 못해 화면이 깨지지 않는다.
+        Color.clear
+            .frame(maxWidth: .infinity)
+            .frame(height: 300)
+            .overlay { coverImageArea }
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            // 길게 누른 상태 → 가운데 휴지통
+            .overlay {
+                if isLongPressedCover && coverImage != nil {
+                    Button {
+                        deleteCover()
+                    } label: {
+                        Image("trash_img")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .padding()
+                            .background(AppColor.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: AppRadius.small))
+                    }
                 }
-                .foregroundStyle(AppColor.textPrimary)
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.vertical, AppSpacing.sm)
-                .background(AppColor.surface.opacity(0.9))
-                .clipShape(Capsule())
-                .padding(AppSpacing.md)
             }
+            // 표지 변경 버튼 (우하단)
+            .overlay(alignment: .bottomTrailing) {
+                PhotosPicker(selection: $coverPickerItem, matching: .images) {
+                    HStack(spacing: AppSpacing.xs) {
+                        Image(systemName: "pencil")
+                        Text("표지 변경").customFont(size: 13)
+                    }
+                    .foregroundStyle(AppColor.textPrimary)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(AppColor.surface.opacity(0.9))
+                    .clipShape(Capsule())
+                    .padding(AppSpacing.md)
+                }
+            }
+            // 흰 액자: 테두리 여백 + 하단 두꺼운 여백(폴라로이드)
+            .padding(12)
+            .padding(.bottom, 24)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
+            .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)
+    }
+
+    /// 표지 이미지 영역 (사진 있으면 사진, 없으면 그라데이션 안내)
+    @ViewBuilder
+    private var coverImageArea: some View {
+        if let coverImage {
+            Image(uiImage: coverImage)
+                .resizable()
+                .scaledToFill()
+                .colorMultiply(isLongPressedCover ? .gray : .white)
+                .onLongPressGesture { isLongPressedCover.toggle() }
+        } else {
+            LinearGradient(
+                colors: [AppColor.accentSoft, AppColor.surface],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .overlay(
+                Text("나만의 표지를 더해보세요")
+                    .customFont(size: 15)
+                    .foregroundStyle(AppColor.textSecondary)
+            )
         }
-        .frame(height: 320)
-        .frame(maxWidth: .infinity)
-        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
-        .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)
+    }
+
+    /// 표지 사진 삭제: 파일 삭제 + 저장된 파일명 제거 + 화면 갱신.
+    private func deleteCover() {
+        if !coverImageFileName.isEmpty {
+            FileManagerSet.deleteImageFromFileManager(fileName: coverImageFileName)
+        }
+        coverImageFileName = ""
+        coverImage = nil
+        isLongPressedCover = false
     }
 
     // MARK: - 오늘 일기 쓰기 버튼
 
     private var writeButton: some View {
-        // 실제 화면 이동은 이후 탭바/네비게이션 단계에서 연결한다.
         Button {
-            // TODO: 작성 화면으로 이동 (탭바 연결 단계에서 처리)
+            showCompose = true
         } label: {
             HStack(spacing: AppSpacing.sm) {
                 Image(systemName: "square.and.pencil")
@@ -206,7 +271,7 @@ struct HomeView: View {
 #Preview {
     // Preview용 의존성 주입. 실제 날씨 API는 안 도므로 날씨 카드는 로딩 상태로 보일 수 있음.
     // .customFont가 FontManager를 EnvironmentObject로 요구하므로 반드시 함께 주입한다.
-    HomeView()
+    HomeView(shouldNavigateToCompose: .constant(false))
         .environmentObject(WeatherService())
         .environmentObject(SwiftDataManager())
         .environmentObject(FontManager())

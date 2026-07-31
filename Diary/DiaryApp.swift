@@ -77,12 +77,9 @@ struct DiaryApp: App {
                             }
                         }
                 } else {
-                    // 메인 뷰 표시
+                    // 메인 뷰 표시 (새 디자인: 탭바)
                     GlobalFontView(size: 16) {
-                        MainView(
-                            model: .preview,
-                            shouldNavigateToCompose: $shouldNavigateToCompose
-                        )
+                        MainTabView(shouldNavigateToCompose: $shouldNavigateToCompose)
                     }
                     // 폰트 매니저
                     .environmentObject(fontManager)
