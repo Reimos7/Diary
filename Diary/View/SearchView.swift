@@ -23,35 +23,34 @@ struct SearchView: View {
                 // 검색어가 존재하고 입력이 완료된 경우에만 리스트에 표시함
                 if !keyword.isEmpty && !isTyping {
                     List {
-                        ForEach(manager.diaryEntries, id: \.self) { data in
-                            
+                        ForEach(Array(manager.diaryEntries.enumerated()), id: \.element) { pair in
                             ZStack {
-                                // 디자인을 위해 보여지는 셀
-                                DiaryCell(data: data)
-                                
-                                // 터치 영역을 위한 투명 버튼
-                                NavigationLink(destination: DetailView(data: data)) {
+                                // 기록 화면과 동일한 셀 (좌우 번갈아 배치)
+                                DiaryCell(data: pair.element, index: pair.offset)
+
+                                NavigationLink(destination: DetailView(data: pair.element)) {
                                     EmptyView()
                                 }
-                                // 네비게이션 링크 표시 제거
                                 .buttonStyle(.plain)
-                                // 터치 영역 유지 (보이지 않게 설정)
                                 .opacity(0)
                             }
-                            // 줄 없애기
                             .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 0, leading: AppSpacing.md, bottom: 0, trailing: AppSpacing.md))
                         }
                     }
-                    // 리스트 배경 제거
-                    .scrollContentBackground(.hidden)
                     .listStyle(.plain)
-                    
+                    .scrollContentBackground(.hidden)
                 } else {
                     Spacer()
                     Text("일기를 검색해주세요")
+                        .customFont(size: 16)
+                        .foregroundStyle(AppColor.textSecondary)
                     Spacer()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .paperBackground()
             // 기본 뒤로 가기 버튼 숨김
             .navigationBarBackButtonHidden()
             // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
@@ -60,30 +59,26 @@ struct SearchView: View {
                 // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        // 뒤로 가기 동작 (현재 뷰 닫기)
                         dismiss()
                     } label: {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color(uiColor: UIColor.label))
-                        
+                            .foregroundStyle(AppColor.textPrimary)
                     }
-                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
+                    .tint(.clear)
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     HStack {
                         TextField("일기를 검색 해주세요", text: $keyword, onEditingChanged: { editing in
-                            // 입력 중이면 true, 입력이 끝나면 false
                             isTyping = editing
                         })
-                        .font(.system(size: 16))
+                        .customFont(size: 16)
+                        .foregroundStyle(AppColor.textPrimary)
                         .padding(1)
                         .frame(maxWidth: .infinity)
                         .textFieldStyle(PlainTextFieldStyle())
-                        //.background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6)))
                         .focused($focused)
-                        
                     }
-                    .padding(.horizontal,5)
+                    .padding(.horizontal, 5)
                     .frame(maxWidth: .infinity)
                 }
                 // 검색 버튼 - 키보드 엔터키와 동일한 액션
@@ -94,9 +89,9 @@ struct SearchView: View {
                         Image("search_img")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 24, height: 24) // SF Symbol 크기와 유사하게 조정
+                            .frame(width: 24, height: 24)
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.primary) // 다크 모드에서 자동으로 흰색 적용
+                            .foregroundStyle(AppColor.textPrimary)
                     }
                 }
             }
@@ -159,4 +154,6 @@ struct NavigationControllerWrapper: UIViewControllerRepresentable {
 
 #Preview {
     SearchView()
+        .environmentObject(SwiftDataManager())
+        .environmentObject(FontManager())
 }
