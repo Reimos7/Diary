@@ -22,21 +22,8 @@ struct FontView: View {
                 Text("위치 권한을 허용하면 날씨를 기록할 수 있어요!\n")
             } else {
                 if let model = service.currentWeather {
-                    Image(systemName: model.icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 100, maxHeight: 100)
-                        .offset(x: 1, y: 1)
-                        .foregroundStyle(.gray.opacity(0.3))
-                    
-                    Image(systemName: model.icon)
-                        .symbolRenderingMode(.multicolor)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 100, maxHeight: 100)
-                        .onAppear {
-                            print(model.icon)
-                        }
+                    // 손그림 커스텀 날씨 아이콘 (홈과 동일한 공유 데이터 재사용, API 추가 호출 없음)
+                    WeatherIconView(symbol: model.icon, size: 90)
                 }
             }
         }

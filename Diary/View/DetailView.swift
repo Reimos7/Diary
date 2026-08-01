@@ -45,6 +45,8 @@ struct DetailView: View {
                             contentSection(fillHeight: fillHeight(for: geo.size.height))
                         }
                     }
+                    // 사진이 있으면 사진이 네비게이션 바 밑까지 꽉 차게 (상단 안전영역 무시)
+                    .ignoresSafeArea(edges: hasPhotos ? .top : [])
 
                     // 캡쳐 저장 완료 토스트
                     if showToast {
@@ -67,6 +69,8 @@ struct DetailView: View {
             .navigationBarBackButtonHidden()
             .background(NavigationControllerWrapper())
             .navigationBarTitleDisplayMode(.inline)
+            // 네비게이션 바 배경 투명 → 사진이 그 아래로 비쳐 상단이 꽉 참
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar { toolbarContent }
             .alert("일기를 앨범에 저장하시겠습니까?", isPresented: $screenshotShareAlert) {
                 Button("확인") {
@@ -110,18 +114,44 @@ struct DetailView: View {
             if let paths = data.imagePath {
                 ForEach(paths, id: \.self) { fileName in
                     if let image = FileManagerSet.loadImageFromFileManager(fileName: fileName) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 320)
-                            .clipped()
-                            .onTapGesture {
-                                selectedImageForFullscreen = IdentifiableImage(image: image)
-                            }
+                        photoImage(image)
                     }
                 }
             }
+        }
+    }
+
+    /// 사진 방향에 따라 다르게 표시.
+    /// - 가로 사진: 비율 유지(scaledToFit) → 잘림 없이 낮고 넓게.
+    /// - 세로 사진: 채우고 크롭(scaledToFill + 고정 높이) → 레터박스 없이 꽉 차게.
+    @ViewBuilder
+    private func photoImage(_ image: UIImage) -> some View {
+        let isLandscape = image.size.width >= image.size.height
+        Group {
+            if isLandscape {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(maxHeight: 420)
+            } else {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 440)
+                    .clipped()
+            }
+        }
+        // 하단을 크림색으로 부드럽게 페이드 → 아래 내용과 자연스럽게 이어짐
+        .overlay(alignment: .bottom) {
+            LinearGradient(colors: [.clear, AppColor.background],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: 90)
+                .allowsHitTesting(false)
+        }
+        .onTapGesture {
+            selectedImageForFullscreen = IdentifiableImage(image: image)
         }
     }
 
@@ -135,24 +165,26 @@ struct DetailView: View {
                 .foregroundStyle(AppColor.textPrimary)
         }
         .padding(.horizontal, AppSpacing.lg)
-        .padding(.vertical, AppSpacing.md)
+        .padding(.vertical, AppSpacing.sm)
     }
 
     // MARK: - 본문 영역 (세로 구분선으로 감싼 날씨 + 설명 + 본문)
 
     private func contentSection(fillHeight: CGFloat) -> some View {
         HStack(spacing: 0) {
-            // 왼쪽 세로선만 (아래까지 채움)
+            // 왼쪽 세로선만.
+            // 위쪽은 공책 여백선처럼 살짝 올라가게(offset -30), 대신 높이를 30 더 늘려 하단까지 이어지게 함.
             Rectangle()
                 .fill(AppColor.divider)
                 .frame(width: 1)
                 .frame(maxHeight: .infinity)
-                //.offset(y: -30)
+                .padding(.bottom, -30)
+                .offset(y: -30)
 
-            VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: AppSpacing.md) {
                 // 날씨 아이콘 + 설명 (우측 정렬)
                 VStack(alignment: .trailing, spacing: AppSpacing.xs) {
-                    weatherIcon(size: 48)
+                    weatherIcon(size: 60)
 
                     // 날씨 설명 (B): 저장된 날씨 데이터를 한글 설명으로 표시
                     if !weatherDescription.isEmpty {
@@ -170,12 +202,11 @@ struct DetailView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(8)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, AppSpacing.sm)
 
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.lg)
+            .padding(.top, AppSpacing.md)
         }
         .frame(minHeight: fillHeight)
         // 왼쪽 세로선을 화면 끝에서 살짝 안쪽으로 → 공책 여백선처럼 보이게
@@ -193,12 +224,8 @@ struct DetailView: View {
 
     @ViewBuilder
     private func weatherIcon(size: CGFloat) -> some View {
-        if let symbol = data.currentWeatherImage {
-            Image(systemName: symbol)
-                .symbolRenderingMode(.multicolor)
-                .resizable()
-                .scaledToFit()
-                .frame(width: size, height: size)
+        if data.currentWeatherImage != nil {
+            WeatherIconView(symbol: data.currentWeatherImage, size: size)
         }
     }
 

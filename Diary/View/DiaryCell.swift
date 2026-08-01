@@ -76,11 +76,7 @@ struct DiaryCell: View {
             // 날씨 (아이콘 + 한글 설명)
             if let symbol = data.currentWeatherImage {
                 HStack(spacing: AppSpacing.xs) {
-                    Image(systemName: symbol)
-                        .symbolRenderingMode(.multicolor)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
+                    WeatherIconView(symbol: symbol, size: 42)
                     if !weatherDescription.isEmpty {
                         Text(weatherDescription)
                             .customFont(size: 13)

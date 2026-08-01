@@ -116,12 +116,8 @@ struct HomeView: View {
                         .foregroundStyle(AppColor.textSecondary)
                 }
                 Spacer()
-                // 오른쪽: 날씨 아이콘
-                Image(systemName: weather.icon)
-                    .symbolRenderingMode(.multicolor)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 56, height: 56)
+                // 오른쪽: 날씨 아이콘 (손그림 커스텀)
+                WeatherIconView(symbol: weather.icon, size: 100)
             } else {
                 // 로딩 중
                 Text("날씨를 불러오는 중...")

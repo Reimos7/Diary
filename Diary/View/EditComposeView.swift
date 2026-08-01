@@ -60,6 +60,8 @@ struct EditComposeView: View {
                         }
                     }
                     .background(AppColor.background.ignoresSafeArea())
+                    // 사진이 있으면 네비게이션 바 밑까지 꽉 차게
+                    .ignoresSafeArea(edges: hasPhotos ? .top : [])
                     .onChange(of: content) { _, _ in
                         withAnimation { proxy.scrollTo("textEditorScroll", anchor: .bottom) }
                     }
@@ -87,6 +89,7 @@ struct EditComposeView: View {
                             Button("설정") { PhotoPermissionManager.openPhotoSetting() }
                         }
                     }
+                    .toolbarBackground(.hidden, for: .navigationBar)
                     .toolbar { toolbarContent }
                     .alert("글 작성을 그만하시나요?", isPresented: $showDismissAlert) {
                         Button("나가기", role: .destructive) { dismiss() }
@@ -124,8 +127,15 @@ struct EditComposeView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 320)
+                            .frame(height: 340)
                             .clipped()
+                            // 하단을 크림색으로 부드럽게 페이드
+                            .overlay(alignment: .bottom) {
+                                LinearGradient(colors: [.clear, AppColor.background],
+                                               startPoint: .top, endPoint: .bottom)
+                                    .frame(height: 90)
+                                    .allowsHitTesting(false)
+                            }
                             .colorMultiply(isLongPressedPhoto ? .gray : .white)
                             .onTapGesture {
                                 selectedImageForFullscreen = IdentifiableImage(image: image)
@@ -176,7 +186,7 @@ struct EditComposeView: View {
                 .foregroundStyle(AppColor.textPrimary)
         }
         .padding(.horizontal, AppSpacing.lg)
-        .padding(.vertical, AppSpacing.md)
+        .padding(.vertical, AppSpacing.sm)
     }
 
     // MARK: - 본문 영역 (왼쪽 세로선 + 우측 날씨 + 가운데 입력)
@@ -188,7 +198,7 @@ struct EditComposeView: View {
                 .frame(width: 1)
                 .frame(maxHeight: .infinity)
 
-            VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: AppSpacing.md) {
                 // 날씨 (기존 일기의 날씨, 우측 정렬)
                 weatherBlock
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -218,7 +228,7 @@ struct EditComposeView: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.lg)
+            .padding(.top, AppSpacing.md)
         }
         .frame(minHeight: fillHeight)
         .padding(.leading, AppSpacing.md)
@@ -230,11 +240,7 @@ struct EditComposeView: View {
     private var weatherBlock: some View {
         if let symbol = data?.currentWeatherImage {
             VStack(alignment: .trailing, spacing: AppSpacing.xs) {
-                Image(systemName: symbol)
-                    .symbolRenderingMode(.multicolor)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 48, height: 48)
+                WeatherIconView(symbol: symbol, size: 60)
                 if !weatherDescription.isEmpty {
                     Text(weatherDescription)
                         .customFont(size: 14)

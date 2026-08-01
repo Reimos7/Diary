@@ -60,11 +60,14 @@ struct ComposeView: View {
                     }
                 }
                 .background(AppColor.background.ignoresSafeArea())
+                // 사진이 있으면 네비게이션 바 밑까지 꽉 차게
+                .ignoresSafeArea(edges: hasPhotos ? .top : [])
                 .onChange(of: content) { _, _ in
                     withAnimation { proxy.scrollTo("textEditorScroll", anchor: .bottom) }
                 }
                 .navigationBarBackButtonHidden()
                 .background(NavigationControllerWrapper())
+                .toolbarBackground(.hidden, for: .navigationBar)
                 .toolbar { toolbarContent }
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -126,8 +129,15 @@ struct ComposeView: View {
                         .resizable()
                         .scaledToFill()
                         .frame(maxWidth: .infinity)
-                        .frame(height: 320)
+                        .frame(height: 340)
                         .clipped()
+                        // 하단을 크림색으로 부드럽게 페이드
+                        .overlay(alignment: .bottom) {
+                            LinearGradient(colors: [.clear, AppColor.background],
+                                           startPoint: .top, endPoint: .bottom)
+                                .frame(height: 90)
+                                .allowsHitTesting(false)
+                        }
                         // 길게 누르면 어두워짐 (삭제 모드 표시)
                         .colorMultiply(isLongPressedPhoto ? .gray : .white)
                         .onTapGesture {
@@ -168,7 +178,7 @@ struct ComposeView: View {
                 .foregroundStyle(AppColor.textPrimary)
         }
         .padding(.horizontal, AppSpacing.lg)
-        .padding(.vertical, AppSpacing.md)
+        .padding(.vertical, AppSpacing.sm)
     }
 
     // MARK: - 본문 영역 (왼쪽 세로선 + 우측 날씨 + 가운데 입력)
@@ -181,7 +191,7 @@ struct ComposeView: View {
                 .frame(width: 1)
                 .frame(maxHeight: .infinity)
 
-            VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: AppSpacing.md) {
                 // 날씨 (우측 정렬)
                 weatherBlock
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -212,7 +222,7 @@ struct ComposeView: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, AppSpacing.lg)
-            .padding(.top, AppSpacing.lg)
+            .padding(.top, AppSpacing.md)
         }
         .frame(minHeight: fillHeight)
         // 왼쪽 세로선을 화면 끝에서 살짝 안쪽으로 (공책 여백선)
@@ -230,11 +240,7 @@ struct ComposeView: View {
                 .multilineTextAlignment(.trailing)
         } else if let model = service.currentWeather {
             VStack(alignment: .trailing, spacing: AppSpacing.xs) {
-                Image(systemName: model.icon)
-                    .symbolRenderingMode(.multicolor)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 48, height: 48)
+                WeatherIconView(symbol: model.icon, size: 60)
                 Text(model.weather)
                     .customFont(size: 14)
                     .foregroundStyle(AppColor.textSecondary)
