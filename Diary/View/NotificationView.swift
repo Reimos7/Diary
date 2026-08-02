@@ -3,6 +3,7 @@
 //  Diary
 //
 //  Created by Reimos on 3/29/25.
+//  새 디자인: 종이 배경 + 카드형 토글. 로직(알림 예약/권한)은 기존 그대로.
 //
 
 import SwiftUI
@@ -14,75 +15,91 @@ struct NotificationView: View {
     @EnvironmentObject var service: WeatherService
     @EnvironmentObject var manager: SwiftDataManager
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationStack {
-            List {
-                Toggle("푸시 알림", isOn: $isOnPushNotification)
-                    .onChange(of: isOnPushNotification) { _ , newValue in
-                        if newValue {
-                            // Toggle on 하면, 앱 권한 설정으로 이동하는 alert 보여주기 
-                            // 권한으로 이동해서 설정 유도
-                            showPushNotificationAlert = true
-                            // 알림 권한 확인 후 일기가 없는 경우 알림 설정
-                            // manager를 직접 사용하여 diary entries 접근
-                            NotificationManager.shared.checkScheduleNotification(entries: manager.diaryEntries)
-                            
-                        } else {
-                            // Toggle off 하면, 이미 예약된 알림을 취소시켜서 알림을 보내지 않게 하기
-                            // 실제 권한 자체는 해제할 수 없기 때문에, 우회적 처리를 하는것이 일반적임
-                            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["diaryReminder"])
-                            // 알림 끄기 - 모든 알림 취소
-                            NotificationManager.shared.cancelPushNotifications()
-                        }
-                        
+            ScrollView {
+                VStack(spacing: AppSpacing.md) {
+                    // 알림 토글 카드
+                    HStack(spacing: AppSpacing.md) {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(AppColor.calendarPastels[0])
+                            .frame(width: 38, height: 38)
+                            .overlay(
+                                Image("notification_img")
+                                    .resizable().scaledToFit()
+                                    .frame(width: 22, height: 22)
+                                    .foregroundStyle(AppColor.textPrimary)
+                            )
+
+                        Text("푸시 알림")
+                            .customFont(size: 16)
+                            .foregroundStyle(AppColor.textPrimary)
+
+                        Spacer()
+
+                        Toggle("", isOn: $isOnPushNotification)
+                            .labelsHidden()
+                            .tint(AppColor.accent)
                     }
-                
-                    .alert("알림 권한이 필요 합니다", isPresented: $showPushNotificationAlert) {
-                        Button(role: .cancel) {
-                            
-                        } label: {
-                            Text("취소")
-                        }
-                        
-                        Button {
-                            // 앱의 설정 화면을 열어 사용자가 위치 권한을 변경할 수 있도록 유도
-                            service.openAppSettings()
-                        } label: {
-                            Text("확인")
-                        }
-                        
-                    } message: {
-                        Text("권한을 허용해 주세요")
-                    }
+                    .padding(AppSpacing.md)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous)
+                            .fill(AppColor.surface)
+                            .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)
+                    )
+
+                    // 안내 문구
+                    Text("오늘 일기를 쓰지 않은 날, 저녁에 잊지 않도록 알려드려요.")
+                        .customFont(size: 13)
+                        .foregroundStyle(AppColor.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, AppSpacing.xs)
+                }
+                .padding(AppSpacing.lg)
+            }
+            .paperBackground()
+            .onChange(of: isOnPushNotification) { _, newValue in
+                if newValue {
+                    showPushNotificationAlert = true
+                    NotificationManager.shared.checkScheduleNotification(entries: manager.diaryEntries)
+                } else {
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["diaryReminder"])
+                    NotificationManager.shared.cancelPushNotifications()
+                }
+            }
+            .alert("알림 권한이 필요 합니다", isPresented: $showPushNotificationAlert) {
+                Button("취소", role: .cancel) {}
+                Button("확인") { service.openAppSettings() }
+            } message: {
+                Text("권한을 허용해 주세요")
             }
             .navigationBarTitleDisplayMode(.inline)
-            // 기본 뒤로 가기 버튼 숨김
             .navigationBarBackButtonHidden()
-            // 스와이프 뒤로 가기 활성화 UIKit의 interactivePopGestureRecognizer 사용
             .background(NavigationControllerWrapper())
             .toolbar {
-                // navigationTitle 대신 커스텀 폰트 적용을 위해 구현
                 ToolbarItem(placement: .principal) {
                     Text("알림 설정")
+                        .customFont(size: 20)
+                        .foregroundStyle(AppColor.textPrimary)
                 }
-                // 뒤로 가기 버튼
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        // 뒤로 가기 동작 (현재 뷰 닫기)
                         dismiss()
                     } label: {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color(uiColor: UIColor.label))
+                            .foregroundStyle(AppColor.textPrimary)
                     }
-                    .tint(.clear) // 버튼에 기본 tint 색(파란색) 무력화
+                    .tint(.clear)
                 }
             }
-            
         }
     }
 }
 
 #Preview {
     NotificationView()
+        .environmentObject(WeatherService())
+        .environmentObject(SwiftDataManager())
+        .environmentObject(FontManager())
 }

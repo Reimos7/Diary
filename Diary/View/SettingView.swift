@@ -99,12 +99,11 @@ struct SettingView: View {
         )
     }
 
-    // 행 사이 구분선 (아이콘 너비만큼 들여쓰기)
+    // 행 사이 구분선 (카드 너비만큼 일직선으로)
     private var rowDivider: some View {
         Rectangle()
             .fill(AppColor.divider)
             .frame(height: 1)
-            .padding(.leading, 64)
     }
 
     // MARK: - 설정 행

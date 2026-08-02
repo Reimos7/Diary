@@ -123,12 +123,8 @@ struct EditComposeView: View {
             ForEach(photoPaths, id: \.self) { path in
                 if let image = FileManagerSet.loadImageFromFileManager(fileName: path) {
                     ZStack {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 340)
-                            .clipped()
+                        // 사진 방향에 따라 다르게 (상세 화면과 동일): 가로=fit, 세로=fill 크롭
+                        photoImage(image)
                             // 하단을 크림색으로 부드럽게 페이드
                             .overlay(alignment: .bottom) {
                                 LinearGradient(colors: [.clear, AppColor.background],
@@ -163,6 +159,26 @@ struct EditComposeView: View {
         }
         .fullScreenCover(item: $selectedImageForFullscreen) { fullScreenImage in
             FullscreenImageView(image: fullScreenImage.image)
+        }
+    }
+
+    /// 사진 방향에 따라 다르게 (상세 화면과 동일). 가로=fit(전체), 세로=fill 크롭(꽉 차게).
+    @ViewBuilder
+    private func photoImage(_ image: UIImage) -> some View {
+        let isLandscape = image.size.width >= image.size.height
+        if isLandscape {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .frame(maxHeight: 420)
+        } else {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 440)
+                .clipped()
         }
     }
 

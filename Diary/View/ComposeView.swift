@@ -124,13 +124,8 @@ struct ComposeView: View {
         VStack(spacing: AppSpacing.sm) {
             ForEach(selectedImages, id: \.self) { image in
                 ZStack {
-                    // 전체 너비 히어로 사진 (상세 화면과 동일한 모습)
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 340)
-                        .clipped()
+                    // 사진 방향에 따라 다르게 (상세 화면과 동일): 가로=fit, 세로=fill 크롭
+                    photoImage(image)
                         // 하단을 크림색으로 부드럽게 페이드
                         .overlay(alignment: .bottom) {
                             LinearGradient(colors: [.clear, AppColor.background],
@@ -165,6 +160,26 @@ struct ComposeView: View {
                     }
                 }
             }
+        }
+    }
+
+    /// 사진 방향에 따라 다르게 (상세 화면과 동일). 가로=fit(전체), 세로=fill 크롭(꽉 차게).
+    @ViewBuilder
+    private func photoImage(_ image: UIImage) -> some View {
+        let isLandscape = image.size.width >= image.size.height
+        if isLandscape {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .frame(maxHeight: 420)
+        } else {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 440)
+                .clipped()
         }
     }
 
