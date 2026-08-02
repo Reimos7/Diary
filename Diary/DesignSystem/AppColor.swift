@@ -42,7 +42,8 @@ enum AppColor {
     /// 은은한 구분선. 배경과 자연스럽게 구분되도록 살짝 진한 웜그레이.
     static let divider = Color(hex: "#D9CFC0")
 
-    /// 캘린더에서 "일기가 있는 날"에 칠하는 파스텔 색 모음. 날짜별로 다르게(랜덤) 사용.
+    /// 캘린더에서 "일기가 있는 날"에 칠하는 파스텔 색 모음.
+    /// (설정 아이콘 배지 등 일반 파스텔 용도로도 사용)
     static let calendarPastels: [Color] = [
         Color(hex: "#D8CCF0"), // 라벤더
         Color(hex: "#FFD9C0"), // 피치
@@ -50,4 +51,12 @@ enum AppColor {
         Color(hex: "#F2CCCC"), // 로즈
         Color(hex: "#C9DCF0")  // 스카이
     ]
+
+    // MARK: - 날씨별 파스텔 (캘린더에서 그날 날씨에 맞는 색)
+    static let weatherSunny  = Color(hex: "#FFF3B0") // 맑음 → 노랑
+    static let weatherCloudy = Color(hex: "#EFE8D8") // 구름/흐림 → 크림베이지
+    static let weatherRain   = Color(hex: "#B8CFF0") // 비 → 블루
+    static let weatherSnow   = Color(hex: "#D8CCF0") // 눈 → 라벤더
+    static let weatherThunder = Color(hex: "#C9B8E8") // 천둥 → 퍼플
+    static let weatherWind   = Color(hex: "#C4E4D6") // 바람 → 민트
 }

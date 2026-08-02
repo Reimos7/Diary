@@ -102,16 +102,16 @@ struct CalendarView: View {
                 navigateToCompose = true
             } label: {
                 ZStack {
-                    // 일기 있는 날 = 파스텔 원
+                    // 일기 있는 날 = 그날 날씨에 맞는 파스텔 원
                     if hasDiary {
                         Circle()
-                            .fill(pastelColor(for: date))
+                            .fill(weatherColor(for: date))
                             .frame(width: 38, height: 38)
                     }
-                    // 오늘 = 테두리 원
+                    // 오늘 = 포인트 색 테두리 원
                     if isToday {
                         Circle()
-                            .stroke(AppColor.textPrimary, lineWidth: 1)
+                            .stroke(AppColor.accent, lineWidth: 1.5)
                             .frame(width: 38, height: 38)
                     }
                     Text("\(day)")
@@ -223,7 +223,8 @@ struct CalendarView: View {
     }
 
     private func dayColor(_ date: Date, isFuture: Bool) -> Color {
-        if isFuture { return AppColor.textSecondary.opacity(0.4) }
+        // 미래 날짜도 달력으로 읽히도록 너무 흐리지 않게
+        if isFuture { return AppColor.textSecondary.opacity(0.55) }
         let weekday = calendar.component(.weekday, from: date)
         switch weekday {
         case 1: return AppColor.sunday
@@ -232,10 +233,34 @@ struct CalendarView: View {
         }
     }
 
-    /// 날짜 기반 결정적 파스텔 색 (같은 날은 항상 같은 색, 날짜마다 다르게).
-    private func pastelColor(for date: Date) -> Color {
-        let dayNumber = calendar.ordinality(of: .day, in: .era, for: date) ?? 0
-        return AppColor.calendarPastels[dayNumber % AppColor.calendarPastels.count]
+    /// 그날 일기의 날씨에 맞는 파스텔 색 (알록달록하되 "의미"가 있어 산만하지 않음).
+    /// 같은 날짜에 여러 일기가 있으면 첫 일기의 날씨를 사용.
+    private func weatherColor(for date: Date) -> Color {
+        let symbol = manager.diaryEntries.first {
+            calendar.isDate($0.date, inSameDayAs: date)
+        }?.currentWeatherImage
+        return Self.pastelForWeather(symbol)
+    }
+
+    /// 날씨 심볼 → 파스텔 색 (WeatherIconView와 동일한 판별 규칙).
+    static func pastelForWeather(_ symbol: String?) -> Color {
+        guard let s = symbol else { return AppColor.weatherCloudy }
+        switch true {
+        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
+            return AppColor.weatherSnow
+        case s.contains("bolt"):
+            return AppColor.weatherThunder
+        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"):
+            return AppColor.weatherRain
+        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"), s.contains("tornado"):
+            return AppColor.weatherWind
+        case s.contains("cloud"), s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"):
+            return AppColor.weatherCloudy
+        case s.contains("sun"), s.contains("moon"):
+            return AppColor.weatherSunny
+        default:
+            return AppColor.weatherCloudy
+        }
     }
 
     private func changeMonth(_ delta: Int) {
