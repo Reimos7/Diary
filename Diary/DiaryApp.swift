@@ -83,7 +83,9 @@ struct DiaryApp: App {
                     }
                     // 폰트 매니저
                     .environmentObject(fontManager)
-                    .preferredColorScheme(getColorScheme())
+                    // 2.0: 다크모드 미지원 → 라이트 모드로 강제 고정 (테마 설정 숨김과 함께)
+                    // 2.1에서 다크모드 대응 시 아래를 .preferredColorScheme(getColorScheme())로 되돌린다.
+                    .preferredColorScheme(.light)
                     // 위젯에서 딥링크로 앱 열기
                     .onOpenURL { url in
                         handleDeepLink(url)

@@ -28,10 +28,11 @@ struct SettingView: View {
                             settingRow(icon: "notification_img", color: AppColor.calendarPastels[0], title: "알림")
                         }
                         rowDivider
-                        NavigationLink { ThemeView() } label: {
-                            settingRow(icon: "theme_img", color: AppColor.calendarPastels[1], title: "테마")
-                        }
-                        rowDivider
+                        // 2.0: 다크모드 미지원으로 테마 설정 숨김 (라이트 고정). 2.1에서 다크모드 대응 시 복구.
+                        // NavigationLink { ThemeView() } label: {
+                        //     settingRow(icon: "theme_img", color: AppColor.calendarPastels[1], title: "테마")
+                        // }
+                        // rowDivider
                         NavigationLink { FontView() } label: {
                             settingRow(icon: "font_img", color: AppColor.calendarPastels[2], title: "폰트")
                         }
