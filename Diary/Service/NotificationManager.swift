@@ -65,8 +65,11 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         let today = DateFormatter.dateScheduleNotificationFormatter.string(from: Date())
         let content = UNMutableNotificationContent()
         
-        content.title = String(localized: "🗓️ \(today) 오늘 일기가 없어요")
-        content.body = String(localized: "✍️ 하루를 기록해 보는 건 어때요?")
+        // String(localized:)는 앱의 appLanguage가 아니라 기기 시스템 언어를 따르므로
+        // 앱 내에서 언어를 바꿔도 반영되지 않는다(한글 고정).
+        // localizedString(_:)은 LocalizedStringResource(locale: appLocale)로 앱 언어를 정확히 따른다.
+        content.title = localizedString("🗓️ \(today) 오늘 일기가 없어요")
+        content.body = localizedString("✍️ 하루를 기록해 보는 건 어때요?")
         content.sound = UNNotificationSound.default
         
         // 알림 날짜및 시간 설정
