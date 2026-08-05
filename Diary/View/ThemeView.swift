@@ -56,7 +56,7 @@ struct ThemeView: View {
 
     // MARK: - 테마 선택 행
 
-    private func themeRow(_ theme: ThemeOption, icon: String, title: String, color: Color) -> some View {
+    private func themeRow(_ theme: ThemeOption, icon: String, title: LocalizedStringKey, color: Color) -> some View {
         Button {
             selectTheme(theme)
         } label: {

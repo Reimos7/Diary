@@ -109,7 +109,9 @@ struct SettingView: View {
 
     // MARK: - 설정 행
 
-    private func settingRow(icon: String, color: Color, title: String,
+    // title은 LocalizedStringKey로 받아 번역 카탈로그(xcstrings)와 연결되게 한다.
+    // (String으로 받으면 Text(title)이 번역되지 않음)
+    private func settingRow(icon: String, color: Color, title: LocalizedStringKey,
                             value: String? = nil, showChevron: Bool = true,
                             isSystemIcon: Bool = false) -> some View {
         HStack(spacing: AppSpacing.md) {
