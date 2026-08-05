@@ -10,6 +10,11 @@
 import SwiftUI
 
 struct DiaryCell: View {
+    // 언어 변경 감지용. List가 이미 그려둔 셀은 입력값(data/index)이 그대로면 다시 그리지 않는데,
+    // 날짜는 평범한 String이라 locale 의존성이 없어 언어를 바꿔도 갱신되지 않는다.
+    // appLanguage를 관찰하면 언어 변경 시 이 셀 body가 재실행되어 날짜가 새 locale로 다시 만들어진다.
+    @AppStorage("appLanguage") private var appLanguage: String = resolvedSystemLanguage()
+
     let data: Diary
     /// 리스트에서의 순번. 홀짝에 따라 사진을 좌/우로 번갈아 배치하고 기울임 각도를 다르게 한다.
     var index: Int = 0
@@ -73,12 +78,12 @@ struct DiaryCell: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
-            // 날씨 (아이콘 + 한글 설명)
+            // 날씨 (아이콘 + 번역된 설명)
             if let symbol = data.currentWeatherImage {
                 HStack(spacing: AppSpacing.xs) {
                     WeatherIconView(symbol: symbol, size: 42)
-                    if !weatherDescription.isEmpty {
-                        Text(weatherDescription)
+                    if let desc = WeatherIconView.description(for: symbol) {
+                        Text(desc)
                             .customFont(size: 13)
                             .foregroundStyle(AppColor.textSecondary)
                     }
@@ -112,23 +117,6 @@ struct DiaryCell: View {
         }
     }
 
-    // MARK: - 날씨 심볼 → 한글 설명 (상세 화면과 동일 규칙)
-
-    private var weatherDescription: String {
-        guard let s = data.currentWeatherImage else { return "" }
-        switch true {
-        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
-            return "눈"
-        case s.contains("bolt"): return "천둥번개"
-        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"): return "비"
-        case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"): return "안개"
-        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"): return "바람"
-        case s.contains("cloud.sun"), s.contains("cloud.moon"): return "구름 조금"
-        case s.contains("cloud"): return "흐림"
-        case s.contains("sun.max"), s.contains("moon.stars"): return "맑음"
-        default: return ""
-        }
-    }
 }
 
 #Preview {

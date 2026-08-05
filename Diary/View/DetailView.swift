@@ -186,9 +186,9 @@ struct DetailView: View {
                 VStack(alignment: .trailing, spacing: AppSpacing.xs) {
                     weatherIcon(size: 60)
 
-                    // 날씨 설명 (B): 저장된 날씨 데이터를 한글 설명으로 표시
-                    if !weatherDescription.isEmpty {
-                        Text(weatherDescription)
+                    // 날씨 설명: 저장된 날씨 데이터를 번역된 설명으로 표시
+                    if let desc = WeatherIconView.description(for: data.currentWeatherImage) {
+                        Text(desc)
                             .customFont(size: 14)
                             .foregroundStyle(AppColor.textSecondary)
                     }
@@ -226,32 +226,6 @@ struct DetailView: View {
     private func weatherIcon(size: CGFloat) -> some View {
         if data.currentWeatherImage != nil {
             WeatherIconView(symbol: data.currentWeatherImage, size: size)
-        }
-    }
-
-    /// 저장된 날씨 심볼 이름을 한글 설명으로 변환한다.
-    /// (일기에는 SF Symbol 이름만 저장되므로 키워드로 판별)
-    private var weatherDescription: String {
-        guard let s = data.currentWeatherImage else { return "" }
-        switch true {
-        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
-            return "눈"
-        case s.contains("bolt"):
-            return "천둥번개"
-        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"):
-            return "비"
-        case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"):
-            return "안개"
-        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"):
-            return "바람"
-        case s.contains("cloud.sun"), s.contains("cloud.moon"):
-            return "구름 조금"
-        case s.contains("cloud"):
-            return "흐림"
-        case s.contains("sun.max"), s.contains("moon.stars"):
-            return "맑음"
-        default:
-            return ""
         }
     }
 

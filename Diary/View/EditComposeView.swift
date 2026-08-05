@@ -257,37 +257,12 @@ struct EditComposeView: View {
         if let symbol = data?.currentWeatherImage {
             VStack(alignment: .trailing, spacing: AppSpacing.xs) {
                 WeatherIconView(symbol: symbol, size: 60)
-                if !weatherDescription.isEmpty {
-                    Text(weatherDescription)
+                if let desc = WeatherIconView.description(for: symbol) {
+                    Text(desc)
                         .customFont(size: 14)
                         .foregroundStyle(AppColor.textSecondary)
                 }
             }
-        }
-    }
-
-    /// 저장된 날씨 심볼 이름을 한글 설명으로 변환 (상세 화면과 동일 규칙).
-    private var weatherDescription: String {
-        guard let s = data?.currentWeatherImage else { return "" }
-        switch true {
-        case s.contains("snow"), s.contains("snowflake"), s.contains("sleet"), s.contains("hail"):
-            return "눈"
-        case s.contains("bolt"):
-            return "천둥번개"
-        case s.contains("rain"), s.contains("drizzle"), s.contains("heavyrain"):
-            return "비"
-        case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"):
-            return "안개"
-        case s.contains("wind"), s.contains("hurricane"), s.contains("tropicalstorm"):
-            return "바람"
-        case s.contains("cloud.sun"), s.contains("cloud.moon"):
-            return "구름 조금"
-        case s.contains("cloud"):
-            return "흐림"
-        case s.contains("sun.max"), s.contains("moon.stars"):
-            return "맑음"
-        default:
-            return ""
         }
     }
 
