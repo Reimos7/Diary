@@ -326,6 +326,8 @@ struct ComposeView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 showToast = false
                 dismiss()
+                // 저장 완료(작성 화면 닫힘) 직후 = 자연스러운 정지점. 조건 충족 시 전면 광고.
+                InterstitialAdManager.shared.notifyDiarySaved()
             }
         }
     }

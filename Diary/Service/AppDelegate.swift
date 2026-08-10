@@ -18,6 +18,7 @@
 import UIKit
 import FirebaseCore
 import FirebaseMessaging
+import GoogleMobileAds
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -40,6 +41,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         //    이 호출이 있어야 아래 didRegisterForRemoteNotifications 콜백으로 디바이스 토큰이 전달된다.
         //    (실제 알림 권한 요청/표시는 기존 NotificationManager가 담당하므로 여기서는 등록만 한다)
         application.registerForRemoteNotifications()
+
+        // 4) Google Mobile Ads(AdMob) SDK 시작.
+        //    한 번만 호출하면 되며, 이후 배너/전면 광고를 로드할 수 있다.
+        //    완료 핸들러는 지금은 불필요하므로 nil. (첫 광고 로드 전에 반드시 start되어 있어야 함)
+        MobileAds.shared.start(completionHandler: nil)
+
+        // 5) 전면 광고 미리 로드. 저장 시점에 바로 띄울 수 있도록 준비만 해둔다.
+        InterstitialAdManager.shared.preload()
 
         return true
     }

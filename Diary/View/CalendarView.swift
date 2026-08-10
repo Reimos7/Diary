@@ -38,6 +38,12 @@ struct CalendarView: View {
                 .padding(AppSpacing.lg)
             }
             .background(AppColor.background.ignoresSafeArea())
+            // 하단 고정 배너 광고. safeAreaInset을 쓰면 배너가 항상 하단에 고정되고,
+            // 위의 ScrollView 콘텐츠는 배너 높이만큼 자동으로 밀려 서로 겹치지 않는다.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAd()
+                    .background(AppColor.background)
+            }
             .navigationDestination(isPresented: $navigateToCompose) {
                 CalendarComposeView(selectedDate: $selectedDate)
             }

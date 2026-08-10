@@ -14,27 +14,73 @@ struct ListView: View {
     @State private var sortByDateDesc: Bool = true
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: SwiftDataManager
+
+    // 네이티브 광고 삽입 간격(일기 N개마다 광고 1장).
+    // 사용량 적은 앱은 "첫 광고가 빨리 나오는 것"이 노출/수익에 중요 → 3으로 설정.
+    // (글 3개만 있어도 광고 1회 노출 보장, 정책상 1:3 밀도도 안전)
+    private let adInterval = 3
+
+    // 리스트의 한 행: 일기 셀 또는 광고.
+    private enum FeedRow: Identifiable {
+        case diary(offset: Int, entry: Diary)
+        case ad(slot: Int)
+
+        var id: String {
+            switch self {
+            case let .diary(_, entry): return "diary-\(ObjectIdentifier(entry))"
+            case let .ad(slot): return "ad-\(slot)"
+            }
+        }
+    }
+
+    // 일기 목록에 adInterval 간격으로 광고 행을 끼운 최종 행 배열.
+    private var feedRows: [FeedRow] {
+        var rows: [FeedRow] = []
+        var adSlot = 0
+        for (offset, entry) in manager.diaryEntries.enumerated() {
+            rows.append(.diary(offset: offset, entry: entry))
+            if (offset + 1) % adInterval == 0 {
+                rows.append(.ad(slot: adSlot))
+                adSlot += 1
+            }
+        }
+        return rows
+    }
     
     var body: some View {
         NavigationStack() {
             List {
-                ForEach(Array(manager.diaryEntries.enumerated()), id: \.element) { pair in
-                    ZStack {
-                        // 실제로 보이는 셀 (좌우 번갈아 배치를 위해 순번 전달)
-                        DiaryCell(data: pair.element, index: pair.offset)
+                // 일기 셀과 광고를 하나의 행 모델(FeedRow)로 합쳐 단일 ForEach로 그린다.
+                // (한 요소가 여러 뷰를 반환하는 방식은 onDelete와 충돌해 광고 행이 안 그려질 수 있어 이렇게 분리)
+                ForEach(feedRows) { row in
+                    switch row {
+                    case let .diary(offset, entry):
+                        ZStack {
+                            // 실제로 보이는 셀 (좌우 번갈아 배치를 위해 순번 전달)
+                            DiaryCell(data: entry, index: offset)
 
-                        // 터치 영역을 만들기 위한 투명 버튼 → 상세 이동
-                        NavigationLink(destination: DetailView(data: pair.element)) {
-                            EmptyView()
+                            // 터치 영역을 만들기 위한 투명 버튼 → 상세 이동
+                            NavigationLink(destination: DetailView(data: entry)) {
+                                EmptyView()
+                            }
+                            .buttonStyle(.plain)
+                            .opacity(0)
                         }
-                        .buttonStyle(.plain)
-                        .opacity(0)
+                        .listRowSeparator(.hidden)      // 줄 없애기
+                        .listRowBackground(Color.clear) // 행 배경 투명 (크림 배경 보이게)
+                        .listRowInsets(EdgeInsets(top: 0, leading: AppSpacing.md, bottom: 0, trailing: AppSpacing.md))
+
+                    case .ad:
+                        // 네이티브 광고 행. 삭제 스와이프는 비활성화(일기만 삭제 가능).
+                        NativeAdCard()
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: AppSpacing.sm, leading: AppSpacing.md,
+                                                      bottom: AppSpacing.sm, trailing: AppSpacing.md))
+                            .deleteDisabled(true)
                     }
-                    .listRowSeparator(.hidden)      // 줄 없애기
-                    .listRowBackground(Color.clear) // 행 배경 투명 (크림 배경 보이게)
-                    .listRowInsets(EdgeInsets(top: 0, leading: AppSpacing.md, bottom: 0, trailing: AppSpacing.md))
                 }
-                .onDelete(perform: delete)
+                .onDelete(perform: deleteRows)
 
             }
             .listStyle(.plain)
@@ -89,12 +135,20 @@ struct ListView: View {
         }
     }
     // 스와이프 삭제 기능
-    func delete(set: IndexSet) {
-        for index in set {
+    // IndexSet은 feedRows(일기+광고 혼합) 기준이므로, 일기 행만 골라 실제 일기를 삭제한다.
+    func deleteRows(_ offsets: IndexSet) {
+        let rows = feedRows
+        let entriesToDelete: [Diary] = offsets.compactMap { idx in
+            if case let .diary(_, entry) = rows[idx] { return entry }
+            return nil
+        }
+        for entry in entriesToDelete {
             // SwiftData(Context)에서 삭제
-            manager.deleteDiaryData(entry: manager.diaryEntries[index])
-            // 배열에서도 즉시 삭제
-            manager.diaryEntries.remove(at: index)
+            manager.deleteDiaryData(entry: entry)
+            // 배열에서도 즉시 삭제 (Diary는 클래스이므로 === 로 식별)
+            if let i = manager.diaryEntries.firstIndex(where: { $0 === entry }) {
+                manager.diaryEntries.remove(at: i)
+            }
             // 삭제 후 바로 SwiftData context 저장
             manager.saveContext()
         }
