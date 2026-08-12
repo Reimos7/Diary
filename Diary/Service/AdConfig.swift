@@ -12,8 +12,20 @@
 //
 
 import Foundation
+import GoogleMobileAds
 
 enum AdConfig {
+
+    // ATT(추적 동의)를 구현하지 않으므로, 모든 광고 요청을 "비개인화(NPA)"로 강제한다.
+    // 이렇게 하면 사용자 추적 없이 광고가 나가고, App Store 개인정보 라벨의 "추적"을 전부 "아니오"로 둘 수 있다.
+    // (앱이 커지면 ATT + 개인화 광고로 전환 예정)
+    static func makeRequest() -> Request {
+        let request = Request()
+        let extras = Extras()
+        extras.additionalParameters = ["npa": "1"]   // npa=1 → 비개인화 광고
+        request.register(extras)
+        return request
+    }
 
     // 구글이 공개한 "테스트 전용" 광고 단위 ID (누구나 사용 가능, 항상 테스트 광고만 나옴)
     private enum Test {

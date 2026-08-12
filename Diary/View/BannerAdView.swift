@@ -21,7 +21,7 @@ private struct BannerContainer: UIViewRepresentable {
         let banner = BannerView(adSize: AdSizeBanner)   // 표준 320x50
         banner.adUnitID = adUnitID
         banner.rootViewController = Self.rootViewController()
-        banner.load(Request())
+        banner.load(AdConfig.makeRequest())
         return banner
     }
 

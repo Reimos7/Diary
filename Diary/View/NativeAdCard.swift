@@ -34,7 +34,7 @@ final class NativeAdLoader: NSObject, ObservableObject {
                               adTypes: [.native],
                               options: nil)
         loader.delegate = self
-        loader.load(Request())
+        loader.load(AdConfig.makeRequest())
         self.adLoader = loader   // 로드 완료 전 해제되지 않도록 강한 참조 유지
     }
 }

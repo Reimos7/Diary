@@ -37,7 +37,7 @@ final class InterstitialAdManager: NSObject {
 
     /// 미리 로드해 둔다. (앱 시작 시 1회 + 광고가 닫힐 때마다 호출)
     func preload() {
-        InterstitialAd.load(with: AdConfig.interstitialUnitID, request: Request()) { [weak self] ad, error in
+        InterstitialAd.load(with: AdConfig.interstitialUnitID, request: AdConfig.makeRequest()) { [weak self] ad, error in
             if let error = error {
                 #if DEBUG
                 print("전면 광고 로드 실패: \(error.localizedDescription)")
