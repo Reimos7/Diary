@@ -22,11 +22,11 @@ enum AdConfig {
         static let native = "ca-app-pub-3940256099942544/3986624511"
     }
 
-    // 실제 광고 단위 ID (AdMob 콘솔에서 발급 후 교체). 배포 전까지는 테스트 ID로 폴백한다.
+    // 실제 광고 단위 ID (AdMob 콘솔 발급값). RELEASE 빌드에서만 사용된다.
     private enum Real {
-        static let banner = ""        // TODO: AdMob에서 발급한 배너 광고 단위 ID
-        static let interstitial = ""  // TODO: AdMob에서 발급한 전면 광고 단위 ID
-        static let native = ""        // TODO: AdMob에서 발급한 네이티브 광고 단위 ID
+        static let banner = "ca-app-pub-4251482602787219/5005836084"
+        static let interstitial = "ca-app-pub-4251482602787219/7816546266"
+        static let native = "ca-app-pub-4251482602787219/1179251650"
     }
 
     // DEBUG에서는 테스트 ID, RELEASE에서는 실 ID(비어 있으면 테스트 ID로 안전 폴백).

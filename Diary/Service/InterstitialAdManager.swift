@@ -39,12 +39,16 @@ final class InterstitialAdManager: NSObject {
     func preload() {
         InterstitialAd.load(with: AdConfig.interstitialUnitID, request: Request()) { [weak self] ad, error in
             if let error = error {
-                print("❌ 전면 광고 로드 실패: \(error.localizedDescription)")
+                #if DEBUG
+                print("전면 광고 로드 실패: \(error.localizedDescription)")
+                #endif
                 return
             }
             self?.interstitial = ad
             ad?.fullScreenContentDelegate = self
-            print("✅ 전면 광고 로드 성공")
+            #if DEBUG
+            print("전면 광고 로드 성공")
+            #endif
         }
     }
 
@@ -91,7 +95,9 @@ extension InterstitialAdManager: FullScreenContentDelegate {
     }
     // 표시 실패 시에도 정리하고 다음을 로드한다.
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("❌ 전면 광고 표시 실패: \(error.localizedDescription)")
+        #if DEBUG
+        print("전면 광고 표시 실패: \(error.localizedDescription)")
+        #endif
         interstitial = nil
         preload()
     }

@@ -41,11 +41,15 @@ final class NativeAdLoader: NSObject, ObservableObject {
 
 extension NativeAdLoader: NativeAdLoaderDelegate {
     func adLoader(_ adLoader: AdLoader, didReceive nativeAd: NativeAd) {
-        print("✅ 네이티브 광고 로드 성공: \(nativeAd.headline ?? "-")")
+        #if DEBUG
+        print("네이티브 광고 로드 성공: \(nativeAd.headline ?? "-")")
+        #endif
         self.nativeAd = nativeAd
     }
     func adLoader(_ adLoader: AdLoader, didFailToReceiveAdWithError error: Error) {
-        print("❌ 네이티브 광고 로드 실패: \(error.localizedDescription)")
+        #if DEBUG
+        print("네이티브 광고 로드 실패: \(error.localizedDescription)")
+        #endif
     }
 }
 
