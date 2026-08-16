@@ -7,5 +7,12 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>dovemayo.otf</string>
+		<string>NanumPen.otf</string>
+		<string>Cafe24Dongdong-v2.0.otf</string>
+		<string>Cafe24Syongsyong-v2.0.otf</string>
+	</array>
 </dict>
 </plist>

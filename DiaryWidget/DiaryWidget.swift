@@ -33,6 +33,29 @@ private extension Color {
     static let gdSaturday = Color(gdHex: "8FA9C0")
 }
 
+// MARK: - 커스텀 폰트 (App Group으로 받은 사용자 선택 폰트를 위젯 텍스트에 적용)
+// 폰트 파일이 위젯 타깃에 없으면 .custom은 시스템 폰트로 자동 폴백된다(크래시 없음).
+
+private struct GDFontNameKey: EnvironmentKey {
+    static let defaultValue: String = "Cafe24DongdongOTF"
+}
+private extension EnvironmentValues {
+    var gdFontName: String {
+        get { self[GDFontNameKey.self] }
+        set { self[GDFontNameKey.self] = newValue }
+    }
+}
+private struct GDFontModifier: ViewModifier {
+    @Environment(\.gdFontName) private var fontName
+    let size: CGFloat
+    func body(content: Content) -> some View {
+        content.font(.custom(fontName, size: size))
+    }
+}
+private extension View {
+    func gdFont(_ size: CGFloat) -> some View { modifier(GDFontModifier(size: size)) }
+}
+
 // MARK: - 손그림 날씨 아이콘 (앱 WeatherIconView와 동일 매핑)
 
 /// SF Symbol 이름 → 손그림 커스텀 에셋 이름(위젯 카탈로그에 복사됨). 매핑 없으면 nil.
@@ -88,7 +111,7 @@ private struct GDStreakBadge: View {
             HStack(spacing: 3) {
                 Text("🔥").font(.system(size: 11))
                 Text("\(days)일 연속")
-                    .font(.system(size: 11, weight: .semibold))
+                    .gdFont(12)
                     .foregroundStyle(Color.gdTextPrimary)
             }
             .padding(.horizontal, 8).padding(.vertical, 4)
@@ -111,6 +134,7 @@ struct TodayDiaryProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodayDiaryEntry>) -> Void) {
         let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)
         let appLanguage = sharedDefaults?.string(forKey: "appLanguage") ?? "en"
+        let fontName = sharedDefaults?.string(forKey: "selectedFont") ?? "Cafe24DongdongOTF"
 
         let currentDate = Date()
         let todayDiary = fetchTodayDiary()
@@ -123,7 +147,8 @@ struct TodayDiaryProvider: TimelineProvider {
             hasWrittenToday: todayDiary != nil,
             diaryDates: diaryDates,
             streak: streak,
-            appLanguage: appLanguage
+            appLanguage: appLanguage,
+            fontName: fontName
         )
 
         let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
@@ -205,6 +230,7 @@ struct TodayDiaryEntry: TimelineEntry {
     let diaryDates: Set<Date>
     var streak: Int = 0
     var appLanguage: String = "en"
+    var fontName: String = "Cafe24DongdongOTF"
 }
 
 struct DiarySnapshot {
@@ -241,7 +267,7 @@ struct SmallWidgetView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top) {
                 Text(entry.date, style: .date)
-                    .font(.system(size: 12, weight: .medium))
+                    .gdFont(13)
                     .foregroundStyle(Color.gdTextSecondary)
                     .lineLimit(1).minimumScaleFactor(0.8)
                 Spacer()
@@ -252,13 +278,13 @@ struct SmallWidgetView: View {
 
             if entry.hasWrittenToday, let diary = entry.todayDiary {
                 Text(diary.content)
-                    .font(.system(size: 15))
+                    .gdFont(16)
                     .foregroundStyle(Color.gdTextPrimary)
                     .lineLimit(3)
                     .multilineTextAlignment(.leading)
             } else {
                 Text("오늘의 순간을\n기록해보세요")
-                    .font(.system(size: 15, weight: .medium))
+                    .gdFont(16)
                     .foregroundStyle(Color.gdTextPrimary)
                     .lineSpacing(2)
             }
@@ -282,7 +308,7 @@ struct MediumWidgetView: View {
             // 왼쪽: 날짜 + 손그림 날씨
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.date, style: .date)
-                    .font(.system(size: 12, weight: .medium))
+                    .gdFont(13)
                     .foregroundStyle(Color.gdTextSecondary)
                     .lineLimit(2).minimumScaleFactor(0.8)
                 Spacer()
@@ -295,7 +321,7 @@ struct MediumWidgetView: View {
             // 오른쪽: 본문/유도 + 스트릭
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.hasWrittenToday ? "오늘의 일기" : "오늘의 일기를 남겨보세요")
-                    .font(.system(size: 12, weight: .semibold))
+                    .gdFont(13)
                     .foregroundStyle(Color.gdTextSecondary)
 
                 if entry.hasWrittenToday, let diary = entry.todayDiary {
@@ -306,7 +332,7 @@ struct MediumWidgetView: View {
                         .multilineTextAlignment(.leading)
                 } else {
                     Text("탭하여 기록을 시작하세요")
-                        .font(.system(size: 14))
+                        .gdFont(15)
                         .foregroundStyle(Color.gdTextPrimary)
                 }
 
@@ -330,7 +356,7 @@ struct LargeWidgetView: View {
         VStack(spacing: 10) {
             HStack {
                 Text(headerDateString)
-                    .font(.system(size: 17, weight: .bold))
+                    .gdFont(19)
                     .foregroundStyle(Color.gdTextPrimary)
                 Spacer()
                 if entry.streak > 0 { GDStreakBadge(days: entry.streak) }
@@ -371,7 +397,7 @@ struct CalendarGridView: View {
             HStack(spacing: 0) {
                 ForEach(0..<7, id: \.self) { index in
                     Text(weekdaySymbols[index])
-                        .font(.system(size: 11, weight: .medium))
+                        .gdFont(12)
                         .foregroundStyle(weekdayColor(for: index))
                         .frame(maxWidth: .infinity)
                 }
@@ -399,7 +425,7 @@ struct CalendarGridView: View {
         if dateInfo.isCurrentMonth {
             VStack(spacing: 3) {
                 Text("\(dateInfo.day)")
-                    .font(.system(size: 12, weight: isToday(dateInfo.date) ? .bold : .regular))
+                    .gdFont(13)
                     .foregroundStyle(dateForegroundColor(for: dateInfo, weekday: weekday))
                     .frame(width: 26, height: 26)
                     .background(
@@ -469,6 +495,7 @@ struct DiaryWidget: Widget {
         StaticConfiguration(kind: kind, provider: TodayDiaryProvider()) { entry in
             TodayDiaryWidgetEntryView(entry: entry)
                 .environment(\.locale, Locale(identifier: entry.appLanguage))
+                .environment(\.gdFontName, entry.fontName)   // 사용자 선택 폰트 적용
                 .containerBackground(for: .widget) {
                     Color.gdBackground   // 크림 배경 (2.0 통일)
                 }

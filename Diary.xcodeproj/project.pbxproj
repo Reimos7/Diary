@@ -61,6 +61,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: InfoPlist.strings",
+				"Font/Cafe24Dongdong-v2.0.otf",
+				"Font/Cafe24Syongsyong-v2.0.otf",
+				Font/dovemayo.otf,
+				Font/NanumPen.otf,
 				Model/Model.swift,
 				Model/SharedModelContainer.swift,
 			);

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 class FontManager: ObservableObject {
     // @AppStorage로 UserDefaults와 연동되어 선택된 폰트를 저장
@@ -24,6 +25,10 @@ class FontManager: ObservableObject {
     
     func changeFont(to fontName: String) {
         currentFont = fontName
+        // 위젯은 별도 프로세스라 App Group으로 폰트를 공유받는다. 선택값을 동기화하고 위젯을 갱신.
+        let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)
+        sharedDefaults?.set(fontName, forKey: "selectedFont")
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     static func displayName(for font: String) -> String {

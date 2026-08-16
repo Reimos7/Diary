@@ -55,6 +55,9 @@ struct DiaryApp: App {
         if sharedDefaults?.string(forKey: "appLanguage") == nil {
             sharedDefaults?.set(appLanguage, forKey: "appLanguage")
         }
+        // 위젯이 커스텀 폰트를 App Group으로 읽으므로, 현재 선택된 폰트를 매 실행 시 동기화
+        let currentFont = UserDefaults.standard.string(forKey: "selectedFont") ?? "Cafe24DongdongOTF"
+        sharedDefaults?.set(currentFont, forKey: "selectedFont")
     }
 
     var body: some Scene {
