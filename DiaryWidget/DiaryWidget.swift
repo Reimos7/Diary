@@ -75,13 +75,13 @@ private func gdWeatherAsset(for symbol: String?) -> String? {
     case s.contains("cloud.sun"):
         return "weather_cloudy_day"
     case s.contains("cloud.moon"):
-        return "weather_cloudy_night"
+        return "cloudy_night"
     case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"), s.contains("mist"):
         return "weather_cloudy"
     case s.contains("cloud"):
         return "weather_cloudy"
     case s.contains("moon"):
-        return "weather_clear_night"
+        return "clear_night"
     case s.contains("sun"):
         return "weather_clear_day"
     default:
@@ -153,10 +153,14 @@ private struct GDStreakBadge: View {
     var body: some View {
         if days > 0 {
             HStack(spacing: 3) {
-                Text("🔥").font(.system(size: 11))
-                Text("\(days)일 연속")
+    
+                Image("sesac")
+                    .resizable().scaledToFit()
+                    .frame(height: 16)
+                Text("\(days)일째 기록 중")
                     .gdFont(12)
                     .foregroundStyle(Color.gdTextPrimary)
+                    .lineLimit(1)
             }
             .padding(.horizontal, 8).padding(.vertical, 4)
             .background(Capsule().fill(Color.gdAccentSoft))
@@ -181,9 +185,11 @@ struct TodayDiaryProvider: TimelineProvider {
         let fontName = sharedDefaults?.string(forKey: "selectedFont") ?? "Cafe24DongdongOTF"
 
         let currentDate = Date()
-        let todayDiary = fetchTodayDiary()
-        let diaryDates = fetchThisMonthDiaryDates()
-        let streak = computeStreak()
+        // 컨테이너/컨텍스트를 1회만 생성해 3개 조회에 공유 (위젯 시간·메모리 예산 절약)
+        let modelContext = ModelContext(SharedModelContainer.create())
+        let todayDiary = fetchTodayDiary(modelContext)
+        let diaryDates = fetchThisMonthDiaryDates(modelContext)
+        let streak = totalDiaryCount(modelContext)
 
         let entry = TodayDiaryEntry(
             date: currentDate,
@@ -199,10 +205,8 @@ struct TodayDiaryProvider: TimelineProvider {
         completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
 
-    private func fetchTodayDiary() -> DiarySnapshot? {
+    private func fetchTodayDiary(_ context: ModelContext) -> DiarySnapshot? {
         do {
-            let container = SharedModelContainer.create()
-            let context = ModelContext(container)
             let calendar = Calendar.current
             let startOfToday = calendar.startOfDay(for: Date())
             let endOfToday = calendar.date(byAdding: .day, value: 1, to: startOfToday)!
@@ -218,10 +222,8 @@ struct TodayDiaryProvider: TimelineProvider {
         }
     }
 
-    private func fetchThisMonthDiaryDates() -> Set<Date> {
+    private func fetchThisMonthDiaryDates(_ context: ModelContext) -> Set<Date> {
         do {
-            let container = SharedModelContainer.create()
-            let context = ModelContext(container)
             let calendar = Calendar.current
             let now = Date()
             let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
@@ -236,29 +238,10 @@ struct TodayDiaryProvider: TimelineProvider {
         }
     }
 
-    /// 오늘(또는 오늘 미작성 시 어제)까지 연속으로 일기가 있는 날 수.
-    private func computeStreak() -> Int {
+    /// 총 일기 개수 (홈 화면 "N일째 기록 중"과 동일한 기준).
+    private func totalDiaryCount(_ context: ModelContext) -> Int {
         do {
-            let container = SharedModelContainer.create()
-            let context = ModelContext(container)
-            let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
-            let start = calendar.date(byAdding: .day, value: -120, to: today)!
-            let descriptor = FetchDescriptor<Diary>(predicate: #Predicate { $0.date >= start })
-            let days = Set(try context.fetch(descriptor).map { calendar.startOfDay(for: $0.date) })
-
-            var cursor = today
-            if !days.contains(today) {
-                // 오늘 미작성 → 어제까지의 연속 기록을 보여준다(아직 살아있는 스트릭)
-                cursor = calendar.date(byAdding: .day, value: -1, to: today)!
-                if !days.contains(cursor) { return 0 }
-            }
-            var streak = 0
-            while days.contains(cursor) {
-                streak += 1
-                cursor = calendar.date(byAdding: .day, value: -1, to: cursor)!
-            }
-            return streak
+            return try context.fetchCount(FetchDescriptor<Diary>())
         } catch {
             return 0
         }

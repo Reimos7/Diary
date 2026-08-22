@@ -80,9 +80,15 @@ struct HomeView: View {
                 .foregroundStyle(AppColor.textPrimary)
 
             // 기록 일수 — 총 일기 개수 기반 (성취감 요소)
-            Text("📖 \(streakCount)일째 기록 중")
-                .customFont(size: 15)
-                .foregroundStyle(AppColor.textSecondary)
+            HStack(spacing: 5) {
+                Image("sesac")
+                    .resizable().scaledToFit()
+                    .frame(height: 26)          // 시각적 크기(크게 보이게)
+                    .frame(height: 20)          // 행이 차지하는 높이 고정 → 홈이 안 길어짐(넘치는 부분은 겹쳐 그려짐)
+                Text("\(streakCount)일째 기록 중")
+                    .customFont(size: 15)
+                    .foregroundStyle(AppColor.textSecondary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -163,12 +169,14 @@ struct HomeView: View {
             .overlay(alignment: .bottomTrailing) {
                 PhotosPicker(selection: $coverPickerItem, matching: .images) {
                     HStack(spacing: AppSpacing.xs) {
-                        Image(systemName: "pencil")
+                        Image("book")
+                            .resizable().scaledToFit()
+                            .frame(height: 22)      // 아이콘: 높이 기준. 이 숫자만 조절
                         Text("표지 변경").customFont(size: 13)
                     }
                     .foregroundStyle(AppColor.textPrimary)
                     .padding(.horizontal, AppSpacing.md)
-                    .padding(.vertical, AppSpacing.sm)
+                    .frame(height: 40)              // 캡슐 높이 고정: 아이콘 키워도 캡슐 그대로
                     .background(AppColor.surface.opacity(0.9))
                     .clipShape(Capsule())
                     .padding(AppSpacing.md)
@@ -222,13 +230,15 @@ struct HomeView: View {
             showCompose = true
         } label: {
             HStack(spacing: AppSpacing.sm) {
-                Image(systemName: "square.and.pencil")
+                Image("pen")
+                    .resizable().scaledToFit()
+                    .frame(height: 30)          // 아이콘: 높이 기준(3:2라 폭 자동). 이 숫자만 바꾸면 아이콘 크기 조절
                 Text("오늘 일기 쓰기")
                     .customFont(size: 17)
             }
             .foregroundStyle(AppColor.surface)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppSpacing.md)
+            .frame(height: 58)                  // 버튼 높이 고정: 아이콘 키워도 버튼은 그대로
             .background(AppColor.accent)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.small, style: .continuous))
         }

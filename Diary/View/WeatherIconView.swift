@@ -52,7 +52,7 @@ struct WeatherIconView: View {
         case s.contains("cloud.sun"):
             return "weather_cloudy_day"
         case s.contains("cloud.moon"):
-            return "weather_cloudy_night"
+            return "cloudy_night"
         // 안개/연무/먼지/스모그 → 구름만 아이콘으로 대체
         case s.contains("fog"), s.contains("haze"), s.contains("smoke"), s.contains("dust"), s.contains("mist"):
             return "weather_cloudy"
@@ -61,7 +61,7 @@ struct WeatherIconView: View {
             return "weather_cloudy"
         // 맑음 (낮/밤)
         case s.contains("moon"):
-            return "weather_clear_night"
+            return "clear_night"
         case s.contains("sun"):
             return "weather_clear_day"
         default:
