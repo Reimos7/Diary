@@ -58,6 +58,9 @@ struct DiaryApp: App {
         // 위젯이 커스텀 폰트를 App Group으로 읽으므로, 현재 선택된 폰트를 매 실행 시 동기화
         let currentFont = UserDefaults.standard.string(forKey: "selectedFont") ?? "Cafe24DongdongOTF"
         sharedDefaults?.set(currentFont, forKey: "selectedFont")
+
+        // 위젯이 사진을 읽을 수 있도록 기존 사진을 App Group으로 1회 마이그레이션(복사)
+        FileManagerSet.migratePhotosToAppGroupIfNeeded()
     }
 
     var body: some Scene {

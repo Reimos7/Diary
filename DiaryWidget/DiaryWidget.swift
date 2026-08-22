@@ -10,6 +10,8 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
+import UIKit
+import ImageIO
 
 // MARK: - 2.0 색상 팔레트 (앱 AppColor와 동일 값, 위젯 타깃 자체 정의)
 
@@ -100,6 +102,48 @@ private struct GDWeatherIcon: View {
                 .resizable().scaledToFit().frame(width: size, height: size)
                 .foregroundStyle(Color.gdTextSecondary)
         }
+    }
+}
+
+// MARK: - 사진(폴라로이드)
+
+/// App Group 컨테이너에서 사진을 "다운샘플링"해서 로드(위젯 메모리 한도 대응).
+private func gdLoadThumbnail(_ fileName: String?, maxPixel: CGFloat) -> UIImage? {
+    guard let fileName,
+          let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: SharedModelContainer.appGroupIdentifier)
+    else { return nil }
+    let url = dir.appendingPathComponent(fileName)
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
+    let options: [CFString: Any] = [
+        kCGImageSourceCreateThumbnailFromImageAlways: true,
+        kCGImageSourceCreateThumbnailWithTransform: true,
+        kCGImageSourceThumbnailMaxPixelSize: maxPixel
+    ]
+    guard let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+    return UIImage(cgImage: cg)
+}
+
+/// List(기록) 화면과 동일한 찢은 종이(photo_frame) 프레임. 회전 없이 반듯하게.
+private struct GDPolaroid: View {
+    let image: UIImage
+    /// 사진(프레임 안쪽) 크기.
+    var size: CGFloat
+    /// 프레임 테두리가 사진 가장자리를 덮도록 하는 여백.
+    var inset: CGFloat = 9
+
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .frame(width: size, height: size)
+            .clipped()
+            .padding(inset)
+            .overlay(
+                // 찢은 종이 프레임을 위에 겹침 (가운데가 뚫려 사진이 비침) — List와 동일
+                Image("photo_frame")
+                    .resizable()
+            )
+            .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 3)
     }
 }
 
@@ -264,35 +308,57 @@ struct SmallWidgetView: View {
     let entry: TodayDiaryEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .top) {
-                Text(entry.date, style: .date)
-                    .gdFont(13)
-                    .foregroundStyle(Color.gdTextSecondary)
-                    .lineLimit(1).minimumScaleFactor(0.8)
-                Spacer()
-                GDWeatherIcon(symbol: entry.todayDiary?.weatherImage, size: 30)
+        // 오늘 사진(있으면 다운샘플 로드)
+        let photo = gdLoadThumbnail(entry.todayDiary?.imagePath, maxPixel: 340)
+
+        if let photo {
+            // 사진 있는 날: 실제 위젯 높이를 재서, 상하 레이블+여백을 뺀 나머지에 사진을 최대 크기로 배치
+            GeometryReader { geo in
+                // 날짜(~18) + 스트릭(~26) + 위아래 여백을 예약하고 나머지를 사진에 할당
+                let reserved: CGFloat = 20
+                let frameTotal = max(min(geo.size.width, geo.size.height - reserved), 60)
+                VStack(spacing: 0) {
+                    Text(entry.date, style: .date)
+                        .gdFont(12)
+                        .foregroundStyle(Color.gdTextSecondary)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                    Spacer(minLength: 4)
+                    GDPolaroid(image: photo, size: frameTotal - 18)   // 프레임 여백(inset*2=18) 제외
+                    Spacer(minLength: 4)
+                    if entry.streak > 0 {
+                        GDStreakBadge(days: entry.streak)
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
-
-            Spacer(minLength: 4)
-
-            if entry.hasWrittenToday, let diary = entry.todayDiary {
-                Text(diary.content)
-                    .gdFont(16)
-                    .foregroundStyle(Color.gdTextPrimary)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
-            } else {
-                Text("오늘의 순간을\n기록해보세요")
-                    .gdFont(16)
-                    .foregroundStyle(Color.gdTextPrimary)
-                    .lineSpacing(2)
-            }
-
-            Spacer(minLength: 4)
-
-            if entry.streak > 0 {
-                GDStreakBadge(days: entry.streak)
+        } else {
+            // 텍스트 레이아웃 (좌측 정렬)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top) {
+                    Text(entry.date, style: .date)
+                        .gdFont(13)
+                        .foregroundStyle(Color.gdTextSecondary)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                    Spacer()
+                    GDWeatherIcon(symbol: entry.todayDiary?.weatherImage, size: 28)
+                }
+                Spacer(minLength: 4)
+                if entry.hasWrittenToday, let diary = entry.todayDiary {
+                    Text(diary.content)
+                        .gdFont(16)
+                        .foregroundStyle(Color.gdTextPrimary)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                } else {
+                    Text("오늘의 순간을\n기록해보세요")
+                        .gdFont(16)
+                        .foregroundStyle(Color.gdTextPrimary)
+                        .lineSpacing(2)
+                }
+                Spacer(minLength: 4)
+                if entry.streak > 0 {
+                    GDStreakBadge(days: entry.streak)
+                }
             }
         }
     }
@@ -304,31 +370,51 @@ struct MediumWidgetView: View {
     let entry: TodayDiaryEntry
 
     var body: some View {
+        // 오늘 사진(있으면 다운샘플 로드)
+        let photo = gdLoadThumbnail(entry.todayDiary?.imagePath, maxPixel: 400)
+
         HStack(spacing: 14) {
-            // 왼쪽: 날짜 + 손그림 날씨
-            VStack(alignment: .leading, spacing: 6) {
-                Text(entry.date, style: .date)
-                    .gdFont(13)
-                    .foregroundStyle(Color.gdTextSecondary)
-                    .lineLimit(2).minimumScaleFactor(0.8)
-                Spacer()
-                GDWeatherIcon(symbol: entry.todayDiary?.weatherImage, size: 44)
+            // 왼쪽: 사진 있으면 폴라로이드, 없으면 날짜 + 큰 날씨 아이콘
+            if let photo {
+                GDPolaroid(image: photo, size: 140)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(entry.date, style: .date)
+                        .gdFont(13)
+                        .foregroundStyle(Color.gdTextSecondary)
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                    Spacer()
+                    GDWeatherIcon(symbol: entry.todayDiary?.weatherImage, size: 44)
+                }
+                .frame(width: 84, alignment: .leading)
             }
-            .frame(width: 84, alignment: .leading)
 
             Rectangle().fill(Color.gdDivider).frame(width: 1)
 
-            // 오른쪽: 본문/유도 + 스트릭
+            // 오른쪽: (사진일 땐 날짜+날씨 / 아닐 땐 라벨) + 본문 + 스트릭
             VStack(alignment: .leading, spacing: 6) {
-                Text(entry.hasWrittenToday ? "오늘의 일기" : "오늘의 일기를 남겨보세요")
-                    .gdFont(13)
-                    .foregroundStyle(Color.gdTextSecondary)
+                HStack(alignment: .center) {
+                    if photo != nil {
+                        Text(entry.date, style: .date)
+                            .gdFont(13)
+                            .foregroundStyle(Color.gdTextSecondary)
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                    } else {
+                        Text(entry.hasWrittenToday ? "오늘의 일기" : "오늘의 일기를 남겨보세요")
+                            .gdFont(13)
+                            .foregroundStyle(Color.gdTextSecondary)
+                    }
+                    Spacer()
+                    if photo != nil {
+                        GDWeatherIcon(symbol: entry.todayDiary?.weatherImage, size: 26)
+                    }
+                }
 
                 if entry.hasWrittenToday, let diary = entry.todayDiary {
                     Text(diary.content)
-                        .font(.system(size: 15))
+                        .gdFont(16)
                         .foregroundStyle(Color.gdTextPrimary)
-                        .lineLimit(3)
+                        .lineLimit(photo != nil ? 2 : 3)
                         .multilineTextAlignment(.leading)
                 } else {
                     Text("탭하여 기록을 시작하세요")
@@ -343,6 +429,7 @@ struct MediumWidgetView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 4)   // 우측 날짜/날씨·스트릭이 상하 가장자리에 붙지 않게 (좌측 사진엔 영향 없음)
         }
     }
 }

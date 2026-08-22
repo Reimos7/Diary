@@ -3,6 +3,8 @@
 //  Diary
 //
 //  Created by Reimos on 3/4/25.
+//  사진을 App Group 컨테이너에 저장해 위젯과 공유한다.
+//  (위젯은 별도 프로세스라 앱 샌드박스 Documents에 접근할 수 없으므로 App Group 필요)
 //
 
 import Foundation
@@ -10,62 +12,87 @@ import SwiftUI
 
 // 파일명 기반 저장 및 불러오기 방식 적용
 struct FileManagerSet {
-    
-    // MARK: 이미지 저장 (파일명만 반환)
+
+    // MARK: - 저장 위치
+
+    /// 위젯과 공유하는 App Group 컨테이너. (없으면 nil → Documents로 폴백)
+    private static var appGroupDirectory: URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: SharedModelContainer.appGroupIdentifier)
+    }
+
+    /// 기존(구버전) 저장 위치. 마이그레이션 폴백용.
+    private static var documentsDirectory: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+
+    /// 신규 저장 기본 위치: App Group. App Group을 못 얻으면 Documents.
+    private static var primaryDirectory: URL {
+        appGroupDirectory ?? documentsDirectory
+    }
+
+    // MARK: - 이미지 저장 (파일명만 반환)
     static func saveImageToFileManager(image: UIImage) -> String? {
         guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
-        
-        let fileName = UUID().uuidString + ".jpg" // [변경] 고유한 파일명 생성
-        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = directory.appendingPathComponent(fileName)
-        
+
+        let fileName = UUID().uuidString + ".jpg"
+        let fileURL = primaryDirectory.appendingPathComponent(fileName)
+
         do {
             try data.write(to: fileURL)
-            return fileName // [리팩토링] 전체 경로 대신 파일명만 반환
+            return fileName
         } catch {
             print("이미지 저장 실패: \(error)")
             return nil
         }
     }
-    
-    // MARK: 이미지 삭제 (파일명 기반)
+
+    // MARK: - 이미지 삭제 (양쪽 위치 모두 정리)
     static func deleteImageFromFileManager(fileName: String) {
-        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = directory.appendingPathComponent(fileName)
-        
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            do {
-                try FileManager.default.removeItem(at: fileURL)
-                print("이미지 삭제 성공: \(fileURL.path)")
-            } catch {
-                print("이미지 삭제 실패: \(error.localizedDescription)")
-            }
-        } else {
-            print("파일이 존재하지 않음: \(fileURL.path)")
+        var urls = [primaryDirectory.appendingPathComponent(fileName)]
+        // App Group과 Documents가 다르면 구버전 위치도 함께 삭제
+        let legacyURL = documentsDirectory.appendingPathComponent(fileName)
+        if legacyURL != urls[0] { urls.append(legacyURL) }
+
+        for url in urls where FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
         }
     }
-    
-    // MARK: 이미지 불러오기 (파일명 기반)
+
+    // MARK: - 이미지 불러오기 (App Group 우선, 없으면 구버전 Documents 폴백)
     static func loadImageFromFileManager(fileName: String) -> UIImage? {
-        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = directory.appendingPathComponent(fileName)
+        let candidates = [
+            appGroupDirectory?.appendingPathComponent(fileName),
+            documentsDirectory.appendingPathComponent(fileName)
+        ].compactMap { $0 }
 
-        print("로딩 시도 중인 경로: \(fileURL.path)")
-        let exists = FileManager.default.fileExists(atPath: fileURL.path)
-        print("파일 존재: \(exists)")
-
-        do {
-            let data = try Data(contentsOf: fileURL)
-            if let image = UIImage(data: data) {
-                print("UIImage 로드 성공")
+        for url in candidates {
+            if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
                 return image
-            } else {
-                print("UIImage(data:) 실패 - 데이터는 있음")
             }
-        } catch {
-            print("Data(contentsOf:) 실패: \(error)")
         }
-
         return nil
+    }
+
+    // MARK: - 기존 사진 마이그레이션 (Documents → App Group, 최초 1회)
+    /// 원본을 "복사"만 하므로(원본 유지) 실패해도 기존 사진은 안전하다.
+    /// 로드는 App Group 우선 + Documents 폴백이라 마이그레이션이 부분 실패해도 사진이 안 사라진다.
+    static func migratePhotosToAppGroupIfNeeded() {
+        let flagKey = "photosMigratedToAppGroup"
+        guard !UserDefaults.standard.bool(forKey: flagKey) else { return }
+        guard let appGroupDir = appGroupDirectory else { return } // App Group 없으면 다음 기회에
+
+        let fm = FileManager.default
+        do {
+            let files = try fm.contentsOfDirectory(at: documentsDirectory, includingPropertiesForKeys: nil)
+            for src in files where src.pathExtension.lowercased() == "jpg" {
+                let dest = appGroupDir.appendingPathComponent(src.lastPathComponent)
+                if !fm.fileExists(atPath: dest.path) {
+                    try? fm.copyItem(at: src, to: dest)
+                }
+            }
+            UserDefaults.standard.set(true, forKey: flagKey)
+        } catch {
+            print("사진 마이그레이션 실패: \(error)")
+        }
     }
 }
