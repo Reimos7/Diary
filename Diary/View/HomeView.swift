@@ -38,17 +38,28 @@ struct HomeView: View {
             // 배경만 화면 전체(안전영역 무시), 콘텐츠는 안전영역 존중 → 상단 안 잘림
             AppColor.background.ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                    headerSection
-                    weatherCard
-                    coverSection
-                    writeButton
+            VStack(spacing: 0) {
+                // 날짜·날씨·표지만 스크롤 영역 (내용이 길면 여기만 스크롤)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                        headerSection
+                        weatherCard
+                        coverSection
+                    }
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.top, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.sm)
                 }
-                .padding(.horizontal, AppSpacing.lg)
-                .padding(.top, AppSpacing.lg)
-                .padding(.bottom, AppSpacing.xl)
+                // "오늘 일기 쓰기"는 스크롤과 무관하게 항상 하단(배너 바로 위)에 고정
+                writeButton
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.sm)
             }
+        }
+        // 하단 고정 배너 광고 (캘린더와 동일 방식)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomBannerAd()
+                .background(AppColor.background)
         }
         .onAppear(perform: loadCoverImage)
         // 사용자가 표지 사진을 새로 고르면 저장 후 화면 갱신
@@ -133,7 +144,7 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .appCard(padding: AppSpacing.lg)
+        .appCard(padding: AppSpacing.md)
     }
 
     // MARK: - 표지 사진
@@ -182,9 +193,8 @@ struct HomeView: View {
                     .padding(AppSpacing.md)
                 }
             }
-            // 흰 액자: 테두리 여백 + 하단 두꺼운 여백(폴라로이드)
+            // 흰 액자: 네 면 동일한 테두리 여백
             .padding(12)
-            .padding(.bottom, 24)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card, style: .continuous))
             .shadow(color: AppShadow.color, radius: AppShadow.radius, x: AppShadow.x, y: AppShadow.y)

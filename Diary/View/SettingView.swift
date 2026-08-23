@@ -70,6 +70,11 @@ struct SettingView: View {
                 .padding(AppSpacing.lg)
             }
             .paperBackground()
+            // 하단 고정 배너 광고 (캘린더와 동일 방식)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAd()
+                    .background(AppColor.background)
+            }
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
             .background(NavigationControllerWrapper())
