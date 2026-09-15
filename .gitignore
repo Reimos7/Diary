@@ -3,6 +3,9 @@ APIKey.swift
 # Secret
 **/Secret/
 
+# 로컬 개발 도구 설정 (XcodeBuildMCP)
+.xcodebuildmcp/
+
 # 추적 제외 (프로젝트 소개 문서)
 README.md
 
