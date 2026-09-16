@@ -94,6 +94,7 @@ enum AppLockStore {
 
         try KeychainService.save(try JSONEncoder().encode(credential), for: .pinCredential)
         try resetFailures()
+        syncEnabledFlag(true)
     }
 
     /// PIN 검증. 성공하면 실패 카운터를 초기화하고, 실패하면 카운터를 올린다.
@@ -133,6 +134,23 @@ enum AppLockStore {
     /// PIN 및 실패 상태 전체 삭제 (잠금 기능 끄기).
     static func clear() throws {
         try KeychainService.deleteAll()
+        syncEnabledFlag(false)
+    }
+
+    // MARK: - 위젯용 미러
+
+    /// 위젯이 읽는 App Group 플래그 키.
+    static let enabledFlagKey = "isAppLockEnabled"
+
+    /// 잠금 on/off를 App Group에 복사한다.
+    ///
+    /// 위젯은 별도 프로세스라 Keychain 자격증명을 확인할 수 없고, 애초에 확인해서도 안 된다.
+    /// 그래서 "잠금이 켜져 있는가"라는 사실만 App Group으로 넘겨 위젯이 내용을 가리게 한다.
+    /// 진실의 원천은 어디까지나 Keychain이고 이 값은 파생된 사본이므로,
+    /// PIN이 바뀌는 모든 경로(setPin/clear)에서 반드시 같이 갱신한다.
+    private static func syncEnabledFlag(_ isEnabled: Bool) {
+        let sharedDefaults = UserDefaults(suiteName: SharedModelContainer.appGroupIdentifier)
+        sharedDefaults?.set(isEnabled, forKey: enabledFlagKey)
     }
 
     // MARK: - 실패 지연
