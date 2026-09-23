@@ -20,8 +20,6 @@ struct PinVerifyView: View {
     var title: LocalizedStringKey = "현재 PIN을 입력해 주세요"
     /// 검증 성공.
     var onVerified: () -> Void
-    /// 사용자가 취소.
-    var onCancel: () -> Void
 
     @State private var pin: String = ""
     @State private var error: PinInputMessage?
@@ -33,31 +31,26 @@ struct PinVerifyView: View {
     /// 다른 화면에서 실패가 누적된 경우에도 상태가 곧 반영된다는 장점이 있다.
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
+    // NavigationStack과 취소 버튼을 이 안에 두지 않는다.
+    // 잠금 해제 화면에서는 빠져나갈 수단이 있으면 안 되고(취소로 잠금을 우회하게 된다),
+    // 설정에서 띄울 때만 부모가 NavigationStack + 취소 버튼을 감싸면 된다.
     var body: some View {
-        NavigationStack {
-            PinInputView(title: title,
-                         message: nil,
-                         pin: $pin,
-                         error: error,
-                         note: lockoutNote,
-                         isDisabled: remainingLockout > 0,
-                         onComplete: handleComplete)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("취소") { onCancel() }
-                            .customFont(size: 16)
-                            .foregroundStyle(AppColor.textSecondary)
-                    }
-                }
-                .onAppear { refreshLockout() }
-                .onReceive(ticker) { _ in refreshLockout() }
-                .alert("확인할 수 없어요", isPresented: $readFailed) {
-                    Button("확인", role: .cancel) { onCancel() }
-                } message: {
-                    Text("잠시 후 다시 시도해 주세요.")
-                }
-        }
+        PinInputView(title: title,
+                     message: nil,
+                     pin: $pin,
+                     error: error,
+                     note: lockoutNote,
+                     isDisabled: remainingLockout > 0,
+                     onComplete: handleComplete)
+            .onAppear { refreshLockout() }
+            .onReceive(ticker) { _ in refreshLockout() }
+            .alert("확인할 수 없어요", isPresented: $readFailed) {
+                // 여기서 화면을 닫지 않는다. 잠금 화면이라면 닫는 순간 잠금이 뚫린다.
+                // 입력만 비우고 다시 시도하게 둔다.
+                Button("확인", role: .cancel) { pin = "" }
+            } message: {
+                Text("잠시 후 다시 시도해 주세요.")
+            }
     }
 
     // MARK: - 검증
@@ -106,6 +99,6 @@ struct PinVerifyView: View {
 }
 
 #Preview {
-    PinVerifyView(onVerified: {}, onCancel: {})
+    PinVerifyView(onVerified: {})
         .environmentObject(FontManager())
 }

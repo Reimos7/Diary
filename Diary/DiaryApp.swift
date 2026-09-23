@@ -37,11 +37,17 @@ struct DiaryApp: App {
     @StateObject private var manager = SwiftDataManager()
     // 폰트 변경
     @StateObject private var fontManager = FontManager()
+    // 앱 잠금 상태머신
+    @StateObject private var lockManager = AppLockManager()
 
     @Environment(\.scenePhase) private var scenePhase
 
     // 위젯에서 딥링크로 전달받을 상태
     @State private var shouldNavigateToCompose: Bool = false
+
+    // 잠긴 상태에서 들어온 딥링크를 잠시 보관한다.
+    // 바로 실행하면 잠금 화면 뒤에서 작성 화면이 열려, 해제 직후 그대로 노출된다.
+    @State private var pendingDeepLink: URL?
     
     // 위젯과 공유하는 ModelContainer
     var sharedModelContainer: ModelContainer = SharedModelContainer.create()
@@ -84,8 +90,11 @@ struct DiaryApp: App {
                         }
                 } else {
                     // 메인 뷰 표시 (새 디자인: 탭바)
+                    // 잠금 게이트는 반드시 여기 최상위 한 곳에만 둔다. (딥링크 우회 방지)
                     GlobalFontView(size: 16) {
-                        MainTabView(shouldNavigateToCompose: $shouldNavigateToCompose)
+                        LockGateView {
+                            MainTabView(shouldNavigateToCompose: $shouldNavigateToCompose)
+                        }
                     }
                     // 폰트 매니저
                     .environmentObject(fontManager)
@@ -94,6 +103,12 @@ struct DiaryApp: App {
                     .preferredColorScheme(.light)
                     // 위젯에서 딥링크로 앱 열기
                     .onOpenURL { url in
+                        handleDeepLink(url)
+                    }
+                    // 잠금이 풀리는 순간 보류해 둔 딥링크를 실행한다.
+                    .onChange(of: lockManager.state) { _, newState in
+                        guard newState == .unlocked, let url = pendingDeepLink else { return }
+                        pendingDeepLink = nil
                         handleDeepLink(url)
                     }
                     .onChange(of: scenePhase) { _, newPhase in
@@ -134,6 +149,7 @@ struct DiaryApp: App {
         // WeatherService는 앱 전체에서 공통적으로 사용하는거니까, environmentObject로 공유 하는게 좋음
         .environmentObject(service)
         .environmentObject(manager)
+        .environmentObject(lockManager)
         // appLanguage 값이 바뀌면 SwiftUI가 전체 뷰를 새 언어로 즉시 다시 렌더링
         .environment(\.locale, Locale(identifier: appLanguage))
     }
@@ -152,6 +168,12 @@ struct DiaryApp: App {
     // 딥링크 처리 함수
     private func handleDeepLink(_ url: URL) {
         print("딥링크 수신: \(url)")
+
+        // 잠겨 있으면 실행하지 않고 보관한다. 해제되는 순간 onChange가 다시 이 함수를 부른다.
+        guard lockManager.state == .unlocked else {
+            pendingDeepLink = url
+            return
+        }
 
         // diary://compose 형태로 전달됨
         if url.scheme == "diary", url.host == "compose" {

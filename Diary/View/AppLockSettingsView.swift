@@ -16,6 +16,7 @@ import SwiftUI
 
 struct AppLockSettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var lockManager: AppLockManager
 
     /// 화면에 표시되는 잠금 상태. Keychain에서 읽어 채운다.
     @State private var isLockEnabled: Bool = false
@@ -160,21 +161,37 @@ struct AppLockSettingsView: View {
             PinSetupView(onFinished: finishFlow, onCancel: finishFlow)
 
         case .disable:
-            PinVerifyView(title: "잠금을 끄려면 PIN을 입력해 주세요",
-                          onVerified: {
-                              try? AppLockStore.clear()
-                              finishFlow()
-                          },
-                          onCancel: finishFlow)
+            verifyFlow(title: "잠금을 끄려면 PIN을 입력해 주세요") {
+                try? AppLockStore.clear()
+                finishFlow()
+            }
 
         case .change:
             // 변경은 2단계다. 현재 PIN 확인을 통과하면 같은 시트 안에서 새 PIN 입력으로 넘어간다.
             if didVerifyForChange {
                 PinSetupView(onFinished: finishFlow, onCancel: finishFlow)
             } else {
-                PinVerifyView(onVerified: { didVerifyForChange = true },
-                              onCancel: finishFlow)
+                verifyFlow(title: "현재 PIN을 입력해 주세요") {
+                    didVerifyForChange = true
+                }
             }
+        }
+    }
+
+    /// PinVerifyView 자체에는 빠져나갈 수단이 없다(잠금 화면에서 그러면 안 되므로).
+    /// 설정에서 띄울 때만 취소 버튼을 여기서 씌워 준다.
+    private func verifyFlow(title: LocalizedStringKey,
+                            onVerified: @escaping () -> Void) -> some View {
+        NavigationStack {
+            PinVerifyView(title: title, onVerified: onVerified)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("취소") { finishFlow() }
+                            .customFont(size: 16)
+                            .foregroundStyle(AppColor.textSecondary)
+                    }
+                }
         }
     }
 
@@ -183,6 +200,9 @@ struct AppLockSettingsView: View {
         flow = nil
         didVerifyForChange = false
         refreshState()
+        // 잠금을 껐다면 상태머신도 같이 풀어 준다.
+        // (안 그러면 잠금은 꺼졌는데 다음 복귀 때 잠금 화면이 뜨는 상태로 남는다)
+        lockManager.revalidate()
     }
 
     // MARK: - 공통 조각
@@ -210,4 +230,5 @@ struct AppLockSettingsView: View {
 #Preview {
     AppLockSettingsView()
         .environmentObject(FontManager())
+        .environmentObject(AppLockManager())
 }
