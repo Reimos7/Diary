@@ -66,7 +66,7 @@ private struct LockScreenView: View {
     var body: some View {
         VStack(spacing: 0) {
             PinVerifyView(title: "PIN을 입력해 주세요") {
-                lockManager.unlock()
+                lockManager.unlock(method: .pin)
             }
 
             // PIN 분실 복구 경로. 설정 화면에만 두면 정작 잠겨서 못 들어가는 사람이 쓸 수 없으므로
@@ -97,8 +97,10 @@ private struct LockScreenView: View {
         .fullScreenCover(isPresented: $isResettingPin) {
             PinSetupView(onFinished: {
                 // 새 PIN을 방금 본인이 정했으므로 그대로 들여보낸다.
+                // 신원을 확인한 수단은 생체였으므로 해제 방법도 biometry로 기록한다.
                 isResettingPin = false
-                lockManager.unlock()
+                AnalyticsManager.log(.pinReset)
+                lockManager.unlock(method: .biometry)
             }, onCancel: {
                 isResettingPin = false
             })
@@ -107,7 +109,7 @@ private struct LockScreenView: View {
             Button("확인", role: .cancel) {}
         } message: {
             // 기기가 실제로 쓰는 이름으로 안내한다. (Touch ID 기기에 "Face ID"가 뜨면 안 된다)
-            Text("\(BiometricService.kind.displayNameWithObjectParticle) 사용할 수 없는 상태예요. 기기를 잠금 해제한 뒤 다시 시도해 주세요.")
+            Text("지금은 \(BiometricService.kind.displayName) 인증을 사용할 수 없어요. 기기를 잠금 해제한 뒤 다시 시도해 주세요.")
         }
     }
 

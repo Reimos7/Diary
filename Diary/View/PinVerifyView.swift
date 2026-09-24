@@ -70,6 +70,8 @@ struct PinVerifyView: View {
                 pin = ""
                 // 틀렸다는 사실은 흔들림으로 한 번만 알린다.
                 error = PinInputMessage(String(localized: "PIN이 맞지 않아요"))
+                // 입력한 값은 절대 싣지 않는다. 몇 번째 실패인지만 본다.
+                AnalyticsManager.log(.appUnlockFailed(attempt: (try? AppLockStore.failureCount()) ?? 0))
                 // verify() 안에서 실패가 기록되며 지연이 시작될 수 있으니 즉시 다시 읽는다.
                 // 지연이 걸렸다면 카운트다운(note)이 위 문구를 덮어쓴다.
                 refreshLockout()

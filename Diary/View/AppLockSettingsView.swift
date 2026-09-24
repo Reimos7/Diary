@@ -195,11 +195,17 @@ struct AppLockSettingsView: View {
     private func flowView(for flow: Flow) -> some View {
         switch flow {
         case .setup:
-            PinSetupView(onFinished: finishFlow, onCancel: finishFlow)
+            PinSetupView(onFinished: {
+                // 기기가 생체를 쓸 수 있는지 함께 남긴다.
+                // "생체 가능한 기기에서 잠금을 얼마나 켜는지"를 봐야 다음 투자 판단이 선다.
+                AnalyticsManager.log(.appLockEnabled(biometry: BiometricService.kind.analyticsValue))
+                finishFlow()
+            }, onCancel: finishFlow)
 
         case .disable:
             verifyFlow(title: "잠금을 끄려면 PIN을 입력해 주세요") {
                 try? AppLockStore.clear()
+                AnalyticsManager.log(.appLockDisabled)
                 finishFlow()
             }
 
@@ -220,19 +226,11 @@ struct AppLockSettingsView: View {
             // 문구에는 기기가 실제로 쓰는 이름을 넣는다.
             // Touch ID 기기(SE·듀오·일부 아이패드)에서 "Face ID"가 보이면 안 되고,
             // 카드에는 "Touch ID"인데 여기만 "생체 인증"이어도 어긋나 보인다.
-            verifyFlow(title: biometricPrompt(isEnabling: shouldEnable)) {
+            verifyFlow(title: "\(BiometricService.kind.displayName) 설정을 바꾸려면 PIN을 입력해 주세요") {
                 try? AppLockStore.setBiometricEnabled(shouldEnable)
                 finishFlow()
             }
         }
-    }
-
-    /// 기기가 실제로 지원하는 생체 이름을 넣은 안내 문구.
-    private func biometricPrompt(isEnabling: Bool) -> LocalizedStringKey {
-        let name = BiometricService.kind.displayNameWithObjectParticle
-        return isEnabling
-            ? "\(name) 켜려면 PIN을 입력해 주세요"
-            : "\(name) 끄려면 PIN을 입력해 주세요"
     }
 
     /// PinVerifyView 자체에는 빠져나갈 수단이 없다(잠금 화면에서 그러면 안 되므로).

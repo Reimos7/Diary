@@ -37,18 +37,21 @@ enum BiometricKind {
         }
     }
 
-    /// 목적격 조사까지 붙인 이름. ("Face ID를", "생체 인증을")
-    ///
-    /// 한국어 조사는 앞 글자의 받침에 따라 달라지는데, 이름이 기기마다 바뀌므로
-    /// 문장 템플릿 하나로는 해결되지 않는다. 케이스별로 조사를 고정해 둔다.
-    /// (영어·일본어 번역에서는 이 값이 통째로 이름으로만 쓰이면 된다)
-    var displayNameWithObjectParticle: String {
+    /// Analytics에 실어 보낼 값. 화면 표시용 이름과 일부러 분리해 둔다.
+    /// (표시 문구가 바뀔 때 집계 값까지 따라 바뀌면 과거 데이터와 이어 붙일 수 없다)
+    var analyticsValue: String {
         switch self {
-        case .faceID, .touchID, .opticID: return "\(displayName)를"
-        case .none: return String(localized: "생체 인증을")
+        case .faceID: return "face_id"
+        case .touchID: return "touch_id"
+        case .opticID: return "optic_id"
+        case .none: return "none"
         }
     }
 }
+
+// 한국어 조사(을/를)를 이름에 붙여 넘기는 방식은 쓰지 않는다.
+// "Face ID를" 같은 값을 그대로 인자로 넘기면 영어 문장에서 "turn on Face ID를"처럼 새어 나온다.
+// 대신 이름 뒤에 조사가 오지 않는 문장으로 쓴다. ("%@ 설정을 바꾸려면…")
 
 enum BiometricError: Error {
     /// 하드웨어가 없거나 사용할 수 없음.

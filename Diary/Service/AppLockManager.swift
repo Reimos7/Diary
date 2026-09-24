@@ -66,11 +66,23 @@ final class AppLockManager: ObservableObject {
 
     // MARK: - 외부 조작
 
+    /// 잠금이 풀린 경로.
+    enum UnlockMethod: String {
+        case pin
+        case biometry
+        /// 잠금 기능 자체가 꺼져서 풀린 경우. 사용자 인증이 아니므로 집계하지 않는다.
+        case lockDisabled
+    }
+
     /// 인증 성공. 잠금을 푼다.
-    func unlock() {
+    func unlock(method: UnlockMethod) {
         backgroundedAt = nil
         hasExhaustedBiometrics = false
         state = .unlocked
+
+        if method != .lockDisabled {
+            AnalyticsManager.log(.appUnlocked(method: method.rawValue))
+        }
     }
 
     /// 즉시 잠근다. (잠금이 꺼져 있으면 아무 일도 하지 않는다)
@@ -101,7 +113,7 @@ final class AppLockManager: ObservableObject {
             try await BiometricService.authenticate(
                 reason: String(localized: "일기를 열려면 인증이 필요해요")
             )
-            unlock()
+            unlock(method: .biometry)
         } catch {
             // 다시 시도해도 결과가 같은 실패는 자동 재시도 대상에서 제외한다.
             switch error {
@@ -128,7 +140,7 @@ final class AppLockManager: ObservableObject {
     /// (콜드런치 때 Keychain을 읽지 못해 보수적으로 잠근 경우를 되돌리는 통로이기도 하다)
     func revalidate() {
         if !isLockEnabled {
-            unlock()
+            unlock(method: .lockDisabled)
         }
     }
 
