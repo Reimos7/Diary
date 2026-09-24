@@ -49,6 +49,10 @@ final class AppLockManager: ObservableObject {
     /// 앱을 떠난 시각. 돌아왔을 때 유예 시간을 계산하는 기준.
     private var backgroundedAt: Date?
 
+    /// 이번 잠금 동안 자동 생체 프롬프트를 이미 소진했는지.
+    /// 잠금이 풀리거나 다시 잠길 때마다 초기화된다.
+    private var hasExhaustedBiometrics: Bool = false
+
     private var observers: [NSObjectProtocol] = []
 
     init() {
@@ -65,20 +69,57 @@ final class AppLockManager: ObservableObject {
     /// 인증 성공. 잠금을 푼다.
     func unlock() {
         backgroundedAt = nil
+        hasExhaustedBiometrics = false
         state = .unlocked
     }
 
     /// 즉시 잠근다. (잠금이 꺼져 있으면 아무 일도 하지 않는다)
+    ///
+    /// 잠글 때마다 생체 프롬프트 기회를 다시 준다.
+    /// 아까 취소했더라도 이번에 새로 잠긴 것은 별개의 상황이기 때문이다.
     func lock() {
         guard isLockEnabled else { return }
+        hasExhaustedBiometrics = false
         state = .locked
     }
 
-    /// 생체인증 프롬프트를 띄우기 직전/직후에 호출한다. (Phase 4)
-    func setAuthenticating(_ isAuthenticating: Bool) {
-        guard state != .unlocked else { return }
-        state = isAuthenticating ? .authenticating : .locked
+    /// 생체 인증을 시도한다. 성공하면 잠금이 풀리고, 실패하면 조용히 PIN 입력 상태로 돌아간다.
+    ///
+    /// 실패 사유를 화면에 크게 띄우지 않는 이유:
+    /// 어떤 실패든 사용자가 할 일은 "아래 키패드로 PIN을 입력한다" 하나뿐이라,
+    /// 오류 문구를 띄우면 정보는 없고 단계만 하나 늘어난다.
+    /// 다만 생체가 잠겼거나(lockout) 등록이 지워진 경우는 다시 시도해도 소용없으므로
+    /// 이번 잠금 동안 자동 프롬프트를 더 띄우지 않는다.
+    @MainActor
+    func authenticateWithBiometrics() async {
+        guard state == .locked, !hasExhaustedBiometrics else { return }
+        guard (try? AppLockStore.isBiometricUsable()) == true else { return }
+
+        state = .authenticating
+
+        do {
+            try await BiometricService.authenticate(
+                reason: String(localized: "일기를 열려면 인증이 필요해요")
+            )
+            unlock()
+        } catch {
+            // 다시 시도해도 결과가 같은 실패는 자동 재시도 대상에서 제외한다.
+            switch error {
+            case BiometricError.lockout, BiometricError.notEnrolled, BiometricError.unavailable:
+                hasExhaustedBiometrics = true
+            default:
+                // 사용자가 취소한 경우도 포함. 이번 잠금에서는 더 띄우지 않는다.
+                // (취소했는데 계속 얼굴을 들이대라고 하면 PIN을 쓸 수가 없다)
+                hasExhaustedBiometrics = true
+            }
+
+            // 인증에 실패했을 뿐 잠금은 그대로다.
+            if state == .authenticating {
+                state = .locked
+            }
+        }
     }
+
 
     /// 설정 화면에서 잠금을 켜거나 끈 뒤, 또는 잠금 화면이 떠 있는 동안 주기적으로 호출한다.
     ///
@@ -146,7 +187,7 @@ final class AppLockManager: ObservableObject {
         // 생체인증 도중에 실제로 앱을 떠난 경우. 인증 중 상태로 남겨두면
         // 돌아왔을 때 프롬프트도 잠금 화면도 없는 어정쩡한 화면이 된다.
         if state == .authenticating {
-            state = .locked
+            lock()
         }
 
         backgroundedAt = Date()
@@ -159,7 +200,7 @@ final class AppLockManager: ObservableObject {
         // 시계가 과거로 조작됐다면 경과 시간을 신뢰할 수 없으므로 잠근다.
         let elapsed = Date().timeIntervalSince(backgroundedAt)
         if elapsed < 0 || elapsed >= Self.graceInterval {
-            state = .locked
+            lock()
         }
     }
 }

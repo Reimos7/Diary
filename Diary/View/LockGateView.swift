@@ -58,14 +58,80 @@ struct LockGateView<Content: View>: View {
 private struct LockScreenView: View {
     @EnvironmentObject private var lockManager: AppLockManager
 
+    /// 생체 인증으로 본인 확인을 마치고 새 PIN을 설정하는 중.
+    @State private var isResettingPin: Bool = false
+    /// 생체 인증이 불가능해 재설정도 할 수 없는 경우의 안내.
+    @State private var showResetUnavailable: Bool = false
+
     var body: some View {
-        PinVerifyView(title: "PIN을 입력해 주세요") {
-            lockManager.unlock()
+        VStack(spacing: 0) {
+            PinVerifyView(title: "PIN을 입력해 주세요") {
+                lockManager.unlock()
+            }
+
+            // PIN 분실 복구 경로. 설정 화면에만 두면 정작 잠겨서 못 들어가는 사람이 쓸 수 없으므로
+            // 실제로 막힌 그 순간에 보이도록 잠금 화면에 둔다.
+            if canResetWithBiometrics {
+                Button {
+                    startPinReset()
+                } label: {
+                    Text("PIN을 잊으셨나요?")
+                        .customFont(size: 14)
+                        .foregroundStyle(AppColor.textSecondary)
+                        .underline()
+                }
+                .padding(.bottom, AppSpacing.lg)
+            }
         }
         .paperBackground()
         // 잠금이 꺼졌는데도 잠긴 채로 남아 앱이 열리지 않는 상황을 막는 안전장치.
         // (콜드런치 때 Keychain을 읽지 못해 보수적으로 잠근 경우가 여기서 회복된다)
         .onAppear { lockManager.revalidate() }
+        // 잠금 화면이 뜨는 순간 생체 인증을 자동으로 시도한다.
+        // state를 함께 감시하는 이유: 앱을 떠났다 돌아와 다시 잠긴 경우에는
+        // 화면이 이미 떠 있어서 onAppear가 다시 호출되지 않는다.
+        .task(id: lockManager.state) {
+            guard lockManager.state == .locked else { return }
+            await lockManager.authenticateWithBiometrics()
+        }
+        .fullScreenCover(isPresented: $isResettingPin) {
+            PinSetupView(onFinished: {
+                // 새 PIN을 방금 본인이 정했으므로 그대로 들여보낸다.
+                isResettingPin = false
+                lockManager.unlock()
+            }, onCancel: {
+                isResettingPin = false
+            })
+        }
+        .alert("PIN을 재설정할 수 없어요", isPresented: $showResetUnavailable) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            // 기기가 실제로 쓰는 이름으로 안내한다. (Touch ID 기기에 "Face ID"가 뜨면 안 된다)
+            Text("\(BiometricService.kind.displayNameWithObjectParticle) 사용할 수 없는 상태예요. 기기를 잠금 해제한 뒤 다시 시도해 주세요.")
+        }
+    }
+
+    /// 생체 인증이 켜져 있고 지금 쓸 수 있을 때만 재설정 경로를 보여준다.
+    /// 쓸 수 없는데 링크만 보이면, 눌러도 아무것도 안 되는 헛된 희망이 된다.
+    private var canResetWithBiometrics: Bool {
+        (try? AppLockStore.isBiometricUsable()) == true
+    }
+
+    /// 생체로 본인 확인 → 새 PIN 설정.
+    /// PIN을 모르는 상태에서 PIN을 바꾸는 유일한 경로이므로, 생체 확인을 반드시 통과해야 한다.
+    private func startPinReset() {
+        Task {
+            do {
+                try await BiometricService.authenticate(
+                    reason: String(localized: "새 PIN을 설정하려면 인증이 필요해요")
+                )
+                isResettingPin = true
+            } catch BiometricError.userCancel {
+                // 사용자가 스스로 닫은 경우는 안내할 것이 없다.
+            } catch {
+                showResetUnavailable = true
+            }
+        }
     }
 }
 

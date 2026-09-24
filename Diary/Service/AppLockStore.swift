@@ -35,6 +35,16 @@ private struct PinCredential: Codable {
     let iterations: Int
 }
 
+/// 생체 인증 설정.
+///
+/// domainState는 기기에 등록된 얼굴/지문의 지문(identity)이다.
+/// 생체를 켠 시점의 값을 함께 저장해 두고 매번 비교해서,
+/// 그 사이에 다른 사람의 생체가 등록됐는지 알아낸다.
+private struct BiometricSetting: Codable {
+    var isEnabled: Bool
+    var domainState: Data?
+}
+
 /// 실패 지연 상태. 앱을 강제 종료해도 리셋되면 안 되므로 메모리나 UserDefaults가 아닌 Keychain에 둔다.
 private struct LockoutState: Codable {
     var failureCount: Int = 0
@@ -136,6 +146,47 @@ enum AppLockStore {
     static func clear() throws {
         try KeychainService.deleteAll()
         syncEnabledFlag(false)
+    }
+
+    // MARK: - 생체 인증 설정
+
+    /// 생체 인증을 쓸 수 있는 상태인가.
+    ///
+    /// 세 가지가 모두 참이어야 한다.
+    ///   1) 사용자가 켜 두었고
+    ///   2) 기기에서 생체를 쓸 수 있고
+    ///   3) 켤 때 기록해 둔 등록 지문이 지금과 같다
+    ///
+    /// 3번이 핵심이다. 누군가 이 폰에 자기 얼굴을 추가하면 지문이 바뀌는데,
+    /// 그걸 확인하지 않으면 "남의 얼굴로 내 일기가 열리는" 상황이 된다.
+    /// 지문이 달라졌으면 생체 설정을 꺼 버리고 PIN을 요구한다. (자동 복구)
+    static func isBiometricUsable() throws -> Bool {
+        guard let setting = try loadBiometricSetting(), setting.isEnabled else { return false }
+        guard BiometricService.canUse else { return false }
+
+        guard setting.domainState == BiometricService.domainState else {
+            // 등록 정보가 바뀌었다. 조용히 끄고 PIN만 받는다.
+            try setBiometricEnabled(false)
+            return false
+        }
+        return true
+    }
+
+    /// 사용자가 켜 두었는지 여부만. (설정 화면의 토글 표시용)
+    static func isBiometricEnabled() throws -> Bool {
+        try loadBiometricSetting()?.isEnabled ?? false
+    }
+
+    /// 생체 인증 사용 여부를 저장한다. 켤 때는 현재 등록 지문을 함께 기록한다.
+    static func setBiometricEnabled(_ isEnabled: Bool) throws {
+        let setting = BiometricSetting(isEnabled: isEnabled,
+                                       domainState: isEnabled ? BiometricService.domainState : nil)
+        try KeychainService.save(try JSONEncoder().encode(setting), for: .biometricSetting)
+    }
+
+    private static func loadBiometricSetting() throws -> BiometricSetting? {
+        guard let data = try KeychainService.read(.biometricSetting) else { return nil }
+        return try? JSONDecoder().decode(BiometricSetting.self, from: data)
     }
 
     // MARK: - 위젯용 미러

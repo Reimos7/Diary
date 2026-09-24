@@ -37,6 +37,8 @@ enum KeychainService {
         case pinCredential = "applock.pin.credential"
         /// 실패 횟수 / 잠금 해제 시각 (LockoutState를 JSON 인코딩)
         case lockoutState = "applock.lockout.state"
+        /// 생체 인증 사용 여부 + 등록 상태 지문 (BiometricSetting을 JSON 인코딩)
+        case biometricSetting = "applock.biometric.setting"
     }
 
     // MARK: - CRUD

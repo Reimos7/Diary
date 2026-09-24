@@ -20,6 +20,8 @@ struct AppLockSettingsView: View {
 
     /// 화면에 표시되는 잠금 상태. Keychain에서 읽어 채운다.
     @State private var isLockEnabled: Bool = false
+    /// 생체 인증 사용 여부.
+    @State private var isBiometricEnabled: Bool = false
     /// Keychain을 읽지 못한 상태. 이때는 토글을 만지지 못하게 막는다.
     @State private var isUnavailable: Bool = false
 
@@ -28,8 +30,17 @@ struct AppLockSettingsView: View {
         case setup          // 최초 설정
         case change         // PIN 변경 (현재 PIN 확인 → 새 PIN)
         case disable        // 잠금 끄기 (현재 PIN 확인)
+        case toggleBiometric(Bool)  // 생체 인증 켜기/끄기 (현재 PIN 확인)
 
-        var id: Int { hashValue }
+        // 연관값이 생기면서 Hashable 자동 합성이 사라졌으므로 id를 직접 만든다.
+        var id: String {
+            switch self {
+            case .setup: return "setup"
+            case .change: return "change"
+            case .disable: return "disable"
+            case .toggleBiometric(let on): return "biometric-\(on)"
+            }
+        }
     }
     @State private var flow: Flow?
     /// 변경 플로우에서 현재 PIN 확인을 통과했는지.
@@ -42,6 +53,9 @@ struct AppLockSettingsView: View {
                     lockToggleCard
 
                     if isLockEnabled {
+                        if BiometricService.canUse {
+                            biometricCard
+                        }
                         changePinCard
                     }
 
@@ -103,6 +117,28 @@ struct AppLockSettingsView: View {
         .background(cardBackground)
     }
 
+    private var biometricCard: some View {
+        HStack(spacing: AppSpacing.md) {
+            iconBadge(systemName: BiometricService.kind == .touchID ? "touchid" : "faceid",
+                      color: AppColor.calendarPastels[0])
+
+            Text(BiometricService.kind.displayName)
+                .customFont(size: 16)
+                .foregroundStyle(AppColor.textPrimary)
+
+            Spacer()
+
+            // 잠금 토글과 같은 이유로 직접 바인딩하지 않는다.
+            // PIN 확인을 통과해야 실제로 값이 바뀐다.
+            Toggle("", isOn: Binding(get: { isBiometricEnabled },
+                                     set: { flow = .toggleBiometric($0) }))
+                .labelsHidden()
+                .tint(AppColor.accent)
+        }
+        .padding(AppSpacing.md)
+        .background(cardBackground)
+    }
+
     private var changePinCard: some View {
         Button {
             didVerifyForChange = false
@@ -141,6 +177,7 @@ struct AppLockSettingsView: View {
     private func refreshState() {
         do {
             isLockEnabled = try AppLockStore.isPinSet()
+            isBiometricEnabled = try AppLockStore.isBiometricUsable()
             isUnavailable = false
         } catch {
             // 읽기에 실패하면 '꺼짐'으로 단정하지 않는다.
@@ -175,7 +212,27 @@ struct AppLockSettingsView: View {
                     didVerifyForChange = true
                 }
             }
+
+        case .toggleBiometric(let shouldEnable):
+            // 생체 등록은 "이 얼굴(지문)로 일기를 열 수 있다"를 뜻하므로, 켜고 끌 때 PIN으로 본인을 확인한다.
+            // 확인 없이 토글만으로 켤 수 있으면, 잠깐 열려 있는 폰에 남이 자기 생체를 걸어둘 수 있다.
+            //
+            // 문구에는 기기가 실제로 쓰는 이름을 넣는다.
+            // Touch ID 기기(SE·듀오·일부 아이패드)에서 "Face ID"가 보이면 안 되고,
+            // 카드에는 "Touch ID"인데 여기만 "생체 인증"이어도 어긋나 보인다.
+            verifyFlow(title: biometricPrompt(isEnabling: shouldEnable)) {
+                try? AppLockStore.setBiometricEnabled(shouldEnable)
+                finishFlow()
+            }
         }
+    }
+
+    /// 기기가 실제로 지원하는 생체 이름을 넣은 안내 문구.
+    private func biometricPrompt(isEnabling: Bool) -> LocalizedStringKey {
+        let name = BiometricService.kind.displayNameWithObjectParticle
+        return isEnabling
+            ? "\(name) 켜려면 PIN을 입력해 주세요"
+            : "\(name) 끄려면 PIN을 입력해 주세요"
     }
 
     /// PinVerifyView 자체에는 빠져나갈 수단이 없다(잠금 화면에서 그러면 안 되므로).

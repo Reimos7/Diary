@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Face ID 기기에서만 읽히는 키. Touch ID는 별도 사용 설명이 필요 없다. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>일기 잠금을 해제할 때 Face ID를 사용합니다</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4251482602787219~1424729430</string>
 	<key>SKAdNetworkItems</key>
