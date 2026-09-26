@@ -38,13 +38,16 @@ struct LockGateView<Content: View>: View {
                     .zIndex(1)
             } else if lockManager.isCovered {
                 // 해제된 상태에서 앱 스위처로 갈 때. 잠금 화면이 떠 있으면 이미 가려져 있으므로 불필요.
+                //
+                // 여기에는 애니메이션을 걸지 않는다.
+                // iOS가 스냅샷을 찍는 정확한 시점은 보장되지 않아서, 페이드 도중에 찍히면
+                // 일기가 반투명하게 남는다. 가리기는 보안 목적이므로 즉시 덮어야 한다.
+                // (전환 순간이라 사용자가 애니메이션을 볼 일도 없다)
                 PrivacyCoverView()
-                    .transition(.opacity)
                     .zIndex(1)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: lockManager.state)
-        .animation(.easeInOut(duration: 0.15), value: lockManager.isCovered)
     }
 
     /// 잠금 화면이든 커버든, 본문 위에 무언가 덮여 있는 상태.
@@ -62,6 +65,14 @@ private struct LockScreenView: View {
     @State private var isResettingPin: Bool = false
     /// 생체 인증이 불가능해 재설정도 할 수 없는 경우의 안내.
     @State private var showResetUnavailable: Bool = false
+
+    /// "PIN을 잊으셨나요?" 링크를 보여줄지.
+    ///
+    /// body에서 매번 계산하지 않고 상태로 들고 있는다.
+    /// 판단에 쓰는 AppLockStore.isBiometricUsable()은 읽기 전용이 아니라,
+    /// 생체 등록이 바뀌었으면 Keychain에 쓰기까지 한다.
+    /// SwiftUI는 body를 몇 번이고 다시 평가하므로 그런 부수효과는 이벤트 시점에만 일으켜야 한다.
+    @State private var canResetWithBiometrics: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -84,15 +95,18 @@ private struct LockScreenView: View {
             }
         }
         .paperBackground()
-        // 잠금이 꺼졌는데도 잠긴 채로 남아 앱이 열리지 않는 상황을 막는 안전장치.
-        // (콜드런치 때 Keychain을 읽지 못해 보수적으로 잠근 경우가 여기서 회복된다)
-        .onAppear { lockManager.revalidate() }
-        // 잠금 화면이 뜨는 순간 생체 인증을 자동으로 시도한다.
-        // state를 함께 감시하는 이유: 앱을 떠났다 돌아와 다시 잠긴 경우에는
-        // 화면이 이미 떠 있어서 onAppear가 다시 호출되지 않는다.
-        .task(id: lockManager.state) {
-            guard lockManager.state == .locked else { return }
-            await lockManager.authenticateWithBiometrics()
+        .onAppear {
+            // 잠금이 꺼졌는데도 잠긴 채로 남아 앱이 열리지 않는 상황을 막는 안전장치.
+            // (콜드런치 때 Keychain을 읽지 못해 보수적으로 잠근 경우가 여기서 회복된다)
+            lockManager.revalidate()
+            refreshResetAvailability()
+            // 콜드런치로 잠금 화면이 처음 뜬 경우. 이후의 재잠금은 매니저가 직접 감지한다.
+            lockManager.requestBiometricsIfNeeded()
+        }
+        // 생체 인증이 끝나 다시 잠금 상태로 돌아왔을 때, 링크 노출 여부를 다시 판단한다.
+        // (등록 변경이 감지돼 생체가 꺼졌다면 링크도 같이 사라져야 한다)
+        .onChange(of: lockManager.state) { _, newState in
+            if newState == .locked { refreshResetAvailability() }
         }
         .fullScreenCover(isPresented: $isResettingPin) {
             PinSetupView(onFinished: {
@@ -115,8 +129,8 @@ private struct LockScreenView: View {
 
     /// 생체 인증이 켜져 있고 지금 쓸 수 있을 때만 재설정 경로를 보여준다.
     /// 쓸 수 없는데 링크만 보이면, 눌러도 아무것도 안 되는 헛된 희망이 된다.
-    private var canResetWithBiometrics: Bool {
-        (try? AppLockStore.isBiometricUsable()) == true
+    private func refreshResetAvailability() {
+        canResetWithBiometrics = (try? AppLockStore.isBiometricUsable()) == true
     }
 
     /// 생체로 본인 확인 → 새 PIN 설정.

@@ -53,6 +53,14 @@ final class AppLockManager: ObservableObject {
     /// 잠금이 풀리거나 다시 잠길 때마다 초기화된다.
     private var hasExhaustedBiometrics: Bool = false
 
+    /// 진행 중인 생체 인증 작업.
+    ///
+    /// 뷰의 .task가 아니라 매니저가 직접 들고 있는다.
+    /// 인증을 시작하면 state가 .authenticating으로 바뀌는데, 뷰에서 .task(id: state)로 매달면
+    /// 그 상태 변화가 자기 자신을 취소하는 구조가 된다. 지금은 LAContext의 async가
+    /// 취소에 반응하지 않아 우연히 동작하지만, 기대어서는 안 되는 동작이다.
+    private var biometricTask: Task<Void, Never>?
+
     private var observers: [NSObjectProtocol] = []
 
     init() {
@@ -61,6 +69,7 @@ final class AppLockManager: ObservableObject {
     }
 
     deinit {
+        biometricTask?.cancel()
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
@@ -95,18 +104,31 @@ final class AppLockManager: ObservableObject {
         state = .locked
     }
 
-    /// 생체 인증을 시도한다. 성공하면 잠금이 풀리고, 실패하면 조용히 PIN 입력 상태로 돌아간다.
+    /// 조건이 맞으면 생체 인증을 시작한다.
     ///
-    /// 실패 사유를 화면에 크게 띄우지 않는 이유:
-    /// 어떤 실패든 사용자가 할 일은 "아래 키패드로 PIN을 입력한다" 하나뿐이라,
-    /// 오류 문구를 띄우면 정보는 없고 단계만 하나 늘어난다.
-    /// 다만 생체가 잠겼거나(lockout) 등록이 지워진 경우는 다시 시도해도 소용없으므로
-    /// 이번 잠금 동안 자동 프롬프트를 더 띄우지 않는다.
-    @MainActor
-    func authenticateWithBiometrics() async {
+    /// 호출 시점은 두 군데다.
+    ///   · 잠금 화면이 처음 나타날 때 (콜드런치)
+    ///   · 앱이 다시 활성화될 때      (백그라운드에서 돌아와 잠긴 경우)
+    /// 잠금 화면이 이미 떠 있는 채로 다시 잠기는 경우가 있어서, 화면 등장만으로는 부족하다.
+    func requestBiometricsIfNeeded() {
         guard state == .locked, !hasExhaustedBiometrics else { return }
+        // 백그라운드에서 프롬프트를 띄우려 하면 실패만 쌓인다.
+        guard UIApplication.shared.applicationState == .active else { return }
         guard (try? AppLockStore.isBiometricUsable()) == true else { return }
 
+        biometricTask?.cancel()
+        biometricTask = Task { @MainActor [weak self] in
+            await self?.runBiometricAuthentication()
+        }
+    }
+
+    /// 성공하면 잠금이 풀리고, 실패하면 조용히 PIN 입력 상태로 돌아간다.
+    ///
+    /// 실패 사유를 화면에 띄우지 않는다.
+    /// 어떤 실패든 사용자가 할 일은 "아래 키패드로 PIN을 입력한다" 하나뿐이라,
+    /// 오류 문구는 정보를 주지 못하고 단계만 하나 늘린다.
+    @MainActor
+    private func runBiometricAuthentication() async {
         state = .authenticating
 
         do {
@@ -115,15 +137,10 @@ final class AppLockManager: ObservableObject {
             )
             unlock(method: .biometry)
         } catch {
-            // 다시 시도해도 결과가 같은 실패는 자동 재시도 대상에서 제외한다.
-            switch error {
-            case BiometricError.lockout, BiometricError.notEnrolled, BiometricError.unavailable:
-                hasExhaustedBiometrics = true
-            default:
-                // 사용자가 취소한 경우도 포함. 이번 잠금에서는 더 띄우지 않는다.
-                // (취소했는데 계속 얼굴을 들이대라고 하면 PIN을 쓸 수가 없다)
-                hasExhaustedBiometrics = true
-            }
+            // 실패 사유를 가리지 않고 이번 잠금에서는 자동 프롬프트를 끝낸다.
+            // 취소인데도 계속 얼굴을 들이대라고 하면 PIN을 쓸 방법이 없고,
+            // lockout이나 미등록은 다시 시도해도 결과가 같다.
+            hasExhaustedBiometrics = true
 
             // 인증에 실패했을 뿐 잠금은 그대로다.
             if state == .authenticating {
@@ -190,6 +207,9 @@ final class AppLockManager: ObservableObject {
         observers.append(center.addObserver(forName: UIApplication.didBecomeActiveNotification,
                                            object: nil, queue: .main) { [weak self] _ in
             self?.isCovered = false
+            // 돌아와서 잠겨 있다면 생체 인증을 다시 제안한다.
+            // 잠금 화면이 이미 떠 있던 경우에는 화면 등장 이벤트가 오지 않으므로 여기서 잡아야 한다.
+            self?.requestBiometricsIfNeeded()
         })
     }
 

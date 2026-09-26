@@ -14,6 +14,9 @@
 //
 
 import SwiftUI
+// 카운트다운에 쓰는 Timer.publish().autoconnect()가 Combine 타입이다.
+// SwiftUI가 재수출해 주어 컴파일은 되지만, 명시하지 않으면 경고가 남는다.
+import Combine
 
 struct PinVerifyView: View {
     /// 화면 상단 제목. 호출 목적(변경/해제)에 따라 부모가 정한다.
