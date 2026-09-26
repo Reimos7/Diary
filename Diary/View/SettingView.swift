@@ -22,6 +22,16 @@ struct SettingView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
+                    // 그룹 0: 보안
+                    // 폰트·언어 같은 취향 설정과 성격이 달라 별도 그룹으로 맨 위에 둔다.
+                    // 다음 브랜치의 백업 항목도 이 그룹에 합류할 예정.
+                    groupCard {
+                        NavigationLink { AppLockSettingsView() } label: {
+                            settingRow(icon: "lock.fill", color: AppColor.calendarPastels[4],
+                                       title: "앱 잠금", isSystemIcon: true)
+                        }
+                    }
+
                     // 그룹 1: 개인화
                     groupCard {
                         NavigationLink { NotificationView() } label: {

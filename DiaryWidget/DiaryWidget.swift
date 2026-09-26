@@ -185,6 +185,26 @@ struct TodayDiaryProvider: TimelineProvider {
         let fontName = sharedDefaults?.string(forKey: "selectedFont") ?? "Cafe24DongdongOTF"
 
         let currentDate = Date()
+        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
+
+        // 앱 잠금이 켜져 있으면 일기를 아예 읽지 않는다.
+        // 화면에서 가리기만 해도 눈에는 안 보이지만, 위젯 프로세스 메모리에 본문과 사진을
+        // 굳이 올릴 이유가 없다. 읽지 않는 것이 가장 확실한 차단이다.
+        if SharedModelContainer.isAppLockEnabled {
+            let lockedEntry = TodayDiaryEntry(
+                date: currentDate,
+                todayDiary: nil,
+                hasWrittenToday: false,
+                diaryDates: [],
+                streak: 0,
+                appLanguage: appLanguage,
+                fontName: fontName,
+                isLocked: true
+            )
+            completion(Timeline(entries: [lockedEntry], policy: .after(nextUpdate)))
+            return
+        }
+
         // 컨테이너/컨텍스트를 1회만 생성해 3개 조회에 공유 (위젯 시간·메모리 예산 절약)
         let modelContext = ModelContext(SharedModelContainer.create())
         let todayDiary = fetchTodayDiary(modelContext)
@@ -201,7 +221,6 @@ struct TodayDiaryProvider: TimelineProvider {
             fontName: fontName
         )
 
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
         completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
 
@@ -258,6 +277,8 @@ struct TodayDiaryEntry: TimelineEntry {
     var streak: Int = 0
     var appLanguage: String = "en"
     var fontName: String = "Cafe24DongdongOTF"
+    /// 앱 잠금이 켜져 있어 내용을 가려야 하는지.
+    var isLocked: Bool = false
 }
 
 struct DiarySnapshot {
@@ -275,13 +296,41 @@ struct TodayDiaryWidgetEntryView: View {
 
     var body: some View {
         Link(destination: URL(string: "diary://compose")!) {
-            switch family {
-            case .systemSmall:  SmallWidgetView(entry: entry)
-            case .systemMedium: MediumWidgetView(entry: entry)
-            case .systemLarge:  LargeWidgetView(entry: entry)
-            default:            SmallWidgetView(entry: entry)
+            if entry.isLocked {
+                // 잠금 중에는 크기와 무관하게 같은 화면을 보여준다.
+                // 탭하면 앱이 열리고, 앱의 잠금 화면이 사용자를 맞이한다.
+                LockedWidgetView()
+            } else {
+                switch family {
+                case .systemSmall:  SmallWidgetView(entry: entry)
+                case .systemMedium: MediumWidgetView(entry: entry)
+                case .systemLarge:  LargeWidgetView(entry: entry)
+                default:            SmallWidgetView(entry: entry)
+                }
             }
         }
+    }
+}
+
+// MARK: - 잠금 상태
+
+/// 앱 잠금이 켜져 있을 때 위젯이 보여주는 화면.
+///
+/// 일기 본문·사진·캘린더 점 등 내용을 드러내는 요소는 하나도 넣지 않는다.
+/// "쓴 날/안 쓴 날"처럼 사소해 보이는 정보도 잠금이 지키려는 사생활의 일부다.
+struct LockedWidgetView: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image("sesac")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 34)
+
+            Image(systemName: "lock.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color(red: 0.58, green: 0.66, blue: 0.75))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

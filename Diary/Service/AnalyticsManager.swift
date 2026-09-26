@@ -34,6 +34,17 @@ enum AnalyticsEvent {
     case languageChanged(language: String)               // 언어 변경
     case fontChanged(font: String)                       // 폰트 변경
 
+    // 앱 잠금 이벤트
+    //
+    // [PIN 값이나 입력한 숫자는 절대 싣지 않는다]
+    // 알고 싶은 것은 "이 기능을 얼마나 쓰고, 얼마나 막히는가"이지 사용자의 비밀번호가 아니다.
+    // 실패 횟수 같은 집계값만 보낸다.
+    case appLockEnabled(biometry: String)                // 잠금 켜기(어떤 생체를 쓸 수 있는 기기인지)
+    case appLockDisabled                                 // 잠금 끄기
+    case appUnlocked(method: String)                     // 해제 성공(pin/biometry)
+    case appUnlockFailed(attempt: Int)                   // 해제 실패(누적 몇 번째 실패인지)
+    case pinReset                                        // 생체로 본인 확인 후 PIN 재설정
+
     // Firebase에 전달될 이벤트 이름.
     // 규칙: 소문자 + 언더스코어, 40자 이내, 예약 접두어(firebase_, google_, ga_) 금지
     var name: String {
@@ -48,6 +59,11 @@ enum AnalyticsEvent {
         case .themeChanged:   return "theme_changed"
         case .languageChanged:return "language_changed"
         case .fontChanged:    return "font_changed"
+        case .appLockEnabled:   return "app_lock_enabled"
+        case .appLockDisabled:  return "app_lock_disabled"
+        case .appUnlocked:      return "app_unlocked"
+        case .appUnlockFailed:  return "app_unlock_failed"
+        case .pinReset:         return "pin_reset"
         }
     }
 
@@ -82,7 +98,18 @@ enum AnalyticsEvent {
             return ["language": language]
         case let .fontChanged(font):
             return ["font": font]
-        case .diaryDeleted, .diaryUpdated:
+        case let .appLockEnabled(biometry):
+            // biometry: face_id / touch_id / none.
+            // 생체를 쓸 수 있는 기기에서 실제로 얼마나 켜는지 보려면 기기 종류를 알아야 한다.
+            return ["biometry": biometry]
+        case let .appUnlocked(method):
+            // method: pin / biometry.
+            // 생체 비중이 높으면 자동 프롬프트 설계가 잘 먹히고 있다는 뜻이다.
+            return ["method": method]
+        case let .appUnlockFailed(attempt):
+            // 실패가 잦으면 4자리 PIN이나 키패드 UX에 문제가 있다는 신호다.
+            return ["attempt": attempt]
+        case .diaryDeleted, .diaryUpdated, .appLockDisabled, .pinReset:
             return nil
         }
     }

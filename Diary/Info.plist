@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!--
+	  수출 규정 선언.
+	  굿디가 쓰는 암호화는 Keychain과 PBKDF2(둘 다 iOS가 제공하는 표준 암호화)뿐이고,
+	  용도는 사용자 인증에 한정된다. 이 경우 미국 수출 규정상 면제 대상으로 본다.
+	  이 키가 없으면 빌드를 업로드할 때마다 App Store Connect가 같은 질문을 반복한다.
+	-->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Face ID 기기에서만 읽히는 키. Touch ID는 별도 사용 설명이 필요 없다. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>일기 잠금을 해제할 때 Face ID를 사용합니다</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4251482602787219~1424729430</string>
 	<key>SKAdNetworkItems</key>
