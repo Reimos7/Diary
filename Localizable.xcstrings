@@ -3412,6 +3412,52 @@
           }
         }
       }
+    },
+    "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. PIN을 잊으면 %@ 인증으로 재설정할 수 있어요." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. PIN을 잊으면 %@ 인증으로 재설정할 수 있어요."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll need to enter your PIN to open the app and read your diary. If you forget it, you can reset it with %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを開くときにPINを入力しないと日記を読めません。PINを忘れた場合は%@で再設定できます。"
+          }
+        }
+      }
+    },
+    "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. %@ 사용을 켜두면 PIN을 잊었을 때 재설정할 수 있어요." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. %@ 사용을 켜두면 PIN을 잊었을 때 재설정할 수 있어요."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll need to enter your PIN to open the app and read your diary. Turn on %@ so you can reset your PIN if you ever forget it."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを開くときにPINを入力しないと日記を読めません。%@をオンにしておくと、PINを忘れたときに再設定できます。"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

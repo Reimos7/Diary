@@ -22,6 +22,13 @@ struct AppLockSettingsView: View {
     @State private var isLockEnabled: Bool = false
     /// 생체 인증 사용 여부.
     @State private var isBiometricEnabled: Bool = false
+    /// 이 기기에서 생체 인증을 쓸 수 있는지, 그리고 어떤 종류인지.
+    ///
+    /// BiometricService는 호출할 때마다 LAContext를 새로 만들어 시스템에 질의한다.
+    /// body에서 직접 부르면 화면이 다시 그려질 때마다 그 질의가 반복되므로,
+    /// 화면에 들어오는 시점에 한 번만 읽어 상태로 들고 있는다.
+    @State private var isBiometricAvailable: Bool = false
+    @State private var biometricKind: BiometricKind = .none
     /// Keychain을 읽지 못한 상태. 이때는 토글을 만지지 못하게 막는다.
     @State private var isUnavailable: Bool = false
 
@@ -53,7 +60,7 @@ struct AppLockSettingsView: View {
                     lockToggleCard
 
                     if isLockEnabled {
-                        if BiometricService.canUse {
+                        if isBiometricAvailable {
                             biometricCard
                         }
                         changePinCard
@@ -119,10 +126,10 @@ struct AppLockSettingsView: View {
 
     private var biometricCard: some View {
         HStack(spacing: AppSpacing.md) {
-            iconBadge(systemName: BiometricService.kind == .touchID ? "touchid" : "faceid",
+            iconBadge(systemName: biometricKind == .touchID ? "touchid" : "faceid",
                       color: AppColor.calendarPastels[0])
 
-            Text(BiometricService.kind.displayName)
+            Text(biometricKind.displayName)
                 .customFont(size: 16)
                 .foregroundStyle(AppColor.textPrimary)
 
@@ -163,11 +170,30 @@ struct AppLockSettingsView: View {
         .background(cardBackground)
     }
 
+    /// 하단 안내 문구. 사용자가 실제로 처한 상황에 맞춰 세 갈래로 나뉜다.
+    ///
+    /// 한 문장으로 고정해 두면 거짓말을 하게 된다.
+    /// 생체 인증을 켠 사용자에게 "PIN을 잊으면 복구할 수 없다"고 말하는 건 사실이 아니고,
+    /// 반대로 생체를 안 켠 사용자에게 복구 가능하다고 말하면 더 위험하다.
     private var guideText: LocalizedStringKey {
         if isUnavailable {
             return "지금은 잠금 설정을 변경할 수 없어요. 잠시 후 다시 시도해 주세요."
         }
-        // 복구 불가 경고는 설정 화면에서도 계속 보이게 둔다.
+
+        let name = biometricKind.displayName
+
+        // 이미 켜 둔 경우: 복구 수단이 있다는 사실을 알려 준다.
+        if isLockEnabled && isBiometricEnabled {
+            return "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. PIN을 잊으면 \(name) 인증으로 재설정할 수 있어요."
+        }
+
+        // 켤 수 있는데 안 켠 경우: 켜야 할 이유를 알려 준다.
+        // 복구 불가 사각지대에 빠지는 사용자를 줄이는 가장 실효성 있는 방법이다.
+        if isLockEnabled && isBiometricAvailable {
+            return "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. \(name) 사용을 켜두면 PIN을 잊었을 때 재설정할 수 있어요."
+        }
+
+        // 생체를 쓸 수 없는 기기이거나 잠금을 아직 켜지 않은 경우.
         // 백업 기능이 나오면 이 문구를 "백업으로 복구할 수 있어요"로 교체한다.
         return "앱을 열 때 PIN을 입력해야 일기를 볼 수 있어요. PIN을 잊으면 복구할 수 없으니 잊지 않도록 주의해 주세요."
     }
@@ -175,6 +201,10 @@ struct AppLockSettingsView: View {
     // MARK: - 동작
 
     private func refreshState() {
+        // 기기의 생체 지원 여부는 Keychain과 무관하므로 먼저 읽어 둔다.
+        biometricKind = BiometricService.kind
+        isBiometricAvailable = BiometricService.canUse
+
         do {
             isLockEnabled = try AppLockStore.isPinSet()
             isBiometricEnabled = try AppLockStore.isBiometricUsable()
@@ -198,7 +228,7 @@ struct AppLockSettingsView: View {
             PinSetupView(onFinished: {
                 // 기기가 생체를 쓸 수 있는지 함께 남긴다.
                 // "생체 가능한 기기에서 잠금을 얼마나 켜는지"를 봐야 다음 투자 판단이 선다.
-                AnalyticsManager.log(.appLockEnabled(biometry: BiometricService.kind.analyticsValue))
+                AnalyticsManager.log(.appLockEnabled(biometry: biometricKind.analyticsValue))
                 finishFlow()
             }, onCancel: finishFlow)
 
@@ -226,7 +256,7 @@ struct AppLockSettingsView: View {
             // 문구에는 기기가 실제로 쓰는 이름을 넣는다.
             // Touch ID 기기(SE·듀오·일부 아이패드)에서 "Face ID"가 보이면 안 되고,
             // 카드에는 "Touch ID"인데 여기만 "생체 인증"이어도 어긋나 보인다.
-            verifyFlow(title: "\(BiometricService.kind.displayName) 설정을 바꾸려면 PIN을 입력해 주세요") {
+            verifyFlow(title: "\(biometricKind.displayName) 설정을 바꾸려면 PIN을 입력해 주세요") {
                 try? AppLockStore.setBiometricEnabled(shouldEnable)
                 finishFlow()
             }
